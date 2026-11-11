@@ -1,0 +1,18 @@
+{
+  "name": "Математика у клітинку",
+  "short_name": "Математика",
+  "description": "Калькулятор з рівняннями й нерівностями, графіки функцій і уроки з тестами — від 1 класу до інституту.",
+  "lang": "uk",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#edf0f5",
+  "theme_color": "#2a54c9",
+  "categories": ["education", "utilities"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

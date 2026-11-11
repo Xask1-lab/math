@@ -1,0 +1,851 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- PWA: маніфест, кольори панелей та іконки -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#edf0f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f131a" media="(prefers-color-scheme: dark)">
+<meta name="description" content="Калькулятор з рівняннями й нерівностями, графіки функцій і понад 60 тем уроків з тестами.">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Математика">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Математика: калькулятор і уроки</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=STIX+Two+Text:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+/* Базове скидання: відступи під «чубчик» і системні панелі телефона */
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+img{max-width:100%}
+</style>
+</head>
+<body>
+<style>
+/* Шкільний зошит у клітинку: синє чорнило, червоне поле з номерами рядків, клавіатура як у калькулятора */
+:root{--paper:#edf0f5;--sheet:#ffffff;--grid:#e1e8f2;--ink:#1a2333;--mu:#5c6779;--ac:#2a54c9;--acs:#e6ecfc;--onac:#ffffff;--red:#c4372d;--ok:#1b7646;--key:#f3f5f9;--dig:#ffffff;--op:#e4eafb;--line:#d5dbe5;--edge:#c9d1de;--g1:#2a54c9;--g2:#c4372d;--g3:#1b7646;
+--ui:"Golos Text",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--math:"STIX Two Text","Cambria Math","Times New Roman",serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#0f131a;--sheet:#171d27;--grid:#212a37;--ink:#e7ebf2;--mu:#9aa5b7;--ac:#8aa9ff;--acs:#1f2b4a;--onac:#0f131a;--red:#ff7f72;--ok:#5ed398;--key:#1e2531;--dig:#232b38;--op:#22305a;--line:#2c3545;--edge:#0a0d12;--g1:#8aa9ff;--g2:#ff7f72;--g3:#5ed398;color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#0f131a;--sheet:#171d27;--grid:#212a37;--ink:#e7ebf2;--mu:#9aa5b7;--ac:#8aa9ff;--acs:#1f2b4a;--onac:#0f131a;--red:#ff7f72;--ok:#5ed398;--key:#1e2531;--dig:#232b38;--op:#22305a;--line:#2c3545;--edge:#0a0d12;--g1:#8aa9ff;--g2:#ff7f72;--g3:#5ed398;color-scheme:dark}
+[hidden]{display:none!important}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.45 var(--ui)}
+main{max-width:620px;margin:0 auto;padding-block:14px 32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:12px}
+section{display:flex;flex-direction:column;gap:10px}
+button{font:inherit;color:inherit;background:var(--key);border:1px solid var(--line);border-radius:10px;cursor:pointer;touch-action:manipulation}
+button:active{transform:translateY(1px)}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}button:active{transform:none}}
+input{font:inherit;color:var(--ink);background:var(--sheet);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.brand{font:600 26px/1 var(--math);letter-spacing:.01em}.brand i{color:var(--red);font-weight:400}
+.tabs{display:flex;gap:4px;padding:4px;background:var(--key);border:1px solid var(--line);border-radius:12px}
+.tabs button{flex:1;border:0;background:transparent;padding:9px 14px;font-weight:600;font-size:15px;color:var(--mu);border-radius:9px}
+.tabs button.on{background:var(--ink);color:var(--sheet)}
+.top .tabs{flex:1 1 300px}
+.ctl{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.sp{flex:1}
+.chip{padding:7px 10px;font-size:13px;font-weight:600;color:var(--mu);background:var(--sheet)}.chip.on{color:var(--ac);border-color:var(--ac);background:var(--acs)}
+#wst{display:flex;gap:6px}#wst button{width:38px;height:36px;font-weight:700;background:var(--sheet);color:var(--mu)}#wst .on{background:var(--ink);color:var(--sheet);border-color:var(--ink)}
+/* аркуш зошита */
+.win{position:relative;border:1px solid var(--line);border-radius:14px;overflow:hidden;background-color:var(--sheet);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px;display:flex;flex-direction:column}
+.win::before{content:"";position:absolute;top:0;bottom:0;left:38px;width:1.5px;background:var(--red);opacity:.55}
+.wh{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 10px 6px 50px;color:var(--mu);font-size:13px;background:var(--sheet);border-bottom:1px solid var(--line)}
+.wh button{padding:2px 10px;margin-left:4px;background:var(--sheet)}
+.rw{position:relative;padding:6px 12px 8px 50px;counter-increment:rw;cursor:text}
+.rw+.rw{border-top:1px dashed var(--line)}
+.rw::before{content:counter(rw);position:absolute;left:0;width:38px;top:12px;text-align:center;font:600 13px var(--ui);color:var(--red);opacity:.7}
+.rw.on{background:color-mix(in srgb,var(--acs) 70%,transparent)}.rw.on::before{color:var(--ac);opacity:1}
+.tx{width:100%;box-sizing:border-box;margin:2px 0;color:var(--mu);font-size:14px;padding:5px 8px;background:transparent;border:1px solid transparent;border-bottom:1px dashed var(--line);border-radius:6px}
+.tx:focus{background:var(--sheet);border-color:var(--line)}
+.ed{font:30px/1.2 var(--math);min-height:56px;padding:4px 0;overflow-x:auto;display:flex;align-items:center;white-space:nowrap}
+.row{display:inline-flex;align-items:center;min-width:.5em}.row.e{border:1.5px dashed var(--ac);border-radius:4px;min-height:1em;min-width:.7em}
+.c{padding:0 1px}.c.v{font-style:italic}
+.tb{display:inline-flex;align-items:center;min-width:.7em;min-height:1em;border:1.5px dashed var(--ac);border-radius:4px;margin-left:3px;opacity:.6}
+.fr{display:inline-flex;flex-direction:column;align-items:center;margin:0 .15em;font-size:.86em}.fr>.row:first-child{border-bottom:2px solid currentColor;padding:0 .2em}.fr>.row:last-child{padding:0 .2em}
+.su{font-size:.62em;align-self:flex-start}.sq>.row{border-top:2px solid currentColor;padding:0 .15em}.gr{display:inline-flex;align-items:center}
+.cr{display:inline-block;width:2px;height:1.1em;background:var(--ac);animation:bl 1s steps(1) infinite}@keyframes bl{50%{opacity:0}}
+.ans{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-height:28px;color:var(--ok);font:600 20px var(--math);padding-top:2px}
+.ans.hint{color:var(--mu);font:14px var(--ui)}.ans.bad{color:var(--red)}
+.gb{margin-left:auto;font:600 12px var(--ui);padding:4px 10px;color:var(--ac);background:var(--sheet)}
+.rx{position:absolute;top:8px;right:8px;width:30px;height:30px;padding:0;font-size:13px;color:var(--mu);background:var(--sheet)}.rx:hover{color:var(--red);border-color:var(--red)}
+.rw{padding-right:48px}
+.rws{position:relative;height:clamp(200px,40vh,420px);overflow-y:auto;overscroll-behavior:contain;counter-reset:rw;scrollbar-width:thin}
+.exh{display:flex;flex-direction:column;gap:2px;margin-bottom:10px}.exh b{font:600 19px var(--math)}
+.exg{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.exi{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;padding:10px 12px;background:var(--sheet)}.exi code{font:18px var(--math);color:var(--ink)}.exi small{color:var(--mu);font-size:12px;line-height:1.3}.exi:hover{border-color:var(--ac)}
+.bt:disabled{opacity:.5;cursor:default}
+.solh{flex-direction:row;justify-content:space-between;align-items:center}.solh .bt{padding:4px 10px}
+.solst{margin:0 0 10px;padding-left:22px;font:17px/1.5 var(--math)}.solst li{margin:3px 0;overflow-wrap:anywhere}
+/* панелі «Приклади» і «Розв’язок» спливають поверх нижньої частини вікна, не стискаючи його */
+.warea{position:relative;flex:1;min-height:90px;display:flex;flex-direction:column}
+#exs,#sol{position:absolute;left:0;right:0;bottom:0;max-height:78%;overflow-y:auto;z-index:3;box-shadow:0 -6px 24px rgba(0,0,0,.25)}
+/* калькулятор уміщується в екран: рядки забирають вільне місце, клавіатура внизу */
+main:has(#calc:not([hidden])){height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));box-sizing:border-box;padding-block:10px 8px;gap:8px}
+#calc:not([hidden]){flex:1;min-height:0;gap:8px}
+#calc .ctl,#calc .pad,#nl,#calc .note{flex:none}
+.warea{flex:1}
+#wins{flex:1;min-height:0;display:flex;flex-direction:column}
+#wins .win{flex:1;min-height:0}
+#wins .rws{flex:1;height:auto;min-height:0}
+#nl{padding:7px}
+#calc .pad button{height:clamp(30px,5vh,52px)}
+.pad .nlk{font-size:clamp(11px,3.2vw,14px);font-weight:600;color:var(--ac);white-space:nowrap;padding:0 2px}
+#calc #pad2 button{height:clamp(30px,4.4vh,46px)}
+#calc #pad3 button{height:clamp(32px,4.6vh,44px)}
+@media (max-height:1100px){#calc .note{display:none}}
+.addrow{display:block;margin:8px 0 10px 50px;width:44px;height:36px;padding:0;font-size:22px;line-height:1;color:var(--ac);background:var(--sheet);border:1.5px dashed var(--ac);border-radius:10px}
+.addrow:hover{background:var(--acs)}.addrow:disabled{opacity:.4}
+.pad .nlk.on{background:var(--acs);border-color:var(--ac)}
+.wide{width:100%;padding:11px;font-weight:600;background:var(--sheet);color:var(--ac);border-style:dashed}
+/* клавіатура */
+.pad{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+.pad button{height:52px;font-size:19px;border-color:var(--line);box-shadow:0 2px 0 var(--edge)}
+.pad .dg{background:var(--dig);font:500 23px var(--math)}
+.pad .op{background:var(--op);color:var(--ac);font-size:22px;font-weight:600}
+.pad .eq{background:var(--ac);color:var(--onac);border-color:var(--ac);font-size:24px;font-weight:700}
+.pad .clr{color:var(--red);font-weight:700}
+.pad .fn{font-size:17px}
+#pad2{grid-template-columns:repeat(6,1fr)}#pad2 button{font:italic 22px var(--math);height:46px}
+#pad3{grid-template-columns:repeat(7,1fr)}#pad3 button{font-size:13px;height:44px;padding:0}
+.note{color:var(--mu);font-size:13px;margin:0}
+/* уроки */
+h3{display:flex;justify-content:space-between;align-items:baseline;margin:14px 0 6px;font:600 21px var(--math);text-wrap:balance}h3 small{font:500 13px var(--ui);color:var(--mu)}
+.tg{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:8px}
+.tp{display:flex;justify-content:space-between;align-items:center;gap:8px;text-align:left;padding:12px 14px;background:var(--sheet);font-size:15px;line-height:1.3;min-height:56px}
+.tp em{font:600 12px var(--ui);font-style:normal;color:var(--mu);background:var(--key);border-radius:20px;padding:2px 8px;white-space:nowrap}.tp em.gd{color:var(--ok)}
+.tp:hover{border-color:var(--ac)}
+.card{background:var(--sheet);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+#det,#test,#hist{display:flex;flex-direction:column;gap:10px}#det[hidden],#test[hidden],#hist[hidden]{display:none!important}
+#det h2{margin:0;font:600 26px var(--math);text-wrap:balance}
+.mxh{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.mxh b{font:600 19px var(--math)}
+#mxl:not(:empty){margin-top:12px;display:flex;flex-direction:column}
+.mxi{display:flex;gap:12px;padding:14px 0;border-top:1px solid var(--line)}
+.mxn{flex:none;width:28px;height:28px;border-radius:50%;background:var(--acs);color:var(--ac);font:700 14px/28px var(--ui);text-align:center}
+.mxb{min-width:0;flex:1}.mxq{font:600 19px/1.4 var(--math)}
+.mxb ol{margin:8px 0;padding-left:20px;font:17px/1.5 var(--math);color:var(--ink)}.mxb li{margin:2px 0}
+.mxa{display:inline-block;font:600 17px var(--math);color:var(--ok);border-left:3px solid var(--ok);padding:2px 10px;background:color-mix(in srgb,var(--ok) 10%,transparent);border-radius:0 6px 6px 0}
+#th p{margin:0 0 8px}#th p:last-child{margin:0}.thl{margin:0;padding-left:20px}.thl li{margin:4px 0}
+#th{line-height:1.6}#th b{color:var(--ac)}
+.q{font:600 24px/1.35 var(--math);margin-bottom:10px}
+.ansrow{display:flex;gap:8px;flex-wrap:wrap}.ansrow input{flex:1 1 180px}
+.bt{padding:10px 14px;font-weight:600;background:var(--key)}.bt.pri{background:var(--ac);color:var(--onac);border-color:var(--ac)}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.res{font-weight:600;min-height:1.4em;margin-top:8px}
+#st{margin:10px 0 0;padding-left:22px;font-family:var(--math);font-size:18px}#st li{margin:4px 0}
+.gd{color:var(--ok)}.bd{color:var(--red)}summary{cursor:pointer}
+label{cursor:pointer}
+/* графік */
+.gf{display:flex;align-items:center;gap:8px}.gf input{flex:1;font-family:var(--math);font-size:18px}
+.sw{width:12px;height:12px;border-radius:50%;flex:none}.gl{font:italic 18px var(--math);white-space:nowrap}
+.gwrap{position:relative}
+#gc{display:block;width:100%;aspect-ratio:1/1;max-height:62vh;border:1px solid var(--line);border-radius:14px;touch-action:none;background:var(--sheet);cursor:crosshair}
+.gbtns{position:absolute;top:8px;right:8px;display:flex;flex-direction:column;gap:6px}.gbtns button{width:38px;height:38px;font-size:18px;background:var(--sheet)}
+#gi{font-size:14px;line-height:1.6;font-variant-numeric:tabular-nums}#gi b{font-family:var(--math)}
+</style>
+<main>
+<header class="top"><div class="brand">Математика <i>у&nbsp;клітинку</i></div>
+<nav class="tabs" aria-label="Розділи"><button id="t1" class="on">Калькулятор</button><button id="t3">Графік</button><button id="t2">Уроки</button></nav></header>
+<section id="calc">
+<div class="ctl"><div id="wst"></div><span class="sp"></span><button id="sv" class="chip" title="Покроковий розв’язок рівняння в активному рядку">Розв’язок</button><button id="ex" class="chip" title="Готові приклади, як користуватися калькулятором">Приклади</button><button id="dg" class="chip" title="Одиниці кутів для sin, cos, tg">Градуси</button><button id="fx" class="chip" hidden title="Тригонометрія, логарифми, нерівності">sin·ln·≤</button></div>
+<div class="warea"><div id="wins"></div><div id="exs" class="card" hidden></div><div id="sol" class="card" hidden></div></div>
+<button id="nl" class="wide" hidden>＋ Новий рядок</button>
+<div class="pad" id="pad3" hidden></div>
+<div class="pad" id="pad"></div>
+<div class="pad" id="pad2"></div>
+<p class="note">Пишіть текстом або кнопками. «=» з невідомою розв’язує рівняння. Знаки «&lt;», «&gt;», «≤», «≥», а також sin, cos, tg, ln, lg, |x| — під клавішею <button class="chip" id="fx2" style="padding:2px 8px">sin·ln·≤</button> у клавіатурі (з клавіатури комп’ютера «&lt;» і «&gt;» теж працюють). Рядок «a=5» задає змінну для рядків нижче.</p>
+</section>
+<section id="gr" hidden>
+<div id="gfs" class="card" style="display:flex;flex-direction:column;gap:8px"></div>
+<div class="gwrap"><canvas id="gc" aria-label="Графік функцій"></canvas><div class="gbtns"><button id="gzi" title="Збільшити">＋</button><button id="gzo" title="Зменшити">−</button><button id="g0" title="Початковий вигляд">⌂</button></div></div>
+<div id="gi" class="card"></div>
+<p class="note">Тягніть графік, щоб зсунути; колесо миші або два пальці змінюють масштаб; дотик показує значення. Кути в графіках — у радіанах.</p>
+</section>
+<section id="les" hidden><div class="tabs" id="lt"><button class="on">Теми</button><button>Тест</button><button>Історія</button></div><div id="test" hidden></div><div id="hist" hidden></div><div id="list"></div><div id="det" hidden>
+<div><button class="bt" id="bk">← Усі теми</button></div><h2 id="tn"></h2><div class="card" id="th"></div>
+<div class="card"><div class="q" id="q"></div><div class="ansrow"><input id="in" placeholder="Відповідь, напр. 7/6 або 2 1/4" autocomplete="off"><button class="bt pri" id="ck">Перевірити</button></div><div class="res" id="res"></div>
+<div class="acts"><button class="bt" id="sh">Розв’язання</button><button class="bt" id="nw">Новий приклад</button><button class="bt" id="oc">У калькулятор</button></div><ol id="st" hidden></ol></div>
+<div class="card"><div class="mxh"><b>Розв’язані приклади</b><span class="acts" style="margin:0"><button class="bt" id="mx">Показати 5 прикладів</button><button class="bt" id="mxc" hidden>✕ Закрити</button></span></div><div id="mxl"></div></div></div></section>
+</main>
+<script>
+const $=s=>document.querySelector(s),mk=()=>({items:[]});
+let wins=[],act=0,WS=[],cw=0;
+const rowAt=(w,p=w.path)=>{let r=w.root;for(const[k,f]of p)r=r.items[k][f];return r};
+const ser=r=>r.items.map((x,k,A)=>x.t=='c'?(isD(x)&&!(k&&isD(A[k-1]))&&mixAt(A,k)?'(':'')+x.v:x.t=='f'?(k&&isD(A[k-1])?'+':'')+`FRAC(${ser(x.n)},${ser(x.d)})`+(k&&isD(A[k-1])?')':''):x.t=='p'?`^(${ser(x.e)})`:x.t=='g'?`${x.fn||''}(${ser(x.r)})`:`SQRT(${ser(x.r)})`).join('');
+function parse(s,env){const t=s.match(/FRAC|SQRT|arcsin|arccos|arctg|sin|cos|ctg|tg|ln|lg|abs|\d+\.?\d*|\.\d+|[a-zπ]|[()+\-*\/^,!]/g)||[];let p=0;const vs=new Set(),pk=()=>t[p],nx=()=>t[p++];
+function ex(){let l=tm();while(pk()=='+'||pk()=='-'){const o=nx(),r=tm(),a=l;l=o=='+'?e=>a(e)+r(e):e=>a(e)-r(e)}return l}
+function tm(){let l=un();for(;;){const k=pk();let o;if(k=='*'||k=='/')o=nx();else if(k&&/^(FRAC|SQRT|\(|\d|\.|[a-zπ])/.test(k))o='*';else break;const r=un(),a=l;l=o=='*'?e=>a(e)*r(e):e=>a(e)/r(e)}return l}
+function un(){if(pk()=='-'){nx();const a=un();return e=>-a(e)}if(pk()=='+'){nx();return un()}return pw()}
+function pw(){let b=at();while(pk()=='!'){nx();const a=b;b=e=>{let n=Math.round(a(e)),r=1;for(let i=2;i<=n;i++)r*=i;return r}}if(pk()=='^'){nx();const x=pw();return e=>Math.pow(b(e),x(e))}return b}
+function at(){const k=nx();if(k==null)throw 0;if(/^[\d.]/.test(k)){const v=parseFloat(k);return()=>v}if(k=='π')return()=>Math.PI;
+if(k=='e')return()=>Math.E;if(FN[k]){nx();const a=ex();nx();return e=>FN[k](a(e))}if(/^[a-z]$/.test(k)){if(env&&env[k]!==undefined)return()=>env[k];vs.add(k);return e=>e[k]}if(k=='('){const a=ex();if(nx()!=')')throw 0;return a}
+if(k=='SQRT'){nx();const a=ex();nx();return e=>Math.sqrt(a(e))}
+if(k=='FRAC'){nx();const a=ex();if(nx()!=',')throw 0;const b=ex();nx();return e=>a(e)/b(e)}throw 0}
+const f=ex();if(p<t.length)throw 0;return{f,vs}}
+const fmt=v=>String(+v.toFixed(8));
+let deg=true;const D2=x=>deg?x*Math.PI/180:x,R2D=x=>deg?x*180/Math.PI:x,TG=x=>Math.abs(Math.cos(D2(x)))<1e-12?NaN:Math.tan(D2(x)),FN={sin:x=>Math.sin(D2(x)),cos:x=>Math.cos(D2(x)),tg:TG,ctg:x=>Math.abs(Math.sin(D2(x)))<1e-12?NaN:1/Math.tan(D2(x)),ln:Math.log,lg:Math.log10,abs:Math.abs,arcsin:x=>R2D(Math.asin(x)),arccos:x=>R2D(Math.acos(x)),arctg:x=>R2D(Math.atan(x))};
+const isD=x=>x.t=='c'&&/^\d$/.test(x.v),mixAt=(A,k)=>{let m=k;while(A[m]&&isD(A[m]))m++;return !!(A[m]&&A[m].t=='f')};
+const CM=(o,a,b,e=1e-9)=>o=='<'?a<b-e:o=='>'?a>b+e:o=='≤'?a<=b+e:o=='≥'?a>=b-e:Math.abs(a-b)<=Math.max(e,1e-9)*(1+Math.abs(b));
+function snapR(z,g){const gz=Math.abs(g(z));for(let q=1;q<=60;q++){const c=Math.round(z*q)/q;if(Math.abs(c-z)<1e-5*(1+Math.abs(z))&&Math.abs(g(c))<=gz*1.0000001+1e-14)return c}return z}
+function roots(g){const X=[];for(let k=-100000;k<=100000;k++)X.push(k/100);for(let s=1;s<=3500;s++){const t=1000*Math.pow(1.004,s);X.push(t,-t)}X.sort((a,b)=>a-b);
+const Y=X.map(x=>{const y=g(x);return isFinite(y)?y:NaN}),R=[],add=z=>{z=snapR(z,g);if(!R.some(q=>Math.abs(q-z)<1e-6*(1+Math.abs(z))))R.push(z)},ab=Math.abs;
+for(let i=0;i<X.length;i++){const y=Y[i];if(y===0){add(X[i]);continue}if(!(y==y))continue;
+if(i&&Y[i-1]*y<0){let a=X[i-1],b=X[i];for(let j=0;j<70;j++){const m=(a+b)/2;if(g(a)*g(m)<=0)b=m;else a=m}const z=(a+b)/2;if(ab(g(z))<1e-6*(1+ab(z)))add(z)}
+else if(i>0&&i<X.length-1&&Y[i-1]*y>0&&Y[i+1]*y>0&&ab(y)<ab(Y[i-1])&&ab(y)<=ab(Y[i+1])){let a=X[i-1],b=X[i+1];const k=.381966;for(let j=0;j<80;j++){const m1=a+(b-a)*k,m2=b-(b-a)*k;if(ab(g(m1))<ab(g(m2)))b=m2;else a=m1}const z=(a+b)/2,gz=ab(g(z)),sc=Math.max(ab(Y[i-1]),ab(Y[i+1]));if(gz<1e-12||gz<1e-9*sc)add(z)}}
+return R.sort((a,b)=>a-b)}
+const rat=v=>{for(let q=1;q<=1000;q++){const p=Math.round(v*q);if(Math.abs(p/q-v)<1e-9)return[p,q]}return null};
+function exact(v){if(!isFinite(v))return'не визначено';const d=fmt(v);if(Number.isInteger(+d))return d;let R=rat(v);if(R)return`${R[0]}/${R[1]} ≈ ${d}`;
+for(const k of[2,3,5,6,7,10,11,13]){R=rat(v/Math.sqrt(k));if(R&&R[1]<=100){const p=R[0],q=R[1];const t=p==1?'':p==-1?'−':p;return(q==1?`${t}√${k}`:`${t}√${k}/${q}`)+` ≈ ${d}`}}return d}
+const pq=s=>/^[\da-zπ.]+$/.test(s)&&!/^\d+[a-zπ]/.test(s)?s:'('+s+')',lin=r=>r.items.map((x,k,A)=>x.t=='c'?x.v:x.t=='f'?(k&&isD(A[k-1])&&/^\d+$/.test(lin(x.n))&&/^\d+$/.test(lin(x.d))?' '+lin(x.n)+'/'+lin(x.d):pq(lin(x.n))+'/'+pq(lin(x.d))):x.t=='p'?'^'+pq(lin(x.e)):x.t=='g'?(x.fn=='abs'?'|'+lin(x.r)+'|':(x.fn||'')+'('+lin(x.r)+')'):'√('+lin(x.r)+')').join('');
+function unwrap(w){const P=w.path;if(!P.length)return;const[ix]=P[P.length-1],f=rowAt(w,P.slice(0,-1)).items[ix];if(f&&f.t=='f'&&f.n.items.length==1&&f.n.items[0].t=='g'&&!f.n.items[0].fn)f.n.items=f.n.items[0].r.items}
+function feed(w,s){let i=0,m,mx=0;const grp=()=>{let d=0,j=i;do{d+=s[j]=='('?1:s[j]==')'?-1:0;j++}while(d&&j<s.length);const v=s.slice(i+1,d?j:j-1);i=j;return v},opd=()=>{if(s[i]=='('){feed(w,grp());return}if(s[i]=='-')key(w,s[i++]);while(i<s.length&&/[0-9.a-zπ]/.test(s[i]))key(w,s[i++])};
+while(i<s.length){const c=s[i++];
+if(c=='^'){key(w,'^');opd();key(w,'>')}
+else if(c=='¦'){key(w,'E');mx=1}
+else if(c=='/'){if(mx){key(w,'>');mx=0}else{key(w,'/');unwrap(w)}opd();key(w,'>')}
+else if(c=='('){i--;key(w,'(');feed(w,grp());key(w,')')}
+else if(/[a-z]/.test(c)&&(m=s.slice(i-1).match(/^(arcsin|arccos|arctg|sin|cos|ctg|tg|ln|lg|abs|sqrt)\(/))){const n=m[1];i+=n.length-1;key(w,n=='sqrt'?'S':'@'+n);feed(w,grp());key(w,n=='sqrt'?'>':')')}
+else key(w,c=='<'?'{':c=='>'?'}':c)}}
+function fromText(w,s){key(w,'C');feed(w,s.replace(/(\d)\s+(\d+\/)/g,'$1¦$2').replace(/\s+/g,'').replace(/[×·]/g,'*').replace(/÷/g,'/').replace(/−/g,'-').replace(/<=/g,'≤').replace(/>=/g,'≥').replace(/\|([^|]*)\|/g,'abs($1)').replace(/√/g,'sqrt').replace(/arctan\(|atan\(/g,'arctg(').replace(/asin\(/g,'arcsin(').replace(/acos\(/g,'arccos(').replace(/cot\(/g,'ctg(').replace(/tan\(/g,'tg(').replace(/log\(/g,'lg('))}
+function calc(w){const env={};for(const o of wins){if(o==w)break;if(o.def)env[o.def[0]]=o.def[1]}w.def=null;const r=calc2(w,env),ks=Object.keys(env);return r&&ks.length&&!w.def?r+'    ['+ks.map(k=>k+'='+fmt(env[k])).join(', ')+']':r}
+function rc(w){const k=wins.indexOf(w);w.ans=calc(w);wins.forEach((o,j)=>{if(j>k)o.ans=calc(o)})}function calc2(w,env){const s=ser(w.root);if(!s)return'';try{
+const TK=s.split(/([<>≤≥=])/),P=[],O=[];TK.forEach((t,k)=>{if(k%2==0){if(t!=='')P.push(t)}else O.push(t)});O.length=Math.max(P.length-1,0);if(!P.length)return'';const ineq=O.some(o=>o!='=');
+const dl=P.length==2&&O[0]=='='&&/^[a-df-z]$/.test(P[0]),E0={...env};if(dl)delete E0[P[0]];const Q=P.map((p,k)=>parse(p,dl&&k==0?E0:env)),vs=new Set();Q.forEach(q=>q.vs.forEach(v=>vs.add(v)));const names=[...vs].join(', ');if(dl&&!Q[1].vs.size){const dv=Q[1].f({});if(isFinite(dv))w.def=[P[0],dv]}
+if(ineq&&!vs.size){const V=Q.map(q=>q.f({}));return Q.every((q,k)=>!k||CM(O[k-1],V[k-1],V[k]))?'✓ нерівність істинна':'✗ нерівність хибна'}
+if(ineq&&vs.size==1){const v=[...vs][0],G=Q.map(q=>x=>q.f({[v]:x})),c=(x,e)=>G.every((h,k)=>!k||CM(O[k-1],G[k-1](x),h(x),e)),ok=[],I=[];
+for(let k=-100000;k<=100000;k++)ok.push(c(k/100,0));
+let s0=-1;for(let k=0;k<=ok.length;k++){if(ok[k]&&s0<0)s0=k;if(!ok[k]&&s0>=0){I.push([s0,k-1]);s0=-1}}
+const X=k=>(k-100000)/100,bs=(f,t)=>{for(let j=0;j<50;j++){const m=(f+t)/2;if(c(m,0))t=m;else f=m}return t};
+const out=I.map(([a,b])=>{const L=a==0?-Infinity:bs(X(a-1),X(a)),R=b==ok.length-1?Infinity:bs(X(b+1),X(b)),li=L>-Infinity&&c(L,1e-9),ri=R<Infinity&&c(R,1e-9);
+return L==-Infinity&&R==Infinity?v+' — будь-яке число':L==-Infinity?`${v} ${ri?'≤':'<'} ${fmt(R)}`:R==Infinity?`${v} ${li?'≥':'>'} ${fmt(L)}`:`${fmt(L)} ${li?'≤':'<'} ${v} ${ri?'≤':'<'} ${fmt(R)}`});
+return out.length?out.join('  або  '):'Розв’язків немає'}
+if(Q.length==1){if(vs.size)return s.includes('=')?'Впишіть праву частину після «=», щоб знайти '+names:'Додайте «=», щоб знайти '+names;const v=Q[0].f({});return isFinite(v)?'= '+exact(v):'не визначено'}
+if(!vs.size){const V=Q.map(q=>q.f({})),k=V.findIndex(v=>!(Math.abs(v-V[0])<=1e-9*(1+Math.abs(v))));return k<0?'✓ рівність істинна (= '+fmt(V[0])+')':'✗ рівність хибна: '+fmt(V[0])+' ≠ '+fmt(V[k])}
+if(vs.size>1){const C=Q.filter(q=>!q.vs.size).map(q=>q.f({}));
+if(!ineq&&C.length&&C.every(v=>Math.abs(v-C[0])<=1e-9*(1+Math.abs(v)))&&Q.every(q=>q.vs.size<2)){return Q.filter(q=>q.vs.size).map(q=>{const u=[...q.vs][0],R=roots(x=>q.f({[u]:x})-C[0]);return R.length?R.map(r=>u+' = '+exact(r)).join(' або '):u+': розв’язків немає'}).join(';  ')}
+return'Кілька невідомих ('+names+') — залиште одне'}
+const v=[...vs][0],G=Q.map(q=>x=>q.f({[v]:x})),i0=Q.findIndex((q,i)=>i<Q.length-1&&(q.vs.size||Q[i+1].vs.size)),g=x=>G[i0](x)-G[i0+1](x),R=roots(g);
+const good=R.filter(r=>G.every(h=>Math.abs(h(r)-G[0](r))<=1e-6*(1+Math.abs(G[0](r)))));
+return good.length?good.map(r=>v+' = '+exact(r)).join(';  '):R.length?'✗ рівність хибна: ланцюжок не збігається':'Дійсних розв’язків немає'}catch(e){return''}}
+const first=x=>x.t=='f'?'n':x.t=='p'?'e':'r',last=x=>x.t=='f'?'d':x.t=='p'?'e':'r';
+function key(w,k){const it=rowAt(w).items,P=w.path,comp=x=>x.t!='c';
+if(k=='C'){w.root=mk();w.path=[];w.i=0}
+else if(k=='>'){if(w.i<it.length){const x=it[w.i];if(comp(x)){P.push([w.i,first(x)]);w.i=0}else w.i++}
+else if(P.length){const[ix,f]=P[P.length-1];if(f=='n'){P[P.length-1]=[ix,'d'];w.i=0}else{P.pop();w.i=ix+1}}}
+else if(k=='<'){if(w.i>0){const x=it[w.i-1];if(comp(x)){const f=last(x);P.push([w.i-1,f]);w.i=x[f].items.length}else w.i--}
+else if(P.length){const[ix,f]=P[P.length-1];if(f=='d'){P[P.length-1]=[ix,'n'];w.i=rowAt(w).items.length}else{P.pop();w.i=ix}}}
+else if(k=='B'){if(w.i>0){const x=it[w.i-1];const sb=x.t=='f'?[x.n,x.d]:[x[first(x)]];if(!comp(x)||sb.every(s=>!s.items.length))it.splice(--w.i,1);else key(w,'<')}else if(P.length)key(w,'<')}
+else if(k=='E'){it.splice(w.i,0,{t:'f',n:mk(),d:mk()});P.push([w.i,'n']);w.i=0}
+else if(k=='/'||k=='F'){let j=w.i;while(j>0&&(it[j-1].t!='c'||/[0-9.a-zπ]/.test(it[j-1].v)))j--;const n=mk();n.items=it.splice(j,w.i-j);it.splice(j,0,{t:'f',n,d:mk()});P.push([j,n.items.length?'d':'n']);w.i=0}
+else if(k=='^'){it.splice(w.i,0,{t:'p',e:mk()});P.push([w.i,'e']);w.i=0}
+else if(k=='Q'){it.splice(w.i,0,{t:'p',e:{items:[{t:'c',v:'2'}]}});w.i++}
+else if(k=='('){it.splice(w.i,0,{t:'g',r:mk()});P.push([w.i,'r']);w.i=0}
+else if(k==')'){if(P.length){const[ix]=P[P.length-1];if(rowAt(w,P.slice(0,-1)).items[ix].t=='g'){P.pop();w.i=ix+1}}}
+else if(k=='S'){it.splice(w.i,0,{t:'s',r:mk()});P.push([w.i,'r']);w.i=0}
+else if(k=='D')it.splice(w.i++,0,{t:'c',v:'/'});
+else if(k[0]=='@'){it.splice(w.i,0,{t:'g',r:mk(),fn:k.slice(1)});P.push([w.i,'r']);w.i=0}
+else if('={}≤≥'.includes(k)){while(P.length){const[ix]=P.pop();w.i=ix+1}w.root.items.splice(w.i++,0,{t:'c',v:k=='{'?'<':k=='}'?'>':k})}
+else if(k=='!'||k=='e')it.splice(w.i++,0,{t:'c',v:k})
+else if(/^[0-9.+\-*=πxyzabc]$/.test(k))it.splice(w.i++,0,{t:'c',v:k})}
+function rr(r,path,w){const el=document.createElement('span'),wi=wins.indexOf(w),cur=wi==act&&JSON.stringify(path)==JSON.stringify(w.path);
+const ls=r.items[r.items.length-1],tail=!path.length||(ls&&ls.t=='f');el.className='row'+(r.items.length||tail?'':' e');el.onclick=ev=>{ev.stopPropagation();w.path=path;w.i=r.items.length;act=wi;render()};
+const car=(h=el)=>{const c=document.createElement('span');c.className='cr';h.append(c)};
+r.items.forEach((x,k)=>{if(cur&&w.i==k)car();const e=document.createElement('span'),sub=(row,f)=>rr(row,[...path,[k,f]],w);
+if(x.t=='c'){e.className=/^[a-df-z]$/.test(x.v)?'c v':'c';e.textContent={'*':'×','/':'÷','-':'−'}[x.v]||x.v}
+else if(x.t=='f'){e.className='fr';e.append(sub(x.n,'n'),sub(x.d,'d'))}
+else if(x.t=='p'){e.className='su';e.append(sub(x.e,'e'))}
+else if(x.t=='g'){e.className='gr';e.append(x.fn=='abs'?'|':(x.fn||'')+'(',sub(x.r,'r'),x.fn=='abs'?'|':')')}
+else{e.className='sq';e.append('√',sub(x.r,'r'))}
+e.onclick=ev=>{ev.stopPropagation();const b=e.getBoundingClientRect();w.path=path;w.i=ev.clientX>b.left+b.width/2?k+1:k;act=wi;render()};el.append(e)});
+if(tail){const tb=document.createElement('span');tb.className='tb';if(cur&&w.i==r.items.length)car(tb);el.append(tb)}else if(cur&&w.i==r.items.length)car();return el}
+function sw(n){wins.act=act;cw=n;wins=WS[n];act=Math.min(wins.act||0,wins.length-1);wins.forEach(w=>w.ans=calc(w));render()}
+function press(k){if(k=='N')return nl();const w=wins[act];key(w,k);snap(w);render()}
+const L={B:'⌫',E:'▢/▢',N:'sin·ln·≤',Q:'x²',S:'√',D:'÷','*':'×','-':'−','^':'xⁿ','<':'◀','>':'▶','!':'n!'},TT={C:'Очистити рядок',B:'Стерти',N:'Новий рядок',E:'Дріб',D:'Ділення',Q:'Квадрат',S:'Корінь','^':'Степінь','<':'Курсор вліво','>':'Курсор вправо'};
+'C B < > N ( ) E ^ S 7 8 9 D Q 4 5 6 * π 1 2 3 - e 0 . = + !'.split(' ').forEach(k=>{const b=document.createElement('button');b.textContent=L[k]||k;if(TT[k])b.title=TT[k];b.className=/^[0-9.]$/.test(k)?'dg':k=='='?'eq':'*D-+'.includes(k)?'op':k=='C'?'clr':'fn';if(k=='N'){b.classList.add('nlk');b.id='fxk';b.title='Функції та знаки нерівностей: sin, cos, tg, ln, lg, |x|, <, >, ≤, ≥';b.onclick=()=>$('#fx').click();$('#pad').append(b);return}b.onclick=()=>press(k);$('#pad').append(b)});
+'x y z a b c'.split(' ').forEach(k=>{const b=document.createElement('button');b.textContent=k;b.onclick=()=>press(k);$('#pad2').append(b)});
+[['sin','@sin'],['cos','@cos'],['tg','@tg'],['ctg','@ctg'],['ln','@ln'],['lg','@lg'],['|x|','@abs'],['arcsin','@arcsin'],['arccos','@arccos'],['arctg','@arctg'],['<','{'],['>','}'],['≤','≤'],['≥','≥']].forEach(([l,k])=>{const b=document.createElement('button');b.textContent=l;b.onclick=()=>press(k);$('#pad3').append(b)});
+$('#fx').onclick=()=>{$('#pad3').hidden=!$('#pad3').hidden;$('#fx').classList.toggle('on',!$('#pad3').hidden);$('#fxk').classList.toggle('on',!$('#pad3').hidden);render()};
+let rzT;window.addEventListener('resize',()=>{clearTimeout(rzT);rzT=setTimeout(()=>{if(!$('#calc').hidden)render()},120)});$('#fx2').onclick=()=>{if($('#pad3').hidden)$('#fx').click();$('#pad3').scrollIntoView({block:'nearest',behavior:'smooth'})};$('#nl').onclick=nl;$('#dg').onclick=()=>{deg=!deg;$('#dg').textContent=deg?'Градуси':'Радіани';WS.forEach(a=>{const s0=wins;wins=a;a.forEach(w=>w.ans=calc(w));wins=s0});saveSoon();render()};
+document.addEventListener('keydown',e=>{if($('#calc').hidden||e.target.tagName=='INPUT'||e.ctrlKey||e.metaKey)return;let k=e.key;
+k={Backspace:'B',ArrowLeft:'<',ArrowRight:'>',r:'S',p:'π',Enter:'N','<':'{','>':'}'}[k]||k;if(/^[0-9.+\-*=^()\/xyzabc<>BSπ{}N]$/.test(k)){e.preventDefault();press(k)}});
+function tab(n){$('#calc').hidden=n!=1;$('#les').hidden=n!=2;$('#gr').hidden=n!=3;[1,2,3].forEach(k=>$('#t'+k).className=n==k?'on':'');if(n==3){gui();gcomp();requestAnimationFrame(gdraw)}try{localStorage.setItem('mtab',n)}catch(e){}}
+$('#t1').onclick=()=>tab(1);$('#t2').onclick=()=>tab(2);$('#t3').onclick=()=>tab(3);
+function newWin(){return{root:mk(),path:[],i:0,txt:null,ans:'',def:null}}
+function mkW(){const a=[newWin()];a.h=[];a.hi=-1;return a}
+function snap(w){wins.h=wins.h.slice(0,wins.hi+1);wins.h.push(JSON.stringify({a:act,L:wins.map(o=>({r:o.root,p:o.path,i:o.i}))}));wins.hi++;w.txt=null;rc(w);saveSoon()}
+function hist(d){const n=wins.hi+d;if(n<0||n>=wins.h.length)return;const o=JSON.parse(wins.h[n]);wins.length=0;o.L.forEach(x=>wins.push({root:x.r,path:x.p,i:x.i,txt:null,ans:'',def:null}));wins.hi=n;act=Math.min(o.a,wins.length-1);wins.forEach(r=>r.ans=calc(r));saveSoon();render()}
+function histPush(){wins.h=wins.h.slice(0,wins.hi+1);wins.h.push(JSON.stringify({a:act,L:wins.map(o=>({r:o.root,p:o.path,i:o.i}))}));wins.hi++}
+function recalcAll(){wins.forEach(r=>r.ans=calc(r));saveSoon();render()}
+function delRow(i){if(wins.length>1){wins.splice(i,1);act=Math.min(i>act?act:Math.max(act-1,0),wins.length-1)}else{const w=wins[0];w.root=mk();w.path=[];w.i=0;w.txt=null;act=0}histPush();recalcAll()}
+function clearWin(){wins.length=0;wins.push(newWin());act=0;histPush();recalcAll()}
+const EX=[['1+2^3*3/2-1','Порядок дій'],['2 1/2+1/4','Змішані числа й дроби'],['25/100*80','Відсотки: 25% від 80'],['sqrt(16)+3^2','Корінь і степінь'],['sin(30)+cos(60)','Тригонометрія (градуси)'],['lg(1000)+ln(e)','Логарифми'],['5!','Факторіал'],['2x+3=11','Лінійне рівняння'],['x^2-5x+6=0','Квадратне рівняння'],['|2x+3|<5','Нерівність з модулем'],[['a=5','a^2+1'],'Змінна: рядок «a=5», далі вираз з a']];
+function exAdd(L){if(wins.length+L.length>50)return;let at=act;if(ser(wins[act].root))at=act+1;else wins.splice(act,1);L.forEach((t,k)=>{const w=newWin();fromText(w,t);wins.splice(at+k,0,w)});act=at+L.length-1;histPush();recalcAll();$('#exs').hidden=true;$('#ex').classList.remove('on')}
+function exAll(){if(WS.length>=5)return;wins.act=act;const a=mkW();a.length=0;EX.forEach(([t])=>[].concat(t).forEach(x=>{const w=newWin();fromText(w,x);a.push(w)}));WS.push(a);cw=WS.length-1;wins=a;act=0;snap(a[0]);render();$('#exs').hidden=true;$('#ex').classList.remove('on')}
+function exBuild(){const B=$('#exs');B.innerHTML='<div class="exh"><b>Приклади використання</b><span class="note">торкніться, щоб вставити в калькулятор</span></div><div class="exg"></div><div class="acts"><button class="bt" id="exa">Усі приклади в новому вікні</button><button class="bt" id="exc">Закрити</button></div>';
+EX.forEach(([t,d])=>{const b=document.createElement('button');b.className='exi';b.innerHTML=`<code>${[].concat(t).map(esc).join('<br>')}</code><small>${d}</small>`;b.onclick=()=>exAdd([].concat(t));B.querySelector('.exg').append(b)});
+const ea=$('#exa');ea.disabled=WS.length>=5;if(ea.disabled)ea.title='Уже відкрито 5 вікон';ea.onclick=exAll;$('#exc').onclick=()=>{B.hidden=true;$('#ex').classList.remove('on')}}
+$('#ex').onclick=()=>{const B=$('#exs');B.hidden=!B.hidden;$('#ex').classList.toggle('on',!B.hidden);if(!B.hidden){exBuild();$('#sol').hidden=true;$('#sv').classList.remove('on')}};
+/* ---- Покроковий розв’язок активного рядка ---- */
+// число красиво: ціле, дріб або десяткове
+const sF=v=>{if(Math.abs(v)<1e-12)v=0;const R=rat(v);const s=R?(R[1]==1?`${R[0]}`:`${R[0]}/${R[1]}`):fmt(v);return s.replace(/^-/,'−')},
+sP=v=>v<0?`(${sF(v)})`:sF(v),
+// многочлен з коефіцієнтів [a2,a1,a0] у вигляді «2x² − 3x + 1»
+sPoly=(C,v)=>{const pw=['',v,v+'²',v+'³'];let o='';C.forEach((c,i)=>{const n=C.length-1-i;if(Math.abs(c)<1e-12)return;const a=Math.abs(c),cs=(n&&Math.abs(a-1)<1e-12)?'':sF(a);o+=o?(c<0?' − ':' + '):(c<0?'−':'');o+=cs+pw[n]});return o||'0'},
+FLIP={'<':'>','>':'<','≤':'≥','≥':'≤'};
+// підбір многочлена степеня ≤ 2 для g(x); null, якщо не многочлен
+function polyFit(g){const y0=g(0),y1=g(1),ym=g(-1);if(![y0,y1,ym].every(isFinite))return null;const a=(y1+ym-2*y0)/2,b=(y1-ym)/2,c=y0;
+for(const t of[2.5,-3.7,7.1,0.31,-11]){const v=g(t),p=a*t*t+b*t+c;if(!isFinite(v)||Math.abs(v-p)>1e-7*(1+Math.abs(v)))return null}
+const cl=v=>Math.abs(v-Math.round(v))<1e-9?Math.round(v):v;return[cl(a),cl(b),cl(c)]}
+function solveSteps(w){
+const env={};for(const o of wins){if(o==w)break;if(o.def)env[o.def[0]]=o.def[1]}
+const s=ser(w.root),txt=lin(w.root),ans=calc(w);if(!s)return{err:'Рядок порожній. Введіть рівняння, напр. 2x+3=11.'};
+const TK=s.split(/([<>≤≥=])/),P=[],O=[];TK.forEach((t,k)=>{if(k%2==0)P.push(t);else O.push(t)});
+let Q;try{Q=P.map(p=>parse(p,env))}catch(e){return{err:'Вираз не дописано — перевірте дужки та знаки.'}}
+const vs=new Set();Q.forEach(q=>q.vs.forEach(v=>vs.add(v)));const st=[`Записуємо: ${txt}`],TP=txt.split(/[<>≤≥=]/);
+if(P.length==1){if(vs.size)return{st:[...st,`Це вираз зі змінною ${[...vs].join(', ')}, а не рівняння.`,`Додайте «= число», щоб отримати рівняння, або задайте змінну рядком вище (напр. ${[...vs][0]}=5).`],fin:''};
+return{st:[...st,'Обчислюємо за порядком дій: дужки → степені й корені → множення й ділення → додавання й віднімання'],fin:ans}}
+if(P.length==2&&O[0]=='='&&/^[a-df-z]$/.test(P[0])&&!Q[1].vs.size)return{st:[...st,`Це задання змінної: ${P[0]} = ${sF(Q[1].f({}))}`,`Значення ${P[0]} використовується в рядках нижче`],fin:ans};
+if(P.length>2)return{st:[...st,'Подвійна нерівність — розв’язуємо обидві частини й беремо перетин'],fin:ans};
+if(vs.size!=1)return{st:[...st,vs.size?`Кілька невідомих (${[...vs].join(', ')}) — одне рівняння їх не визначає однозначно. Задайте зайві змінні рядками вище.`:'Невідомої немає — перевіряємо рівність чисел'],fin:ans};
+const v=[...vs][0],op=O[0],G=x=>Q[0].f({[v]:x})-Q[1].f({[v]:x}),C=polyFit(G);
+if(Math.abs(Q[1].f({[v]:0}))>1e-12||Q[1].vs.size)st.push(`Переносимо все в ліву частину: (${TP[0]}) − (${TP[1]}) ${op} 0`);
+if(!C)return{st:[...st,'Рівняння не лінійне й не квадратне (дроби з невідомою, корені, функції або вищий степінь)','Корені знайдено чисельно — підбором і уточненням з точністю до 10⁻⁸'],fin:ans};
+const[a,b,c]=C;
+if(Math.abs(a)<1e-12){ // лінійне
+st.push(`Зводимо подібні: ${sPoly([b,c],v)} ${op} 0`);
+if(Math.abs(b)<1e-12)return{st:[...st,`Невідома скоротилась: ${sF(c)} ${op} 0`],fin:ans};
+if(c)st.push(`Переносимо число вправо зі зміною знака: ${sPoly([b,0],v)} ${op} ${sF(-c)}`);
+const r0=-c/b;if(op=='=')return{st:[...st,`Ділимо обидві частини на ${sP(b)}: ${v} = ${sF(-c)} : ${sP(b)}`,`${v} = ${sF(r0)}`,`Перевірка: ліва частина ${sF(Q[0].f({[v]:r0}))}, права ${sF(Q[1].f({[v]:r0}))} ✓`],fin:`${v} = ${sF(r0)}`};
+const op2=b<0?FLIP[op]:op;return{st:[...st,`Ділимо на ${sP(b)}${b<0?' — число від’ємне, тому знак нерівності змінюємо на протилежний':''}`,`${v} ${op2} ${sF(r0)}`],fin:ans}}
+// квадратне
+st.push(`Зводимо до вигляду a${v}² + b${v} + c ${op} 0: ${sPoly([a,b,c],v)} ${op} 0`,`a = ${sF(a)}, b = ${sF(b)}, c = ${sF(c)}`);
+const Dd=b*b-4*a*c;st.push(`D = b² − 4ac = ${sP(b)}² − 4·${sP(a)}·${sP(c)} = ${sF(Dd)}`);
+if(Dd<-1e-12){st.push('D < 0 — дійсних коренів немає');if(op!='=')st.push(`Парабола ${a>0?'вище':'нижче'} осі ${v} при всіх ${v}`);return{st,fin:ans}}
+const sD=Math.sqrt(Math.max(Dd,0)),RD=rat(sD),sq=RD?sF(sD):`√${sF(Dd)}`;
+if(Math.abs(Dd)<1e-12){const x0=-b/(2*a);st.push(`D = 0 — один корінь: ${v} = −b/(2a) = ${sF(-b)}/${sP(2*a)} = ${sF(x0)}`);return{st,fin:op=='='?`${v} = ${sF(x0)}`:ans}}
+const x1=(-b-sD)/(2*a),x2=(-b+sD)/(2*a),lo=Math.min(x1,x2),hi=Math.max(x1,x2),xs=x=>rat(x)?sF(x):fmt(x);
+st.push(`√D = ${sq}${RD?'':' ≈ '+fmt(sD)}`,`${v}₁ = (−b − √D)/(2a) = (${sF(-b)} − ${sq})/${sP(2*a)} = ${xs(x1)}`,`${v}₂ = (−b + √D)/(2a) = (${sF(-b)} + ${sq})/${sP(2*a)} = ${xs(x2)}`);
+if(op=='='){st.push(`Перевірка за Вієтою: ${v}₁ + ${v}₂ = −b/a = ${sF(-b/a)}, ${v}₁·${v}₂ = c/a = ${sF(c/a)} ✓`);return{st,fin:ans}}
+const inside=(op=='<'||op=='≤')==(a>0);st.push(`Вітки параболи ${a>0?'вгору':'вниз'}, тому вираз ${op=='<'||op=='≤'?'менший':'більший'} за нуль ${inside?'між коренями':'поза коренями'}`,inside?`${xs(lo)} ${op=='≤'||op=='≥'?'≤':'<'} ${v} ${op=='≤'||op=='≥'?'≤':'<'} ${xs(hi)}`:`${v} ${op=='≤'||op=='≥'?'≤':'<'} ${xs(lo)} або ${v} ${op=='≤'||op=='≥'?'≥':'>'} ${xs(hi)}`);
+return{st,fin:ans}}
+function solBuild(){const B=$('#sol'),w=wins[act],R=solveSteps(w);
+B.innerHTML=`<div class="exh solh"><b>Розв’язок рядка ${act+1}</b><button class="bt" id="solc" title="Закрити">✕</button></div>`+(R.err?`<p class="note">${esc(R.err)}</p>`:`<ol class="solst">${R.st.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>${R.fin?`<div class="mxa">Відповідь: ${esc(R.fin)}</div>`:''}`);
+$('#solc').onclick=()=>{B.hidden=true;$('#sv').classList.remove('on')}}
+$('#sv').onclick=()=>{const B=$('#sol');B.hidden=!B.hidden;$('#sv').classList.toggle('on',!B.hidden);if(!B.hidden){$('#exs').hidden=true;$('#ex').classList.remove('on');solBuild()}};
+
+function nl(){if(wins.length>=50)return;wins.splice(act+1,0,newWin());act++;snap(wins[act]);render()}
+function render(){const W=$('#wins'),o0=W.querySelector('.rws'),st0=o0?o0.scrollTop:0,sw0=o0&&o0.dataset.w==cw;W.innerHTML='';const box=document.createElement('div');box.className='win on';
+box.innerHTML=`<div class="wh"><b>Вікно ${cw+1}</b><span>крок ${wins.hi}/${wins.h.length-1}<button title="Скасувати">↶</button><button title="Повторити">↷</button><button title="Видалити всі рядки цього вікна">Очистити</button></span></div>`;
+const bs=box.querySelectorAll('button');bs[0].onclick=()=>hist(-1);bs[1].onclick=()=>hist(1);bs[2].onclick=clearWin;
+const rws=document.createElement('div');rws.className='rws';rws.dataset.w=cw;
+wins.forEach((w,i)=>{const d=document.createElement('div');d.className='rw'+(i==act?' on':'');d.onclick=()=>{act=i;render()};
+const tx=document.createElement('input');tx.className='tx';tx.autocomplete='off';tx.placeholder='Введіть вираз, напр. 2x+3=11';tx.value=w.txt??lin(w.root);tx.onclick=e=>e.stopPropagation();
+tx.oninput=()=>{const v=tx.value,p=tx.selectionStart;act=i;fromText(w,v);snap(w);w.txt=v;render();const n=$('#wins').querySelectorAll('.tx')[i];n.focus();n.setSelectionRange(p,p)};
+tx.onkeydown=e=>{if(e.key=='Enter'){e.preventDefault();act=i;nl();setTimeout(()=>{const n=$('#wins').querySelectorAll('.tx')[act];n&&n.focus()},0)}};
+const ed=document.createElement('div');ed.className='ed';ed.append(rr(w.root,[],w));const a=document.createElement('div');a.className='ans';a.textContent=w.ans||'';if(/^✗/.test(a.textContent))a.className='ans bad';else if(/^(Додайте|Впишіть|Кілька)/.test(a.textContent))a.className='ans hint';
+const L1=lin(w.root);if(L1.includes('x')&&!/[<>≤≥]/.test(L1)&&L1.split('=').length<=2&&!/^x=[^x]*$/.test(L1)){const gb=document.createElement('button');gb.className='gb';gb.textContent='Графік';gb.title='Побудувати графік цього виразу';gb.onclick=e=>{e.stopPropagation();const P2=L1.split('=');G.f[0]=P2.length==2?(P2[0]=='y'?P2[1]:`(${P2[0]})-(${P2[1]})`):L1;gsave();tab(3)};a.append(gb)}
+const xb=document.createElement('button');xb.className='rx';xb.textContent='✕';xb.title=wins.length>1?'Видалити рядок':'Очистити рядок';xb.setAttribute('aria-label',xb.title);xb.onclick=e=>{e.stopPropagation();delRow(i)};
+d.append(tx,ed,a,xb);rws.append(d)});
+const ad=document.createElement('button');ad.className='addrow';ad.textContent='＋';ad.title='Новий рядок';ad.setAttribute('aria-label','Новий рядок');ad.disabled=wins.length>=50;
+ad.onclick=e=>{e.stopPropagation();if(wins.length>=50)return;wins.push(newWin());act=wins.length-1;snap(wins[act]);render();const R=$('#wins .rws');if(R)R.scrollTop=R.scrollHeight};rws.append(ad);
+box.append(rws);W.append(box);if(!$('#sol').hidden)solBuild();if(sw0)rws.scrollTop=st0;const ar=rws.querySelector('.rw.on');if(ar){const t=ar.offsetTop,h=ar.offsetHeight;if(t<rws.scrollTop)rws.scrollTop=t;else if(t+h>rws.scrollTop+rws.clientHeight)rws.scrollTop=t+h-rws.clientHeight}if(act==wins.length-1){const ad=rws.querySelector('.addrow'),e=ad.offsetTop+ad.offsetHeight+10;if(e>rws.scrollTop+rws.clientHeight)rws.scrollTop=e-rws.clientHeight}const c=rws.querySelector('.rw.on .cr');if(c){const ed=c.closest('.ed'),cl=c.offsetLeft;if(ed&&(cl<ed.scrollLeft||cl>ed.scrollLeft+ed.clientWidth-8))ed.scrollLeft=Math.max(0,cl-ed.clientWidth/2)}
+const ts=$('#wst');ts.innerHTML='';WS.forEach((_,n)=>{const b=document.createElement('button');b.textContent=n+1;b.className=n==cw?'on':'';b.onclick=()=>sw(n);ts.append(b)});
+if(WS.length<5){const b=document.createElement('button');b.textContent='+';b.onclick=()=>{wins.act=act;const a=mkW();WS.push(a);cw=WS.length-1;wins=a;act=0;snap(wins[0]);render()};ts.append(b)}}
+let sT=0;function saveSoon(){clearTimeout(sT);sT=setTimeout(()=>{try{localStorage.setItem('mcalc',JSON.stringify({cw,deg,W:WS.map(a=>a.map(w=>w.txt??lin(w.root)))}))}catch(e){}},300)}
+(()=>{let S=null;try{S=JSON.parse(localStorage.getItem('mcalc')||'null')}catch(e){}
+const W0=S&&Array.isArray(S.W)&&S.W.length?S.W:[['']];if(S&&S.deg===false)deg=false;
+WS=W0.slice(0,5).map(L0=>{const a=mkW();wins=a;a.length=0;(Array.isArray(L0)&&L0.length?L0:['']).slice(0,50).forEach(t=>{const w=newWin();a.push(w);if(t)try{fromText(w,String(t))}catch(e){}});act=0;snap(a[0]);return a});
+cw=Math.min((S&&S.cw)|0,WS.length-1);wins=WS[cw];act=0;$('#dg').textContent=deg?'Градуси':'Радіани';render()})();
+/* ---- Уроки ---- */
+const r=(a,b)=>a+Math.floor(Math.random()*(b-a+1)),gc=(a,b)=>b?gc(b,a%b):a,up=n=>String(n).split('').map(c=>'⁰¹²³⁴⁵⁶⁷⁸⁹'[c]||'⁻').join(''),sg=n=>n<0?'-':'+';
+const T=[['1–4 клас',[
+{n:'Додавання і віднімання',h:'a+b=b+a (переставний закон); (a+b)+c=a+(b+c) (сполучний). Віднімання обернене до додавання: якщо a+b=c, то c−b=a.',g(){const a=r(120,899),b=r(20,99);return{q:`${a} + ${b} = ?`,a:[a+b],s:['Додаємо розряди справа наліво з переносом.',`${a} + ${b} = ${a+b}`],k:`${a}+${b}`}}},
+{n:'Множення і ділення',h:'a×b=b×a. a×(b+c)=a×b+a×c (розподільний закон). Ділення обернене до множення: a×b=c ⇒ c÷a=b. На нуль ділити не можна.',g(){const a=r(2,9),b=r(2,12);return r(0,1)?{q:`${a} × ${b} = ?`,a:[a*b],s:[`${a} × ${b} = ${a*b}`],k:`${a}*${b}`}:{q:`${a*b} ÷ ${a} = ?`,a:[b],s:[`Шукаємо число, яке при множенні на ${a} дає ${a*b}: ${a}×${b}=${a*b}`,`Відповідь: ${b}`],k:`${a*b}D${a}`}}}]],
+['5–6 клас',[
+{n:'Порядок дій',h:'Спочатку дужки, потім степені, далі × та ÷ зліва направо, насамкінець + та −.',g(){const a=r(2,9),b=r(2,9),c=r(2,9),d=r(1,9),v=(a+b)*c-d;return{q:`(${a} + ${b}) × ${c} − ${d} = ?`,a:[v],s:[`Дужки: ${a}+${b}=${a+b}`,`Множення: ${a+b}×${c}=${(a+b)*c}`,`Віднімання: ${(a+b)*c}−${d}=${v}`],k:`(${a}+${b})*${c}-${d}`}}},
+{n:'Звичайні дроби',h:'Додавання й віднімання: зводимо до спільного знаменника (НСК). Множення: чисельник на чисельник, знаменник на знаменник. Ділення: множимо на обернений дріб. Мішане число W a/b = (W·b + a)/b.',g(){
+const fr=(n,d)=>{if(d<0){n=-n;d=-d}const g=gc(Math.abs(n),d)||1;n/=g;d/=g;return d==1?`${n}`:`${n}/${d}`},
+mx=(n,d)=>{const g=gc(Math.abs(n),d)||1;n/=g;d/=g;if(d==1)return`${n}`;const W=Math.trunc(n/d),R=Math.abs(n%d);return W?`${W}\u00a0${R}/${d}`:`${n}/${d}`},
+both=(n,d)=>{const a=fr(n,d),b=mx(n,d);return a==b?a:`${a} = ${b}`},
+pf=()=>{let b,a;do{b=r(2,9);a=r(1,b-1)}while(gc(a,b)>1);return[a,b]},pm=()=>{const[a,b]=pf();return[r(1,5),a,b]},
+O=(q,n,d,s,kt)=>({q:q+' = ?',a:[n/d],as:mx(n,d),s:[...s,`Відповідь: ${both(n,d)}`],kt});
+const m=r(0,10);
+if(m<=1){let[a,b]=pf(),[c,d]=pf();while(b==d)[c,d]=pf();if(m==1&&a/b<c/d)[a,b,c,d]=[c,d,a,b];const sg=m?'−':'+',L=b*d/gc(b,d),n=m?a*(L/b)-c*(L/d):a*(L/b)+c*(L/d);
+return O(`${a}/${b} ${sg} ${c}/${d}`,n,L,[`Спільний знаменник: НСК(${b}; ${d}) = ${L}`,`${a}/${b} = ${a*L/b}/${L},  ${c}/${d} = ${c*L/d}/${L}`,`${a*L/b}/${L} ${sg} ${c*L/d}/${L} = ${n}/${L}`],`${a}/${b}${m?'-':'+'}${c}/${d}`)}
+if(m==2){const[a,b]=pf(),[c,d]=pf();return O(`${a}/${b} · ${c}/${d}`,a*c,b*d,[`Чисельник на чисельник, знаменник на знаменник`,`${a}·${c} / (${b}·${d}) = ${a*c}/${b*d}`,...(gc(a*c,b*d)>1?[`Скорочуємо на ${gc(a*c,b*d)}: ${fr(a*c,b*d)}`]:[])],`${a}/${b}*${c}/${d}`)}
+if(m==3){const[a,b]=pf(),[c,d]=pf();return O(`${a}/${b} : ${c}/${d}`,a*d,b*c,[`Ділення = множення на обернений дріб: ${c}/${d} → ${d}/${c}`,`${a}/${b} · ${d}/${c} = ${a*d}/${b*c}`,...(gc(a*d,b*c)>1?[`Скорочуємо на ${gc(a*d,b*c)}: ${fr(a*d,b*c)}`]:[])],`(${a}/${b})/(${c}/${d})`)}
+if(m==4){let[a,b]=pf();while(gc(a,b)>1)[a,b]=pf();const k=r(2,9);return AX(O(`Скоротіть дріб ${a*k}/${b*k}`,a,b,[`НСД(${a*k}; ${b*k}) = ${k}`,`${a*k}:${k} = ${a},  ${b*k}:${k} = ${b}`]),{q:`Скоротіть дріб ${a*k}/${b*k}`,kt:`${a*k}/${b*k}`})}
+if(m==5){const[W,a,b]=pm();return AX(O(`${W}\u00a0${a}/${b} — запишіть неправильним дробом`,W*b+a,b,[`ціле · знаменник + чисельник: ${W}·${b} + ${a} = ${W*b+a}`,`Знаменник залишається: ${b}`]),{q:`Запишіть мішане число ${W}\u00a0${a}/${b} неправильним дробом`,as:`${W*b+a}/${b}`,s:[`ціле · знаменник + чисельник: ${W}·${b} + ${a} = ${W*b+a}`,`Знаменник залишається: ${b}`,`Відповідь: ${W*b+a}/${b}`],kt:`${W} ${a}/${b}`})}
+if(m==6){const[W,a,b]=pm();const n=W*b+a;return AX(O('',n,b,[]),{q:`Виділіть цілу частину: ${n}/${b}`,s:[`${n} : ${b} = ${W} (остача ${a})`,`Ціла частина ${W}, остача ${a} стає чисельником`,`Відповідь: ${mx(n,b)}`],kt:`${n}/${b}`})}
+if(m<=8){let[W1,a,b]=pm(),[W2,c,d]=pm();if(m==8&&W1+a/b<W2+c/d)[W1,a,b,W2,c,d]=[W2,c,d,W1,a,b];const sg=m==8?'−':'+',n1=W1*b+a,n2=W2*d+c,L=b*d/gc(b,d),n=m==8?n1*(L/b)-n2*(L/d):n1*(L/b)+n2*(L/d);
+return O(`${W1}\u00a0${a}/${b} ${sg} ${W2}\u00a0${c}/${d}`,n,L,[`Переводимо в неправильні дроби: ${W1}\u00a0${a}/${b} = ${n1}/${b},  ${W2}\u00a0${c}/${d} = ${n2}/${d}`,`Спільний знаменник ${L}: ${n1*L/b}/${L} ${sg} ${n2*L/d}/${L}`,`= ${n}/${L}`],`${W1} ${a}/${b}${m==8?'-':'+'}${W2} ${c}/${d}`)}
+if(m==9){const[W,a,b]=pm(),[c,d]=pf(),n1=W*b+a;return O(`${W}\u00a0${a}/${b} · ${c}/${d}`,n1*c,b*d,[`${W}\u00a0${a}/${b} = ${n1}/${b}`,`${n1}/${b} · ${c}/${d} = ${n1*c}/${b*d}`,...(gc(n1*c,b*d)>1?[`Скорочуємо: ${fr(n1*c,b*d)}`]:[])],`${W} ${a}/${b}*${c}/${d}`)}
+const W=r(1,6),[a,b]=pf();return O(`${W} − ${a}/${b}`,W*b-a,b,[`Позичаємо 1 з цілого: ${W} = ${W-1}\u00a0${b}/${b}`,`${W-1}\u00a0${b}/${b} − ${a}/${b} = ${W-1}\u00a0${b-a}/${b}`],`${W}-${a}/${b}`)}},
+{n:'Відсотки',h:'1% = 1/100. p% від N = N·p/100. Знайти число за його відсотком: N = A·100/p.',g(){const p=[10,20,25,50,75][r(0,4)],N=20*r(1,15);return{q:`Скільки становить ${p}% від ${N}?`,a:[N*p/100],s:[`${p}% = ${p}/100`,`${N} × ${p}/100 = ${N*p/100}`],k:`${p}/100>*${N}`}}},
+{n:'Степені та корені',h:'aⁿ=a·a·…·a (n разів); aᵐ·aⁿ=aᵐ⁺ⁿ; (aᵐ)ⁿ=aᵐⁿ; a⁰=1; a⁻ⁿ=1/aⁿ. √(a²)=a при a≥0.',g(){if(r(0,1)){const a=r(2,9),n=r(2,4);return{q:`${a}${up(n)} = ?`,a:[a**n],s:[`${a} множимо саме на себе ${n} р.: ${a**n}`],k:`${a}^${n}>`}}const k=r(2,15);return{q:`√${k*k} = ?`,a:[k],s:[`${k}² = ${k*k}, тому √${k*k} = ${k}`],k:`S${k*k}`}}}]],
+['7–9 клас',[
+{n:'Лінійні рівняння',h:'ax+b=c ⇒ ax=c−b ⇒ x=(c−b)/a. Доданок переносимо з протилежним знаком; обидві частини ділимо на a≠0.',g(){const x=r(-9,9),a=r(2,9),b=r(1,20)*(r(0,1)?1:-1),c=a*x+b;return{q:`${a}x ${b<0?'−':'+'} ${Math.abs(b)} = ${c}.  x = ?`,a:[x],s:[`${a}x = ${c} − (${b}) = ${c-b}`,`x = ${c-b} ÷ ${a} = ${x}`],k:`${a}x${sg(b)}${Math.abs(b)}=${c}`}}},
+{n:'Квадратні рівняння',h:'ax²+bx+c=0; D=b²−4ac. D>0: x=(−b±√D)/(2a); D=0: x=−b/2a; D<0: коренів немає. Теорема Вієта: x₁+x₂=−b/a, x₁·x₂=c/a.',g(){let r1=r(-9,9),r2=r(-9,9);while(r1==r2)r2=r(-9,9);const p=-(r1+r2),q=r1*r2,D=p*p-4*q,s=Math.sqrt(D),x1=(-p+s)/2,x2=(-p-s)/2;
+return{q:`x² ${p?(p<0?'− ':'+ ')+Math.abs(p)+'x ':''}${q?(q<0?'− ':'+ ')+Math.abs(q):''} = 0.  Знайдіть корені (через пробіл)`,a:[x1,x2],s:[`a=1, b=${p}, c=${q}`,`D = ${p*p} − ${4*q} = ${D}, √D = ${s}`,`x₁ = (${-p} + ${s})/2 = ${x1}`,`x₂ = (${-p} − ${s})/2 = ${x2}`],k:`x^2>${p?sg(p)+Math.abs(p)+'x':''}${q?sg(q)+Math.abs(q):''}=0`}}},
+{n:'Теорема Піфагора',h:'У прямокутному трикутнику c²=a²+b², де c — гіпотенуза, a і b — катети.',g(){const m=r(1,3),[a,b,c]=[[3,4,5],[5,12,13],[8,15,17],[7,24,25],[20,21,29]][r(0,4)].map(v=>v*m);return{q:`Катети ${a} і ${b}. Знайдіть гіпотенузу.`,a:[c],s:[`c² = ${a}² + ${b}² = ${a*a} + ${b*b} = ${c*c}`,`c = √${c*c} = ${c}`],k:`S${a}^2>+${b}^2>`}}}]],
+['10–11 клас',[
+{n:'Арифметична прогресія',h:'aₙ=a₁+(n−1)d; Sₙ=(a₁+aₙ)·n/2=(2a₁+(n−1)d)·n/2.',g(){const a=r(1,10),d=r(1,6),n=r(5,12),an=a+(n-1)*d,S=(a+an)*n/2;return{q:`a₁=${a}, d=${d}. Знайдіть суму перших ${n} членів.`,a:[S],s:[`a${n} = ${a} + ${n-1}·${d} = ${an}`,`S = (${a}+${an})·${n}/2 = ${S}`],k:`(${a}+${an})${n}/2>`}}}]],
+['Інститут',[
+{n:'Похідна степеневої функції',h:'(xⁿ)′=n·xⁿ⁻¹; (c·f)′=c·f′; (f+g)′=f′+g′; (f·g)′=f′g+fg′; (f/g)′=(f′g−fg′)/g².',g(){const a=r(1,6),n=r(2,4),x=r(1,4),v=a*n*x**(n-1);return{q:`f(x) = ${a}x${up(n)}. Знайдіть f′(${x}).`,a:[v],s:[`f′(x) = ${a}·${n}·x${up(n-1)}`,`f′(${x}) = ${a*n}·${x**(n-1)} = ${v}`],k:`${a*n}*${x}^${n-1}>`}}},
+{n:'Визначений інтеграл',h:'∫xⁿdx = xⁿ⁺¹/(n+1)+C; формула Ньютона–Лейбніца: ∫ₐᵇf dx = F(b)−F(a).',g(){const n=r(1,3),b=r(1,3),a=(n+1)*r(1,3),v=a/(n+1)*b**(n+1);return{q:`∫₀${up(b)} ${a}x${up(n)} dx = ?`,a:[v],s:[`F(x) = ${a}x${up(n+1)}/${n+1} = ${a/(n+1)}x${up(n+1)}`,`F(${b}) − F(0) = ${a/(n+1)}·${b**(n+1)} = ${v}`],k:`${a}/${n+1}>*${b}^${n+1}>`}}},
+{n:'Визначник матриці 2×2',h:'det[[a,b],[c,d]] = ad − bc. det=0 ⇒ матриця вироджена (оберненої немає).',g(){const[a,b,c,d]=[0,0,0,0].map(()=>r(-5,9));return{q:`det [[${a}, ${b}], [${c}, ${d}]] = ?`,a:[a*d-b*c],s:[`${a}·${d} − ${b}·${c} = ${a*d} − (${b*c}) = ${a*d-b*c}`],k:`${a}*${d}-${b}*${c}`}}}]]];
+const J=(...a)=>a.join('<br>'),H={
+'Додавання і віднімання':J(`<b>Закони:</b> a+b=b+a; (a+b)+c=a+(b+c); a+0=a; a−a=0.`,`<b>Стовпчиком:</b> розряд під розрядом, додаємо справа наліво, десяток переносимо вгору; при відніманні «позичаємо» десяток зліва.`,`<b>Перевірка:</b> якщо a+b=c, то c−b=a.`,`<b>Приклад:</b> 347+85: 7+5=12 (пишемо 2, переносимо 1), 4+8+1=13 (пишемо 3, переносимо 1), 3+1=4 → 432.`),
+'Множення і ділення':J(`<b>Закони:</b> a·b=b·a; (ab)c=a(bc); a(b+c)=ab+ac; a·1=a; a·0=0.`,`<b>Ділення:</b> a÷b=c, якщо c·b=a. На 0 ділити не можна; a÷1=a; a÷a=1.`,`<b>Ознаки подільності:</b> на 2 — остання цифра парна; на 5 — закінчується на 0 або 5; на 3 і 9 — сума цифр ділиться на 3 і 9; на 10 — закінчується на 0.`,`<b>Приклад:</b> 7·12=7·10+7·2=70+14=84.`),
+'Порядок дій':J(`<b>Порядок:</b> 1) дужки; 2) степені й корені; 3) × та ÷ зліва направо; 4) + та − зліва направо.`,`<b>Приклад:</b> 2+3·4²=2+3·16=2+48=50, а (2+3)·4²=5·16=80.`,`<b>Порада:</b> пронумеруйте дії над знаками, потім рахуйте по порядку.`),
+'Звичайні дроби':J(`<b>Види:</b> правильний (3/4 — чисельник менший), неправильний (11/4), мішане число 2&nbsp;3/4 =&nbsp;2 + 3/4.`,`<b>Мішане → неправильний:</b> 2&nbsp;3/4 = (2·4 + 3)/4 = 11/4.`,`<b>Неправильний → мішане:</b> 11/4: 11 : 4 = 2 (остача 3) → 2&nbsp;3/4.`,`<b>Скорочення:</b> ділимо чисельник і знаменник на НСД: 18/24 =&nbsp;3/4.`,`<b>Додавання й віднімання:</b> зводимо до спільного знаменника (НСК): 1/2 + 1/3 =&nbsp;3/6 + 2/6 =&nbsp;5/6.`,`<b>Мішані числа:</b> переводимо в неправильні дроби, рахуємо, виділяємо цілу частину: 1&nbsp;1/2 + 2&nbsp;2/3 =&nbsp;3/2 + 8/3 =&nbsp;9/6 + 16/6 =&nbsp;25/6 =&nbsp;4&nbsp;1/6.`,`<b>Ціле мінус дріб:</b> позичаємо одиницю: 3 − 2/5 =&nbsp;2&nbsp;5/5 − 2/5 =&nbsp;2&nbsp;3/5.`,`<b>Множення:</b> 2/3 · 3/4 =&nbsp;6/12 = 1/2.`,`<b>Ділення:</b> множимо на обернений: 2/3 : 4/5 =&nbsp;2/3 · 5/4 =&nbsp;10/12 =&nbsp;5/6.`,`<b>У калькуляторі:</b> пишіть «2 3/4» (ціле, пробіл, дріб) або ціле число + кнопка ▢/▢.`),
+
+'Відсотки':J(`<b>Основне:</b> 1% = 1/100 = 0,01.`,`<b>p% від N</b> = N·p/100. <b>Число за його частиною:</b> N=A·100/p. <b>Скільки % становить A від N:</b> A/N·100%.`,`<b>Приклад:</b> 25% від 80 = 80·25/100 = 20. Збільшити на 20% — помножити на 1,2.`),
+'Степені та корені':J(`<b>Степінь:</b> aⁿ=a·a·…·a (n разів); a⁰=1; a⁻ⁿ=1/aⁿ.`,`<b>Закони:</b> aᵐ·aⁿ=aᵐ⁺ⁿ; aᵐ/aⁿ=aᵐ⁻ⁿ; (aᵐ)ⁿ=aᵐⁿ; (ab)ⁿ=aⁿbⁿ.`,`<b>Корінь:</b> √a — невід’ємне число, квадрат якого дорівнює a; √(a²)=|a|; √(ab)=√a·√b.`,`<b>Квадрати:</b> 11²=121, 12²=144, 13²=169, 14²=196, 15²=225.`),
+'Лінійні рівняння':J(`<b>Вигляд:</b> ax+b=c. Переносимо доданок через «=» зі зміною знака, потім ділимо обидві частини на a (a≠0).`,`Якщо a=0: при b=c розв’язків безліч, інакше їх немає.`,`<b>Приклад:</b> 3x+5=20 → 3x=15 → x=5. Перевірка: 3·5+5=20 ✓.`),
+'Квадратні рівняння':J(`<b>Вигляд:</b> ax²+bx+c=0 (a≠0). Дискримінант D=b²−4ac.`,`D>0: x=(−b±√D)/(2a); D=0: x=−b/(2a); D<0: дійсних коренів немає.`,`<b>Теорема Вієта</b> (a=1): x₁+x₂=−b, x₁·x₂=c. Розклад: a(x−x₁)(x−x₂).`,`<b>Неповні:</b> ax²+c=0 → x=±√(−c/a); ax²+bx=0 → x(ax+b)=0.`,`<b>Приклад:</b> x²−5x+6=0: D=25−24=1, x=(5±1)/2 → 3 і 2. Вієта: 3+2=5, 3·2=6 ✓.`),
+'Теорема Піфагора':J(`<b>Теорема:</b> у прямокутному трикутнику c²=a²+b² (c — гіпотенуза). Катет: a=√(c²−b²).`,`<b>Піфагорові трійки:</b> 3-4-5, 5-12-13, 8-15-17, 7-24-25, 20-21-29 (і кратні їм).`,`<b>Обернена теорема:</b> якщо c²=a²+b², трикутник прямокутний.`),
+'Арифметична прогресія':J(`<b>Означення:</b> кожен член більший за попередній на d: d=aₙ₊₁−aₙ.`,`<b>Формули:</b> aₙ=a₁+(n−1)d; Sₙ=(a₁+aₙ)·n/2=(2a₁+(n−1)d)·n/2. Властивість: aₙ=(aₙ₋₁+aₙ₊₁)/2.`,`<b>Приклад:</b> 3, 7, 11, …: d=4; a₁₀=3+9·4=39; S₁₀=(3+39)·10/2=210.`),
+'Похідна степеневої функції':J(`<b>Правила:</b> (c)′=0; (xⁿ)′=n·xⁿ⁻¹; (cf)′=c·f′; (f±g)′=f′±g′; (fg)′=f′g+fg′; (f/g)′=(f′g−fg′)/g²; (f(g(x)))′=f′(g)·g′.`,`<b>Таблиця:</b> (sin x)′=cos x; (cos x)′=−sin x; (eˣ)′=eˣ; (ln x)′=1/x.`,`<b>Зміст:</b> f′(x₀) — кутовий коефіцієнт дотичної в точці x₀.`,`<b>Приклад:</b> f=3x⁴ → f′=12x³; f′(2)=96.`),
+'Визначений інтеграл':J(`<b>Таблиця:</b> ∫xⁿdx=xⁿ⁺¹/(n+1)+C (n≠−1); ∫dx/x=ln|x|+C; ∫eˣdx=eˣ+C; ∫cos x dx=sin x+C; ∫sin x dx=−cos x+C.`,`<b>Формула Ньютона–Лейбніца:</b> ∫ₐᵇ f dx = F(b)−F(a), де F — первісна.`,`<b>Приклад:</b> ∫₀² 3x² dx = x³ від 0 до 2 = 8−0 = 8.`),
+'Визначник матриці 2×2':J(`<b>Формула:</b> |a b; c d| = ad−bc.`,`<b>Властивості:</b> det=0 — матриця вироджена (оберненої немає); det(AB)=det A·det B; перестановка двох рядків змінює знак.`,`<b>Обернена:</b> A⁻¹=1/(ad−bc)·[d −b; −c a].`,`<b>Приклад:</b> |2 3; 1 4| = 8−3 = 5.`)};
+const A=(q,a,s,k)=>({q,a:[].concat(a),s,k}),P=n=>n<0?`(${n})`:n,sn=n=>n<0?'−':'+',ab=Math.abs,pick=a=>a[r(0,a.length-1)],fa=n=>{let f=1;for(let i=2;i<=n;i++)f*=i;return f},N=(n,h,g)=>({n,h,g});
+T[1][1].push(
+N('Прості рівняння','Невідомий доданок = сума − відомий доданок. Невідомий множник = добуток ÷ відомий множник. Невідоме зменшуване = різниця + від’ємник.',()=>{const x=r(2,30),a=r(2,20),m=r(0,2);return m==0?A(`x + ${a} = ${x+a}. x = ?`,x,[`x = ${x+a} − ${a} = ${x}`],`x+${a}=${x+a}`):m==1?A(`x − ${a} = ${x}. x = ?`,x+a,[`x = ${x} + ${a} = ${x+a}`],`x-${a}=${x}`):A(`${a}x = ${a*x}. x = ?`,x,[`x = ${a*x} ÷ ${a} = ${x}`],`${a}x=${a*x}`)}),
+N('Десяткові дроби','Додаємо й віднімаємо, вирівнюючи коми. Множимо як цілі числа, потім відділяємо стільки знаків, скільки їх було в обох множниках разом.',()=>{const X=r(12,99),Y=r(12,99),m=r(0,1),v=m?X*Y/100:(X+Y)/10;return A(`${X/10} ${m?'×':'+'} ${Y/10} = ?`,+v.toFixed(2),[m?`${X}×${Y}=${X*Y}; разом 2 знаки після коми → ${fmt(v)}`:`${X/10}+${Y/10}=${fmt(v)}`],`${X/10}${m?'*':'+'}${Y/10}`)}),
+N('Пропорції','a : b = c : d ⇒ a·d = b·c (основна властивість). Крайній член = добуток середніх, поділений на інший крайній.',()=>{const a=r(2,9),k=r(2,9),b=r(2,9),x=b*k,c=a*k;return A(`${a} : ${b} = ${c} : x. Знайдіть x.`,x,[`x = ${b}·${c}/${a} = ${x}`],`${a}/${b}>=${c}/x>`)}),
+N('Вирази зі змінними','Щоб знайти значення виразу, підставте числа замість букв і виконайте дії за порядком. 3x означає 3·x.',()=>{const a=r(2,9),b=r(2,9),x=r(1,9),y=r(1,9),v=a*x+b*y;return A(`Знайдіть значення ${a}x + ${b}y при x=${x}, y=${y}`,v,[`${a}·${x} + ${b}·${y} = ${a*x} + ${b*y} = ${v}`],`${a}*${x}+${b}*${y}`)}),
+N('Задачі на рух','s = v·t; v = s/t; t = s/v. Назустріч швидкості додають, навздогін віднімають.',()=>{const v=r(4,12)*5,t=r(2,9),s=v*t,m=r(0,2);return m==0?A(`Авто їхало ${t} год зі швидкістю ${v} км/год. Яка відстань?`,s,[`s = ${v}·${t} = ${s}`],`${v}*${t}`):m==1?A(`Відстань ${s} км, швидкість ${v} км/год. Скільки годин у дорозі?`,t,[`t = ${s}/${v} = ${t}`],`${s}/${v}>`):A(`За ${t} год пройдено ${s} км. Яка швидкість (км/год)?`,v,[`v = ${s}/${t} = ${v}`],`${s}/${t}>`)}),
+N('Задачі на роботу','Вся робота = 1. Якщо перший виконує за a днів, другий за b, то за день разом 1/a + 1/b, а разом працюватимуть ab/(a+b) днів.',()=>{const[a,b]=pick([[3,6],[4,12],[6,12],[10,15],[20,30],[12,4],[15,10]]),t=a*b/(a+b);return A(`Перший майстер виконує роботу за ${a} дн., другий за ${b} дн. За скільки днів вони виконають її разом?`,t,[`За день: 1/${a} + 1/${b} = ${a+b}/${a*b}`,`Разом: ${a*b}/${a+b} = ${t} дн.`])}),
+N('Задачі на відсотки','Знижка p%: нова ціна = ціна·(100−p)/100. Підвищення на p%: ціна·(100+p)/100.',()=>{const X=20*r(5,30),p=pick([10,20,25,50]),v=X*(100-p)/100;return A(`Товар коштував ${X} грн. Знижка ${p}%. Нова ціна?`,v,[`${X}·(100−${p})/100 = ${v}`],`${X}*(100-${p})/100>`)}),
+N('Цілі числа та модуль','Мінус перед дужкою змінює знаки всередині. |a| — відстань від a до 0 на координатній прямій: |−5| = 5. Відстань між a і b: |a − b|.',()=>{const a=r(-15,15),b=r(-15,15),c=r(-15,15);if(r(0,1)){const v=a+b-c;return A(`${a} + ${P(b)} − ${P(c)} = ?`,v,[`${a} ${sn(b)} ${ab(b)} ${c<0?'+':'−'} ${ab(c)} = ${v}`],`${a}+(${b})-(${c})`)}return A(`Яка відстань між точками ${a} і ${b} на координатній прямій?`,ab(a-b),[`|${a} − ${P(b)}| = ${ab(a-b)}`])}));
+T[2][1].push(
+N('Формули скороченого множення','(a±b)² = a² ± 2ab + b²; a² − b² = (a−b)(a+b); (a±b)³ = a³ ± 3a²b + 3ab² ± b³; a³ ± b³ = (a±b)(a² ∓ ab + b²).',()=>{if(r(0,1)){const A1=r(2,9)*10,B=r(1,3);return A(`Обчисліть за формулою: ${A1+B}²`,(A1+B)**2,[`(${A1}+${B})² = ${A1*A1} + ${2*A1*B} + ${B*B} = ${(A1+B)**2}`],`${A1+B}^2>`)}const m=r(51,99),n=100-m;return A(`Обчисліть: ${m}² − ${n}²`,m*m-n*n,[`(${m}−${n})(${m}+${n}) = ${m-n}·100 = ${m*m-n*n}`],`${m}^2>-${n}^2>`)}),
+N('Розкладання на множники','Винесення спільного множника; групування; формули скороченого множення; x² − Sx + P = (x − p)(x − q), де p + q = S, p·q = P.',()=>{const p=r(1,9),q=r(1,9);return A(`Розкладіть x² − ${p+q}x + ${p*q} на множники (x − p)(x − q). Впишіть p і q через пробіл.`,[p,q],[`Шукаємо числа з сумою ${p+q} і добутком ${p*q}: ${p} і ${q}`,`(x − ${p})(x − ${q})`])}),
+N('Раціональні дроби','Скорочуємо, розкладаючи на множники: (x² − a²)/(x − a) = x + a (x ≠ a). Додаємо дроби, звівши до спільного знаменника.',()=>{const a=r(1,9),x=r(10,20);return A(`Спростіть (x² − ${a*a})/(x − ${a}) і знайдіть значення при x = ${x}`,x+a,[`(x−${a})(x+${a})/(x−${a}) = x+${a}`,`${x}+${a} = ${x+a}`],`(${x}^2>-${a*a})/${x}-${a}>`)}),
+N('Теорема Вієта','x² + px + q = 0: x₁ + x₂ = −p, x₁·x₂ = q. Обернена: числа із сумою −p і добутком q є коренями.',()=>{const x1=r(-6,6),x2=r(-6,6),p=-(x1+x2),q=x1*x2;return r(0,1)?A(`x² ${sn(p)} ${ab(p)}x ${sn(q)} ${ab(q)} = 0. Знайдіть x₁ + x₂.`,x1+x2,[`x₁ + x₂ = −p = ${x1+x2}`]):A(`x² ${sn(p)} ${ab(p)}x ${sn(q)} ${ab(q)} = 0. Знайдіть x₁·x₂.`,q,[`x₁·x₂ = q = ${q}`])}),
+N('Системи лінійних рівнянь','Підстановка: виразити одну змінну і підставити. Додавання: домножити так, щоб одна змінна скоротилась. Крамер: x = Dx/D, y = Dy/D.',()=>{let a1,b1,a2,b2,D;do{a1=r(1,5);b1=r(-5,5);a2=r(1,5);b2=r(-5,5);D=a1*b2-a2*b1}while(!D);const x=r(-5,9),y=r(-5,9),c1=a1*x+b1*y,c2=a2*x+b2*y;return A(`{ ${a1}x ${sn(b1)} ${ab(b1)}y = ${c1};  ${a2}x ${sn(b2)} ${ab(b2)}y = ${c2} }. Знайдіть x.`,x,[`D = ${a1}·${b2} − ${a2}·${b1} = ${D}`,`Dx = ${c1}·${b2} − ${c2}·${b1} = ${c1*b2-c2*b1}`,`x = ${c1*b2-c2*b1}/${D} = ${x}; y = ${y}`])}),
+N('Нелінійні системи','Якщо x + y = S, xy = P: підставте y = S − x і отримайте x² − Sx + P = 0, або за Вієтом x, y — корені t² − St + P = 0.',()=>{const p=r(1,9);let q;do{q=r(1,9)}while(q==p);return A(`x + y = ${p+q}, xy = ${p*q}. Знайдіть x (усі значення через пробіл).`,[p,q],[`x і y — корені t² − ${p+q}t + ${p*q} = 0`,`t = ${p} або t = ${q}`])}),
+N('Задачі на складання рівнянь','Позначте невідоме буквою x, запишіть умову рівнянням, розв’яжіть і перевірте за умовою задачі.',()=>{const x=r(5,40),d=r(2,9);return A(`Одне число більше за інше на ${d}, а їх сума ${2*x+d}. Знайдіть менше число.`,x,[`x + (x+${d}) = ${2*x+d}`,`2x = ${2*x} → x = ${x}`],`x+x+${d}=${2*x+d}`)}),
+N('Лінійна функція','y = kx + b; графік — пряма. k — нахил, b — перетин з віссю Oy. Нуль функції: x = −b/k. Зростає при k > 0, спадає при k < 0.',()=>{const k=r(2,6),b=r(-9,9),x0=r(-5,5);return r(0,1)?A(`f(x) = ${k}x ${sn(b)} ${ab(b)}. Знайдіть f(${x0}).`,k*x0+b,[`${k}·${P(x0)} ${sn(b)} ${ab(b)} = ${k*x0+b}`],`${k}*${P(x0)}${b<0?'-':'+'}${ab(b)}`):A(`Знайдіть нуль функції y = ${k}x ${sn(-k*x0)} ${ab(k*x0)}.`,x0,[`${k}x = ${k*x0} → x = ${x0}`],`${k}x${-k*x0<0?'-':'+'}${ab(k*x0)}=0`)}),
+N('Обернена пропорційність','y = k/x (x ≠ 0); графік — гіпербола. Добуток x·y стале: якщо x збільшити вдвічі, y зменшиться вдвічі.',()=>{const x=r(2,9),m=r(2,9),K=x*m,x2=pick([1,2,3,4,6,12].filter(d=>K%d==0));return A(`y = ${K}/x. Знайдіть y при x = ${x2}.`,K/x2,[`y = ${K}/${x2} = ${K/x2}`],`${K}/${x2}>`)}),
+N('Квадратична функція','y = ax² + bx + c — парабола. Вершина: x₀ = −b/(2a), y₀ = f(x₀). При a > 0 вітки вгору (є найменше значення), при a < 0 вниз.',()=>{const m=r(1,6),c=r(-9,9);return r(0,1)?A(`y = x² − ${2*m}x ${sn(c)} ${ab(c)}. Знайдіть абсцису вершини.`,m,[`x₀ = ${2*m}/2 = ${m}`]):A(`Знайдіть найменше значення y = x² − ${2*m}x ${sn(c)} ${ab(c)}.`,c-m*m,[`x₀ = ${m}`,`y₀ = ${m*m} − ${2*m*m} ${sn(c)} ${ab(c)} = ${c-m*m}`],`${m}^2>-${2*m}*${m}${c<0?'-':'+'}${ab(c)}`)}),
+N('Лінійні нерівності','Розв’язуємо як рівняння, але при множенні чи діленні на від’ємне число знак нерівності змінюється. Відповідь — проміжок.',()=>{const a=r(2,6),b=r(-9,9),c=r(10,40),lim=(c-b)/a,mx=Math.ceil(lim)-1;return A(`${a}x ${sn(b)} ${ab(b)} < ${c}. Яке найбільше ціле x?`,mx,[`${a}x < ${c-b} → x < ${fmt(lim)}`,`Найбільше ціле: ${mx}`],`${a}x${b<0?'-':'+'}${ab(b)}{${c}`)}),
+N('Системи лінійних нерівностей','Розв’язуємо кожну нерівність окремо і беремо спільну частину проміжків (їх перетин).',()=>{const p=r(-5,3),q=p+r(3,8),B=r(1,5);return A(`{ 3x − 5 > ${3*p-5};  x + ${B} ≤ ${q+B} }. Скільки цілих розв’язків?`,q-p,[`3x > ${3*p} → x > ${p}`,`x ≤ ${q}`,`${p} < x ≤ ${q}: ${q-p} цілих`])}),
+N('Квадратні нерівності','Знайдіть корені тричлена. Для ax² + bx + c < 0 при a > 0 розв’язок — між коренями, для > 0 — поза ними.',()=>{const p=r(-6,3),q=p+r(2,8);return A(`x² ${sn(-(p+q))} ${ab(p+q)}x ${sn(p*q)} ${ab(p*q)} < 0. Скільки цілих розв’язків?`,q-p-1,[`Корені: ${p} і ${q}`,`${p} < x < ${q}: ${q-p-1} цілих`],`x^2>${-(p+q)<0?'-':'+'}${ab(p+q)}x${p*q<0?'-':'+'}${ab(p*q)}{0`)}),
+N('Геометрична прогресія','bₙ = b₁·qⁿ⁻¹; q = bₙ₊₁/bₙ; Sₙ = b₁(qⁿ − 1)/(q − 1) при q ≠ 1.',()=>{const b=r(1,5),q=r(2,3),n=r(3,6),S=b*(q**n-1)/(q-1);return A(`b₁ = ${b}, q = ${q}. Знайдіть суму перших ${n} членів.`,S,[`S = ${b}·(${q}^${n} − 1)/(${q} − 1) = ${S}`],`${b}*(${q}^${n}>-1)/${q}-1>`)}),
+N('Комбінаторика','n! = 1·2·…·n; перестановки Pₙ = n!; розміщення Aₙᵏ = n!/(n−k)!; комбінації Cₙᵏ = n!/(k!(n−k)!).',()=>{const n=r(5,9),k=r(2,4),m=r(0,2);return m==0?A(`Скількома способами можна розсадити ${n} учнів на ${n} місцях?`,fa(n),[`P = ${n}! = ${fa(n)}`],`${n}!`):m==1?A(`Скільки існує способів вибрати ${k} учнів із ${n}, якщо порядок важливий?`,fa(n)/fa(n-k),[`A = ${n}!/${n-k}! = ${fa(n)/fa(n-k)}`],`(${n}!)/(${n-k}!)>`):A(`Скількома способами можна вибрати ${k} учнів із ${n}? (порядок не важливий)`,fa(n)/(fa(k)*fa(n-k)),[`C = ${n}!/(${k}!·${n-k}!) = ${fa(n)/(fa(k)*fa(n-k))}`],`(${n}!)/(${k}!*${n-k}!)>`)}),
+N('Ймовірність','P(A) = m/n — кількість сприятливих результатів поділена на кількість усіх рівноможливих. 0 ≤ P ≤ 1; P(не A) = 1 − P(A).',()=>{const a=r(1,8),b=r(1,8);return A(`У коробці ${a} червоних і ${b} синіх куль. Яка ймовірність навмання витягти червону? (дробом, напр. 3/8)`,a/(a+b),[`P = ${a}/(${a}+${b}) = ${a}/${a+b} ≈ ${fmt(a/(a+b))}`],`${a}/${a}+${b}>`)}),
+N('Елементи статистики','Середнє = сума/кількість. Медіана — середнє значення впорядкованого ряду (для непарної кількості). Мода — значення, що трапляється найчастіше. Розмах = max − min.',()=>{const n=pick([5,7]);let L=[];for(let i=0;i<n-1;i++)L.push(r(1,20));const s=L.reduce((x,y)=>x+y,0);L.push(((n-s%n)%n)||n);const t=r(0,2),S=[...L].sort((x,y)=>x-y),sum=L.reduce((x,y)=>x+y,0),txt=L.join(', ');return t==0?A(`Знайдіть середнє: ${txt}`,sum/n,[`Сума = ${sum}, кількість ${n}`,`${sum}/${n} = ${sum/n}`],`(${L.join('+')})/${n}>`):t==1?A(`Знайдіть медіану: ${txt}`,S[(n-1)/2],[`Впорядкуємо: ${S.join(', ')}`,`Посередині: ${S[(n-1)/2]}`]):A(`Знайдіть розмах: ${txt}`,S[n-1]-S[0],[`max − min = ${S[n-1]} − ${S[0]} = ${S[n-1]-S[0]}`])}));
+T[3][1].push(
+N('Тригонометрія: значення та радіани','sin 30° = ½, cos 60° = ½, sin 90° = 1, cos 0° = 1, tg 45° = 1, sin 45° = cos 45° = √2/2, sin 60° = cos 30° = √3/2. π рад = 180°.',()=>{if(r(0,1)){const[t,d]=pick([[1,6],[1,4],[1,3],[1,2],[2,3],[3,4],[5,6],[1,1]]);return A(`Скільком градусам дорівнює ${t==1&&d==1?'π':`${t==1?'':t}π/${d}`} радіан?`,180*t/d,[`π = 180°, тому ${t}·180/${d} = ${180*t/d}°`])}const sa=pick([[0,0],[30,.5],[90,1]]),cb=pick([[0,1],[60,.5],[90,0]]);return A(`sin ${sa[0]}° + cos ${cb[0]}° = ?`,sa[1]+cb[1],[`sin ${sa[0]}° = ${sa[1]}, cos ${cb[0]}° = ${cb[1]}`,`Сума: ${sa[1]+cb[1]}`])}),
+N('Формули зведення','sin(180°−α) = sin α; cos(180°−α) = −cos α; sin(180°+α) = −sin α; cos(180°+α) = −cos α; sin(360°−α) = −sin α; cos(360°−α) = cos α. Знак визначає чверть.',()=>{const[q,v,s]=pick([['sin 150°',.5,'sin(180°−30°) = sin 30°'],['cos 120°',-.5,'cos(180°−60°) = −cos 60°'],['sin 210°',-.5,'sin(180°+30°) = −sin 30°'],['cos 300°',.5,'cos(360°−60°) = cos 60°'],['tg 135°',-1,'tg(180°−45°) = −tg 45°'],['cos 180°',-1,'cos 180° = −1'],['sin 330°',-.5,'sin(360°−30°) = −sin 30°']]);return A(`${q} = ?`,v,[s,`= ${v}`])}),
+N('Тригонометричні рівняння й тотожності','sin²α + cos²α = 1; tg α = sin α/cos α. sin x = a ⇒ x = (−1)ⁿ·arcsin a + πn; cos x = a ⇒ x = ± arccos a + 2πn; tg x = a ⇒ x = arctg a + πn.',()=>{if(r(0,1)){const[a,b,c]=pick([[3,4,5],[5,12,13],[8,15,17],[7,24,25]]);return A(`sin α = ${a}/${c}, α — гострий кут. Знайдіть cos α (дробом).`,b/c,[`cos²α = 1 − (${a}/${c})² = ${b*b}/${c*c}`,`cos α = ${b}/${c}`])}const[f,v,x]=pick([['sin',.5,30],['cos',.5,60],['tg',1,45],['sin',1,90],['cos',0,90]]);return A(`Найменший додатний кут x (у градусах): ${f} x = ${v}`,x,[`${f} ${x}° = ${v}`])}),
+N('Границя функції','lim f(x) при x → a — значення, до якого прямує f. Невизначеність 0/0: розкладаємо й скорочуємо. При x → ∞ для дробу з однаковими степенями — відношення старших коефіцієнтів.',()=>{if(r(0,1)){const a=r(1,9);return A(`lim x→${a} (x² − ${a*a})/(x − ${a}) = ?`,2*a,[`(x−${a})(x+${a})/(x−${a}) = x+${a} → ${2*a}`])}const a=r(1,9),c=r(1,5),b=r(0,9),d=r(0,9);return A(`lim x→∞ (${a}x + ${b})/(${c}x + ${d}) = ? (дробом, напр. 3/2)`,a/c,[`Ділимо на x: (${a}+${b}/x)/(${c}+${d}/x) → ${a}/${c}`])}),
+N('Дотична і швидкість','f′(x₀) — кутовий коефіцієнт дотичної; рівняння дотичної y = f(x₀) + f′(x₀)(x − x₀). Фізичний зміст: v(t) = s′(t), a(t) = v′(t).',()=>{const a=r(1,5),b=r(-5,5),x0=r(-3,4);if(r(0,1))return A(`Знайдіть кутовий коефіцієнт дотичної до y = ${a}x² ${sn(b)} ${ab(b)}x при x = ${x0}.`,2*a*x0+b,[`y′ = ${2*a}x ${sn(b)} ${ab(b)}`,`y′(${x0}) = ${2*a*x0+b}`],`2*${a}*${P(x0)}${b<0?'-':'+'}${ab(b)}`);const v=r(2,6),t=r(1,5);return A(`Точка рухається за законом s(t) = ${v}t² (м). Знайдіть швидкість при t = ${t} с.`,2*v*t,[`v = s′ = ${2*v}t`,`v(${t}) = ${2*v*t} м/с`])}),
+N('Екстремуми та монотонність','Критичні точки: f′(x) = 0. Якщо f′ змінює знак з «+» на «−» — максимум, з «−» на «+» — мінімум. f′ > 0 — функція зростає, f′ < 0 — спадає.',()=>{const p=r(1,5);return A(`f(x) = x³ − ${3*p*p}x. Знайдіть точку локального мінімуму.`,p,[`f′ = 3x² − ${3*p*p} = 0 → x = ±${p}`,`f′ змінює знак з «−» на «+» при x = ${p} → мінімум`])}),
+N('Первісна','F′ = f. Для f = axⁿ: F = a·xⁿ⁺¹/(n+1) + C. Дві первісні відрізняються на сталу C; C знаходять із заданої точки.',()=>{const n=r(1,3),a=(n+1)*r(1,4),x0=r(1,3),Cc=r(1,9),v=a/(n+1)*x0**(n+1)+Cc;return A(`f(x) = ${a}x^${n}. Первісна F має F(0) = ${Cc}. Знайдіть F(${x0}).`,v,[`F(x) = ${a/(n+1)}x^${n+1} + ${Cc}`,`F(${x0}) = ${v}`])}),
+N('Площа криволінійної трапеції','S = ∫ f(x)dx від a до b = F(b) − F(a), якщо f ≥ 0 на [a; b].',()=>{const b=r(1,4),a=3*r(1,3);return A(`Знайдіть площу під графіком y = ${a}x² на [0; ${b}].`,a*b**3/3,[`F(x) = ${a/3}x³`,`S = F(${b}) − F(0) = ${a*b**3/3}`],`${a}/3>*${b}^3>`)}),
+N('Показникові рівняння й нерівності','aˣ = aᵏ ⇒ x = k. aˣ > aᵏ: при a > 1 маємо x > k, при 0 < a < 1 маємо x < k. Зводимо обидві частини до однієї основи.',()=>{const b=pick([2,3,5]),k=r(2,4);return r(0,1)?A(`${b}^x = ${b**k}. Знайдіть x.`,k,[`${b**k} = ${b}^${k} → x = ${k}`],`${b}^x>=${b**k}`):A(`${b}^x > ${b**k}. Найменше ціле x?`,k+1,[`x > ${k}`,`Найменше ціле: ${k+1}`],`${b}^x>}${b**k}`)}),
+N('Логарифми','log_a b = x ⇔ aˣ = b. log_a(bc) = log_a b + log_a c; log_a(b/c) = log_a b − log_a c; log_a bᵏ = k·log_a b; log_a a = 1; log_a 1 = 0.',()=>{const b=pick([2,3,5]),m=r(1,4),n=r(1,4);if(r(0,1))return A(`log_${b} ${b**m} + log_${b} ${b**n} = ?`,m+n,[`log_${b} ${b**m} = ${m}, log_${b} ${b**n} = ${n}`,`Сума: ${m+n}`]);return A(`log_${b} x = ${m}. Знайдіть x.`,b**m,[`x = ${b}^${m} = ${b**m}`])}),
+N('Степенева функція','y = xⁿ. При парному n функція парна (f(−x) = f(x)), при непарному — непарна. Дробовий показник: x^(p/q) = q-й корінь з xᵖ.',()=>{const c=r(2,5),n=r(2,4);return r(0,1)?A(`f(x) = x^${n}. Знайдіть f(−${c}).`,(-c)**n,[`(−${c})^${n} = ${(-c)**n}`],`(-${c})^${n}>`):A(`x^${n} = ${c**n}, x > 0. Знайдіть x.`,c,[`x = ${c}`],`x^${n}>=${c**n}`)}),
+N('Комплексні числа','z = a + bi, i² = −1. (a+bi)(c+di) = (ac − bd) + (ad + bc)i. Спряжене: a − bi. Модуль |z| = √(a² + b²).',()=>{const a=r(1,6),b=r(1,6),c=r(1,6),d=r(1,6),t=r(0,2);if(t==0){const[p,q,s]=pick([[3,4,5],[5,12,13],[8,15,17]]);return A(`Знайдіть |z|, якщо z = ${p} + ${q}i.`,s,[`√(${p}²+${q}²) = √${p*p+q*q} = ${s}`])}return t==1?A(`(${a}+${b}i)(${c}+${d}i). Знайдіть дійсну частину.`,a*c-b*d,[`Re = ${a}·${c} − ${b}·${d} = ${a*c-b*d}`]):A(`(${a}+${b}i)(${c}+${d}i). Знайдіть уявну частину.`,a*d+b*c,[`Im = ${a}·${d} + ${b}·${c} = ${a*d+b*c}`])}));
+T[4][1].push(
+N('Вектори: скалярний добуток','a·b = x₁x₂ + y₁y₂ + z₁z₂ = |a||b|cos φ. Вектори перпендикулярні, якщо a·b = 0.',()=>{const v=()=>[r(-4,6),r(-4,6),r(-4,6)],p=v(),q=v(),s=p[0]*q[0]+p[1]*q[1]+p[2]*q[2];return A(`a = (${p}), b = (${q}). Знайдіть a·b.`,s,[`${p[0]}·${P(q[0])} + ${p[1]}·${P(q[1])} + ${p[2]}·${P(q[2])} = ${s}`],`${p[0]}*${P(q[0])}+${p[1]}*${P(q[1])}+${p[2]}*${P(q[2])}`)}),
+N('Матриці: добуток','(AB)ᵢⱼ = сума добутків i-го рядка A на j-й стовпець B. Загалом AB ≠ BA; (AB)ᵀ = BᵀAᵀ.',()=>{const m=()=>[r(0,4),r(0,4),r(0,4),r(0,4)],X=m(),Y=m(),v=X[0]*Y[1]+X[1]*Y[3];return A(`A = [[${X[0]}, ${X[1]}], [${X[2]}, ${X[3]}]], B = [[${Y[0]}, ${Y[1]}], [${Y[2]}, ${Y[3]}]]. Знайдіть елемент (AB)₁₂.`,v,[`(AB)₁₂ = ${X[0]}·${Y[1]} + ${X[1]}·${Y[3]} = ${v}`],`${X[0]}*${Y[1]}+${X[1]}*${Y[3]}`)}));
+/* ---- Нові теми ---- */
+const R2=x=>Math.round(x*100)/100,AX=(o,x)=>Object.assign(o,x),dc=s=>String(s).replace('.',',');
+T[0][1].push(
+N('Периметр і площа','Прямокутник: P = 2(a + b), S = a·b. Квадрат: P = 4a, S = a². Площа вимірюється у квадратних одиницях: см², м².',()=>{const a=r(2,15),b=r(2,15),m=r(0,2);return [A(`Прямокутник ${a} см × ${b} см. Знайдіть периметр (см).`,2*(a+b),[`P = 2·(${a} + ${b}) = ${2*(a+b)} см`],`2(${a}+${b})`),A(`Прямокутник ${a} см × ${b} см. Знайдіть площу (см²).`,a*b,[`S = ${a}·${b} = ${a*b} см²`],`${a}*${b}`),A(`Квадрат зі стороною ${a} см. Знайдіть площу (см²).`,a*a,[`S = ${a}² = ${a*a} см²`],`${a}^2>`)][m]}),
+N('Одиниці вимірювання','1 км = 1000 м; 1 м = 100 см; 1 см = 10 мм; 1 кг = 1000 г; 1 т = 1000 кг; 1 год = 60 хв; 1 хв = 60 с.',()=>{const[u,v,k]=pick([['км','м',1000],['м','см',100],['см','мм',10],['кг','г',1000],['т','кг',1000],['год','хв',60],['хв','с',60]]),n=r(2,9);return A(`${n} ${u} = ? ${v}`,n*k,[`1 ${u} = ${k} ${v}`,`${n}·${k} = ${n*k} ${v}`],`${n}*${k}`)}));
+T[1][1].push(
+N('НСД і НСК','НСД — найбільше число, на яке діляться обидва числа; НСК — найменше число, яке ділиться на обидва. НСД(a; b)·НСК(a; b) = a·b. Алгоритм Евкліда: НСД(a; b) = НСД(b; a mod b).',()=>{const g=r(2,9),a=g*r(1,9),b=g*r(2,9),G1=gc(a,b),L=a*b/G1;return r(0,1)?A(`НСД(${a}; ${b}) = ?`,G1,[`${a} = ${G1}·${a/G1}, ${b} = ${G1}·${b/G1}`,`НСД = ${G1}`]):A(`НСК(${a}; ${b}) = ?`,L,[`НСД(${a}; ${b}) = ${G1}`,`НСК = ${a}·${b}/${G1} = ${L}`],`${a}*${b}/${G1}>`)}),
+N('Округлення','Дивимося на першу відкинуту цифру: 0–4 — попередню залишаємо, 5–9 — збільшуємо на 1.',()=>{const n=r(1000,99999),m=r(0,2),v=dc((n/100).toFixed(2));return m==0?A(`Округліть ${v} до цілих.`,Math.floor((n+50)/100),[`Перша цифра після коми: ${Math.floor(n/10)%10}`,`${v} ≈ ${Math.floor((n+50)/100)}`]):m==1?A(`Округліть ${v} до десятих.`,Math.floor((n+5)/10)/10,[`Друга цифра після коми: ${n%10}`,`${v} ≈ ${dc(Math.floor((n+5)/10)/10)}`]):A(`Округліть ${n} до сотень.`,Math.floor((n+50)/100)*100,[`Цифра десятків: ${Math.floor(n/10)%10}`,`${n} ≈ ${Math.floor((n+50)/100)*100}`])}),
+N('Коло і круг','Довжина кола C = 2πr = πd; площа круга S = πr²; d = 2r. У задачах беремо π ≈ 3,14.',()=>{const R0=r(2,12);return r(0,1)?AX(A(`Радіус кола ${R0} см. Знайдіть довжину кола (π ≈ 3,14, до сотих).`,R2(2*3.14*R0),[`C = 2·3,14·${R0} = ${dc(R2(2*3.14*R0))} см`],`2*3.14*${R0}`),{tol:.011}):AX(A(`Радіус круга ${R0} см. Знайдіть площу (π ≈ 3,14, до сотих).`,R2(3.14*R0*R0),[`S = 3,14·${R0}² = ${dc(R2(3.14*R0*R0))} см²`],`3.14*${R0}^2>`),{tol:.011})}));
+T[2][1].push(
+N('Площі фігур','Трикутник S = ½·a·h; паралелограм S = a·h; трапеція S = (a + b)/2·h; ромб S = d₁·d₂/2.',()=>{const a=r(2,14),b=r(2,14),h=r(2,12);return [A(`Трикутник: основа ${a}, висота ${2*h}. Знайдіть площу.`,a*h,[`S = ½·${a}·${2*h} = ${a*h}`],`${a}*${2*h}/2>`),A(`Паралелограм: сторона ${a}, висота до неї ${h}. Знайдіть площу.`,a*h,[`S = ${a}·${h} = ${a*h}`],`${a}*${h}`),A(`Трапеція: основи ${a} і ${b}, висота ${2*h}. Знайдіть площу.`,(a+b)*h,[`S = (${a} + ${b})/2·${2*h} = ${(a+b)*h}`],`(${a}+${b})/2>*${2*h}`),A(`Ромб: діагоналі ${2*a} і ${b}. Знайдіть площу.`,a*b,[`S = ${2*a}·${b}/2 = ${a*b}`],`${2*a}*${b}/2>`)][r(0,3)]}),
+N('Прямокутний трикутник','sin A = протилежний катет / гіпотенуза; cos A = прилеглий катет / гіпотенуза; tg A = протилежний / прилеглий. Катет навпроти кута 30° дорівнює половині гіпотенузи.',()=>{const c=2*r(2,15),b=r(2,15);return [AX(A(`Гіпотенуза ${c}, ∠A = 30°. Знайдіть катет, протилежний куту A.`,c/2,[`a = c·sin 30° = ${c}·½ = ${c/2}`]),{kt:`${c}*sin(30)`}),A(`Катет ${b}, гострий кут 45°. Знайдіть другий катет.`,b,[`tg 45° = 1, тому катети рівні: ${b}`]),AX(A(`Катет ${b} прилягає до ∠A = 60°. Знайдіть гіпотенузу.`,2*b,[`c = b / cos 60° = ${b} / ½ = ${2*b}`]),{kt:`${b}*cos(60)^-1`})][r(0,2)]}),
+N('Складні відсотки','Після n років під p% річних: S = S₀·(1 + p/100)ⁿ. Прості відсотки: S = S₀·(1 + p·n/100).',()=>{const S0=1000*r(1,10),p=pick([5,10,20]),n=r(2,3),v=R2(S0*(1+p/100)**n);return AX(A(`Вклад ${S0} грн під ${p}% річних, відсотки складні. Скільки буде через ${n} р.? (до копійок)`,v,[`S = ${S0}·(1 + ${p}/100)${up(n)}`,`= ${S0}·${dc(1+p/100)}${up(n)} = ${dc(v)} грн`],`${S0}*(1+${p}/100>)^${n}>`),{tol:.006})}));
+T[3][1].push(
+N('Об’єми тіл','Куб V = a³; прямокутний паралелепіпед V = abc; циліндр V = πr²h; конус V = ⅓πr²h; куля V = 4/3·πr³.',()=>{const a=r(2,9),b=r(2,9),h=3*r(1,4),R0=r(1,6);return [A(`Куб з ребром ${a}. Знайдіть об’єм.`,a**3,[`V = ${a}³ = ${a**3}`],`${a}^3>`),A(`Прямокутний паралелепіпед ${a} × ${b} × ${h}. Знайдіть об’єм.`,a*b*h,[`V = ${a}·${b}·${h} = ${a*b*h}`],`${a}*${b}*${h}`),A(`Циліндр: r = ${R0}, h = ${h}. Знайдіть V/π.`,R0*R0*h,[`V = π·${R0}²·${h} = ${R0*R0*h}π`]),A(`Конус: r = ${R0}, h = ${h}. Знайдіть V/π.`,R0*R0*h/3,[`V = ⅓·π·${R0}²·${h} = ${R0*R0*h/3}π`]),A(`Куля радіуса ${3*R0}. Знайдіть V/π.`,36*R0**3,[`V = 4/3·π·${3*R0}³ = ${36*R0**3}π`])][r(0,4)]}),
+N('Нескінченно спадна геометрична прогресія','Якщо |q| < 1, сума всіх членів S = b₁/(1 − q).',()=>{const[n0,d0]=pick([[1,2],[1,3],[1,4],[2,3],[-1,2]]),b=r(1,9)*d0,S=b/(1-n0/d0);return A(`b₁ = ${b}, q = ${n0}/${d0}. Знайдіть суму прогресії.`,S,[`S = ${b} / (1 − (${n0}/${d0})) = ${exact(S)}`],`${b}/1-${n0}/${d0}>>`)}));
+T[4][1].push(
+N('Системи числення','Двійкове число: 1011₂ = 1·8 + 0·4 + 1·2 + 1·1 = 11. З десяткової в двійкову: ділимо на 2 і записуємо остачі знизу вгору. Шістнадцяткова: цифри 0–9 і A–F (A = 10, …, F = 15).',()=>{const n=r(5,255),bn=n.toString(2);return r(0,1)?A(`Переведіть ${bn}₂ у десяткову систему.`,n,[bn.split('').map((d,i)=>`${d}·2${up(bn.length-1-i)}`).join(' + ')+` = ${n}`]):A(`Переведіть ${n} у двійкову систему.`,+bn,[`Ділимо на 2, остачі знизу вгору: ${bn}`])}),
+N('Ймовірність: незалежні події','Незалежні події: P(A і B) = P(A)·P(B). Несумісні: P(A або B) = P(A) + P(B). Протилежна подія: P(Ā) = 1 − P(A).',()=>{const p=pick([.5,.4,.8,.9,.7,.6]),q=pick([.5,.2,.3,.9,.6]);return r(0,1)?A(`Ймовірність влучення першого стрільця ${dc(p)}, другого ${dc(q)}. Яка ймовірність, що влучать обидва?`,R2(p*q),[`P = ${dc(p)}·${dc(q)} = ${dc(R2(p*q))}`],`${p}*${q}`):A(`Ймовірність відмови приладу ${dc(R2(1-p))}. Яка ймовірність, що жоден із двох незалежних приладів не відмовить?`,R2(p*p),[`P(працює) = 1 − ${dc(R2(1-p))} = ${dc(p)}`,`P = ${dc(p)}² = ${dc(R2(p*p))}`])}));
+
+/* ---- Розширені генератори завдань ---- */
+(()=>{
+const Q=(q,a,s,kt,x)=>Object.assign({q,a:[].concat(a),s,kt},x||{}),
+FR=(n,d)=>{if(d<0){n=-n;d=-d}const g=gc(Math.abs(n),d)||1;n/=g;d/=g;return d==1?`${n}`:`${n}/${d}`},
+M=(...f)=>pick(f)(),
+L=(k,b,v='x')=>`${k==1?'':k==-1?'−':k<0?'−'+(-k):k}${v}${b?` ${b<0?'−':'+'} ${ab(b)}`:''}`,
+Lt=(k,b,v='x')=>`${k==1?'':k==-1?'-':k}${v}${b?(b<0?'-':'+')+ab(b):''}`,
+S=n=>n<0?`− ${-n}`:`+ ${n}`,
+D=x=>dc(+(+x).toFixed(4)),
+nz=(a,b)=>{let v;do{v=r(a,b)}while(!v);return v},
+RG={};
+
+RG['Додавання і віднімання']=()=>M(
+()=>{const a=r(120,899),b=r(20,399);return Q(`${a} + ${b} = ?`,a+b,[`Одиниці: ${a%10} + ${b%10} = ${a%10+b%10}`,`Стовпчиком з переносом: ${a} + ${b} = ${a+b}`],`${a}+${b}`)},
+()=>{const b=r(20,399),a=b+r(15,500);return Q(`${a} − ${b} = ?`,a-b,[`Віднімаємо порозрядно, «позичаючи» десяток, де треба`,`${a} − ${b} = ${a-b}`,`Перевірка: ${a-b} + ${b} = ${a}`],`${a}-${b}`)},
+()=>{const a=r(10,99),b=r(10,99),c=r(10,99);return Q(`${a} + ${b} + ${c} = ?`,a+b+c,[`${a} + ${b} = ${a+b}`,`${a+b} + ${c} = ${a+b+c}`],`${a}+${b}+${c}`)},
+()=>{const x=r(10,300),b=r(10,300);return Q(`? + ${b} = ${x+b}`,x,[`Невідомий доданок = сума − відомий доданок`,`${x+b} − ${b} = ${x}`],`x+${b}=${x+b}`)},
+()=>{const a=r(200,900),x=r(10,a-50);return Q(`${a} − ? = ${a-x}`,x,[`Невідомий від’ємник = зменшуване − різниця`,`${a} − ${a-x} = ${x}`],`${a}-x=${a-x}`)});
+
+RG['Множення і ділення']=()=>M(
+()=>{const a=r(2,9),b=r(2,12);return Q(`${a} × ${b} = ?`,a*b,[`${a} × ${b} = ${a*b}`],`${a}*${b}`)},
+()=>{const a=r(2,9),b=r(2,12);return Q(`${a*b} ÷ ${a} = ?`,b,[`Яке число при множенні на ${a} дає ${a*b}? ${a} × ${b} = ${a*b}`],`${a*b}/${a}`)},
+()=>{const a=r(12,99),b=r(2,9);return Q(`${a} × ${b} = ?`,a*b,[`${a} = ${a-a%10} + ${a%10}`,`${a-a%10}·${b} + ${a%10}·${b} = ${(a-a%10)*b} + ${a%10*b} = ${a*b}`],`${a}*${b}`)},
+()=>{const b=r(2,9),q=r(12,99);return Q(`${b*q} ÷ ${b} = ?`,q,[`Ділимо кутом: ${b*q} ÷ ${b} = ${q}`,`Перевірка: ${q} × ${b} = ${b*q}`],`${b*q}/${b}`)},
+()=>{const a=r(2,99),k=pick([10,100]);return Q(`${a} × ${k} = ?`,a*k,[`Множення на ${k} — дописуємо ${k==10?'один нуль':'два нулі'}: ${a*k}`],`${a}*${k}`)},
+()=>{const a=r(2,9),x=r(2,12);return Q(`? × ${a} = ${a*x}`,x,[`Невідомий множник = добуток ÷ відомий множник`,`${a*x} ÷ ${a} = ${x}`],`x*${a}=${a*x}`)});
+
+RG['Порядок дій']=()=>M(
+()=>{const a=r(2,20),b=r(2,9),c=r(2,9),v=a+b*c;return Q(`${a} + ${b} × ${c} = ?`,v,[`Спочатку множення: ${b}×${c} = ${b*c}`,`Потім додавання: ${a} + ${b*c} = ${v}`],`${a}+${b}*${c}`)},
+()=>{const a=r(2,9),b=r(2,9),c=r(2,9),d=r(1,9),v=(a+b)*c-d;return Q(`(${a} + ${b}) × ${c} − ${d} = ?`,v,[`Дужки: ${a}+${b} = ${a+b}`,`Множення: ${a+b}×${c} = ${(a+b)*c}`,`Віднімання: ${(a+b)*c}−${d} = ${v}`],`(${a}+${b})*${c}-${d}`)},
+()=>{const a=r(3,9),b=r(3,9),d=r(2,9),c=d*r(2,9),v=a*b-c/d;return Q(`${a} × ${b} − ${c} ÷ ${d} = ?`,v,[`Множення: ${a}×${b} = ${a*b}`,`Ділення: ${c}÷${d} = ${c/d}`,`Віднімання: ${a*b} − ${c/d} = ${v}`],`${a}*${b}-${c}/${d}`)},
+()=>{const a=r(2,9),b=r(2,5),c=r(2,9),v=a+b*b*c;return Q(`${a} + ${b}² × ${c} = ?`,v,[`Степінь: ${b}² = ${b*b}`,`Множення: ${b*b}×${c} = ${b*b*c}`,`Додавання: ${a} + ${b*b*c} = ${v}`],`${a}+${b}^2*${c}`)},
+()=>{const c=r(2,9),q=r(2,9),b=r(1,9),a=b+c*q,d=r(1,20),v=(a-b)/c+d;return Q(`(${a} − ${b}) ÷ ${c} + ${d} = ?`,v,[`Дужки: ${a}−${b} = ${a-b}`,`Ділення: ${a-b}÷${c} = ${q}`,`Додавання: ${q} + ${d} = ${v}`],`(${a}-${b})/${c}+${d}`)},
+()=>{const a=r(30,99),b=r(2,9),c=r(1,b-1),d=r(2,6),v=a-(b-c)*d;return Q(`${a} − (${b} − ${c}) × ${d} = ?`,v,[`Дужки: ${b}−${c} = ${b-c}`,`Множення: ${b-c}×${d} = ${(b-c)*d}`,`Віднімання: ${a} − ${(b-c)*d} = ${v}`],`${a}-(${b}-${c})*${d}`)});
+
+RG['Відсотки']=()=>M(
+()=>{const p=pick([10,20,25,30,40,50,75]),N=20*r(1,25);return Q(`Скільки становить ${p}% від ${N}?`,N*p/100,[`${p}% = ${p}/100`,`${N} · ${p}/100 = ${N*p/100}`],`${N}*${p}/100`)},
+()=>{const p=pick([10,20,25,40,50]),N=20*r(1,25),A1=N*p/100;return Q(`${p}% числа дорівнюють ${A1}. Знайдіть число.`,N,[`Число = частина · 100 / відсоток`,`${A1} · 100 / ${p} = ${N}`],`${A1}*100/${p}`)},
+()=>{const N=pick([20,25,40,50,80,200]),p=pick([5,10,20,25,40,50,60,75]),A1=N*p/100;return Q(`Скільки відсотків становить ${D(A1)} від ${N}?`,p,[`${D(A1)} / ${N} · 100% = ${p}%`],`${A1}/${N}*100`)},
+()=>{const p=pick([10,20,25,50]),N=20*r(1,25),up1=r(0,1),v=N*(100+(up1?p:-p))/100;return Q(`${up1?'Збільште':'Зменште'} ${N} на ${p}%.`,v,[`${up1?'Збільшити':'Зменшити'} на ${p}% — помножити на ${D((100+(up1?p:-p))/100)}`,`${N} · ${D((100+(up1?p:-p))/100)} = ${D(v)}`],`${N}*${(100+(up1?p:-p))/100}`)});
+
+RG['Степені та корені']=()=>M(
+()=>{const a=r(2,9),n=r(2,4);return Q(`${a}${up(n)} = ?`,a**n,[`${Array(n).fill(a).join('·')} = ${a**n}`],`${a}^${n}`)},
+()=>{const k=r(2,15);return Q(`√${k*k} = ?`,k,[`${k}² = ${k*k}, тому √${k*k} = ${k}`],`sqrt(${k*k})`)},
+()=>{const k=r(2,6);return Q(`∛${k**3} = ?`,k,[`${k}³ = ${k**3}, тому ∛${k**3} = ${k}`])},
+()=>{const a=r(2,5),n=r(2,5),neg=(-a)**n;return Q(`(−${a})${up(n)} = ?`,neg,[`${n%2?'Непарний':'Парний'} степінь від’ємного числа — ${n%2?'від’ємний':'додатний'}`,`= ${neg}`],`(-${a})^${n}`)},
+()=>{const a=pick([2,3,4,5,10]),n=r(1,3);return Q(`${a}⁻${up(n)} = ? (дробом)`,1/a**n,[`a⁻ⁿ = 1/aⁿ`,`${a}⁻${up(n)} = 1/${a**n}`],`${a}^-${n}`,{as:`1/${a**n}`})},
+()=>{const a=r(2,7),m=r(2,4),n=r(2,4);return Q(`${a}${up(m)} · ${a}${up(n)} = ${a}ᵏ. Знайдіть k.`,m+n,[`aᵐ·aⁿ = aᵐ⁺ⁿ`,`k = ${m} + ${n} = ${m+n}`])},
+()=>{const a=r(2,9),b=r(2,9);return Q(`√${a*a} · √${b*b} = ?`,a*b,[`√${a*a} = ${a}, √${b*b} = ${b}`,`${a}·${b} = ${a*b}`],`sqrt(${a*a})*sqrt(${b*b})`)});
+
+RG['Прості рівняння']=()=>{const x=r(2,30),a=r(2,20);return M(
+()=>Q(`x + ${a} = ${x+a}. x = ?`,x,[`Невідомий доданок: x = ${x+a} − ${a} = ${x}`],`x+${a}=${x+a}`),
+()=>Q(`x − ${a} = ${x}. x = ?`,x+a,[`Невідоме зменшуване: x = ${x} + ${a} = ${x+a}`],`x-${a}=${x}`),
+()=>Q(`${x+a} − x = ${a}. x = ?`,x,[`Невідомий від’ємник: x = ${x+a} − ${a} = ${x}`],`${x+a}-x=${a}`),
+()=>{const k=r(2,9),y=r(2,12);return Q(`${k}x = ${k*y}. x = ?`,y,[`Невідомий множник: x = ${k*y} ÷ ${k} = ${y}`],`${k}x=${k*y}`)},
+()=>{const k=r(2,9),y=r(2,12);return Q(`x : ${k} = ${y}. x = ?`,k*y,[`Невідоме ділене: x = ${y} · ${k} = ${k*y}`],`x/${k}=${y}`)},
+()=>{const k=r(2,9),y=r(2,12);return Q(`${k*y} : x = ${y}. x = ?`,k,[`Невідомий дільник: x = ${k*y} ÷ ${y} = ${k}`],`${k*y}/x=${y}`)})};
+
+RG['Десяткові дроби']=()=>M(
+()=>{const X=r(12,99),Y=r(12,99),v=(X+Y)/10;return Q(`${D(X/10)} + ${D(Y/10)} = ?`,v,[`Кома під комою: ${D(X/10)} + ${D(Y/10)} = ${D(v)}`],`${X/10}+${Y/10}`)},
+()=>{const Y=r(12,99),X=Y+r(5,300),v=(X-Y)/10;return Q(`${D(X/10)} − ${D(Y/10)} = ?`,v,[`Кома під комою: ${D(X/10)} − ${D(Y/10)} = ${D(v)}`],`${X/10}-${Y/10}`)},
+()=>{const X=r(12,99),Y=r(2,99),v=X*Y/100;return Q(`${D(X/10)} × ${D(Y/10)} = ?`,v,[`Множимо як цілі: ${X}·${Y} = ${X*Y}`,`Після коми разом 2 знаки → ${D(v)}`],`${X/10}*${Y/10}`)},
+()=>{const b=r(2,9),q=r(2,30),a=b*q;return Q(`${D(a/10)} ÷ ${D(b/10)} = ?`,q,[`Переносимо кому в обох на 1 знак: ${a} ÷ ${b}`,`= ${q}`],`${a/10}/${b/10}`)},
+()=>{const X=r(101,999),k=pick([10,100,1000]),m=r(0,1),v=m?X/100*k:X/100/k;return Q(`${D(X/100)} ${m?'×':'÷'} ${k} = ?`,v,[`${m?'Множення':'Ділення'} на ${k} — кома ${m?'вправо':'вліво'} на ${String(k).length-1} знак(и)`,`= ${D(v)}`],`${X/100}${m?'*':'/'}${k}`)});
+
+RG['Пропорції']=()=>M(
+()=>{const a=r(2,9),k=r(2,9),b=r(2,9);return Q(`${a} : ${b} = ${a*k} : x. Знайдіть x.`,b*k,[`Основна властивість: ${a}·x = ${b}·${a*k}`,`x = ${b*a*k}/${a} = ${b*k}`],`${a}/${b}=${a*k}/x`)},
+()=>{const a=r(2,9),k=r(2,9),b=r(2,9);return Q(`x : ${b*k} = ${a} : ${b}. Знайдіть x.`,a*k,[`x·${b} = ${b*k}·${a}`,`x = ${a*b*k}/${b} = ${a*k}`],`x/${b*k}=${a}/${b}`)},
+()=>{const n=r(2,6),p=5*r(4,30),m=r(2,9);return Q(`За ${n} кг яблук заплатили ${n*p} грн. Скільки коштують ${m} кг?`,m*p,[`Пряма пропорційність: ${n} кг — ${n*p} грн, ${m} кг — x`,`x = ${n*p}·${m}/${n} = ${m*p} грн`],`${n*p}*${m}/${n}`)},
+()=>{const w=pick([2,3,4,6]),d=pick([6,8,10,12,15]),w2=pick([2,3,4,5,6,8,10,12].filter(v=>v!=w&&w*d%v==0));return Q(`${w} робітники виконують роботу за ${d} днів. За скільки днів її виконають ${w2} робітників (з тією ж продуктивністю)?`,w*d/w2,[`Обернена пропорційність: робітники × дні = стала = ${w*d}`,`x = ${w*d}/${w2} = ${w*d/w2} дн.`],`${w}*${d}/${w2}`)});
+
+RG['Вирази зі змінними']=()=>{const x=r(1,9),y=r(1,9),a=r(2,9),b=r(2,9);return M(
+()=>Q(`Знайдіть значення ${a}x + ${b}y при x = ${x}, y = ${y}`,a*x+b*y,[`${a}·${x} + ${b}·${y} = ${a*x} + ${b*y} = ${a*x+b*y}`],`${a}*${x}+${b}*${y}`),
+()=>Q(`Знайдіть значення ${a}(x − y) при x = ${x+y}, y = ${y}`,a*x,[`x − y = ${x+y} − ${y} = ${x}`,`${a}·${x} = ${a*x}`],`${a}*(${x+y}-${y})`),
+()=>Q(`Знайдіть значення x² + ${a}x при x = ${x}`,x*x+a*x,[`${x}² + ${a}·${x} = ${x*x} + ${a*x} = ${x*x+a*x}`],`${x}^2+${a}*${x}`),
+()=>{const xn=-x;return Q(`Знайдіть значення ${a}x − ${b} при x = ${xn}`,a*xn-b,[`${a}·(${xn}) − ${b} = ${a*xn} − ${b} = ${a*xn-b}`],`${a}*(${xn})-${b}`)},
+()=>Q(`Спростіть ${a}x + ${b}x − x і знайдіть значення при x = ${x}`,(a+b-1)*x,[`${a}x + ${b}x − x = ${a+b-1}x`,`${a+b-1}·${x} = ${(a+b-1)*x}`],`${a}*${x}+${b}*${x}-${x}`))};
+
+RG['Задачі на рух']=()=>{const v=r(4,12)*5,t=r(2,9),s=v*t;return M(
+()=>Q(`Авто їхало ${t} год зі швидкістю ${v} км/год. Яка відстань?`,s,[`s = v·t = ${v}·${t} = ${s} км`],`${v}*${t}`),
+()=>Q(`Відстань ${s} км, швидкість ${v} км/год. Скільки годин у дорозі?`,t,[`t = s/v = ${s}/${v} = ${t} год`],`${s}/${v}`),
+()=>Q(`За ${t} год пройдено ${s} км. Яка швидкість (км/год)?`,v,[`v = s/t = ${s}/${t} = ${v} км/год`],`${s}/${t}`),
+()=>{const v1=r(4,12)*5,v2=r(4,12)*5,T1=r(2,6),S1=(v1+v2)*T1;return Q(`З двох міст, відстань між якими ${S1} км, назустріч одне одному виїхали два авто зі швидкостями ${v1} і ${v2} км/год. Через скільки годин вони зустрінуться?`,T1,[`Швидкість зближення: ${v1} + ${v2} = ${v1+v2} км/год`,`t = ${S1}/${v1+v2} = ${T1} год`],`${S1}/(${v1}+${v2})`)},
+()=>{const v2=r(4,10)*5,dv=r(1,4)*5,v1=v2+dv,T1=r(2,6),S1=dv*T1;return Q(`Мотоцикліст (${v1} км/год) наздоганяє авто (${v2} км/год), яке їде попереду на ${S1} км. Через скільки годин він його наздожене?`,T1,[`Швидкість зближення: ${v1} − ${v2} = ${dv} км/год`,`t = ${S1}/${dv} = ${T1} год`],`${S1}/(${v1}-${v2})`)},
+()=>{const vb=r(10,25),vt=r(1,4),T1=r(2,6),dn=r(0,1),w=dn?vb+vt:vb-vt;return Q(`Власна швидкість човна ${vb} км/год, швидкість течії ${vt} км/год. Яку відстань пройде човен за ${T1} год ${dn?'за течією':'проти течії'}?`,w*T1,[`${dn?'За течією':'Проти течії'}: ${vb} ${dn?'+':'−'} ${vt} = ${w} км/год`,`s = ${w}·${T1} = ${w*T1} км`],`(${vb}${dn?'+':'-'}${vt})*${T1}`)})};
+
+RG['Задачі на роботу']=()=>{let a,b;do{a=r(2,40);b=r(2,40)}while(a==b||(a*b)%(a+b));const t=a*b/(a+b);return M(
+()=>Q(`Перший майстер виконує роботу за ${a} дн., другий — за ${b} дн. За скільки днів вони виконають її разом?`,t,[`Вся робота = 1. За день перший робить 1/${a}, другий 1/${b}`,`Разом за день: 1/${a} + 1/${b} = ${FR(a+b,a*b)}`,`t = 1 : ${FR(a+b,a*b)} = ${t} дн.`],`1/(1/${a}+1/${b})`),
+()=>Q(`Дві бригади разом виконують роботу за ${t} дн. Перша сама виконала б її за ${a} дн. За скільки днів виконає її друга бригада?`,b,[`Разом за день: 1/${t}; перша: 1/${a}`,`Друга за день: 1/${t} − 1/${a} = ${FR(a-t,a*t)}`,`t₂ = 1 : ${FR(a-t,a*t)} = ${b} дн.`],`1/(1/${t}-1/${a})`),
+()=>Q(`Перша труба наповнює басейн за ${a} год, друга — за ${b} год. За скільки годин наповнять басейн обидві труби разом?`,t,[`За годину: 1/${a} + 1/${b} = ${FR(a+b,a*b)} басейну`,`t = 1 : ${FR(a+b,a*b)} = ${t} год`],`1/(1/${a}+1/${b})`),
+()=>{let f,e;do{f=r(2,20);e=r(f+1,40)}while((f*e)%(e-f));const T1=f*e/(e-f);return Q(`Одна труба наповнює бак за ${f} год, а друга спорожнює його за ${e} год. За скільки годин наповниться порожній бак, якщо відкрити обидві?`,T1,[`За годину: 1/${f} − 1/${e} = ${FR(e-f,f*e)} бака`,`t = 1 : ${FR(e-f,f*e)} = ${T1} год`],`1/(1/${f}-1/${e})`)})};
+
+RG['Задачі на відсотки']=()=>{const X=20*r(5,30),p=pick([10,20,25,50]);return M(
+()=>Q(`Товар коштував ${X} грн. Знижка ${p}%. Нова ціна?`,X*(100-p)/100,[`Нова ціна = ${100-p}% старої`,`${X}·${100-p}/100 = ${X*(100-p)/100} грн`],`${X}*(100-${p})/100`),
+()=>Q(`Ціна ${X} грн зросла на ${p}%. Нова ціна?`,X*(100+p)/100,[`Нова ціна = ${100+p}% старої`,`${X}·${100+p}/100 = ${X*(100+p)/100} грн`],`${X}*(100+${p})/100`),
+()=>{const nw=X*(100-p)/100;return Q(`Після знижки ${p}% товар коштує ${nw} грн. Скільки він коштував спочатку?`,X,[`${nw} грн — це ${100-p}% початкової ціни`,`${nw}·100/${100-p} = ${X} грн`],`${nw}*100/${100-p}`)},
+()=>{const nw=X*(100-p)/100;return Q(`Ціна знизилась з ${X} до ${nw} грн. На скільки відсотків?`,p,[`Знижка: ${X} − ${nw} = ${X-nw} грн`,`${X-nw}/${X}·100% = ${p}%`],`(${X}-${nw})/${X}*100`)},
+()=>{const v=X*(100+p)/100*(100-p)/100;return Q(`Ціну ${X} грн спочатку підвищили на ${p}%, потім знизили на ${p}%. Яка ціна тепер?`,v,[`Після підвищення: ${X}·${D(1+p/100)} = ${D(X*(1+p/100))}`,`Після зниження: ${D(X*(1+p/100))}·${D(1-p/100)} = ${D(v)} грн`,`Ціна не повернулась до ${X}: відсотки рахуються від різних сум`],`${X}*${1+p/100}*${1-p/100}`,{tol:.006})})};
+
+RG['Коло і круг']=()=>{const R0=r(2,20);return M(
+()=>Q(`Радіус кола ${R0} см. Знайдіть довжину кола (π ≈ 3,14).`,R2(2*3.14*R0),[`C = 2πr = 2·3,14·${R0} = ${D(R2(2*3.14*R0))} см`],`2*3.14*${R0}`,{tol:.011}),
+()=>Q(`Радіус круга ${R0} см. Знайдіть площу (π ≈ 3,14).`,R2(3.14*R0*R0),[`S = πr² = 3,14·${R0}² = ${D(R2(3.14*R0*R0))} см²`],`3.14*${R0}^2`,{tol:.011}),
+()=>Q(`Діаметр кола ${2*R0} см. Знайдіть довжину кола (π ≈ 3,14).`,R2(3.14*2*R0),[`C = πd = 3,14·${2*R0} = ${D(R2(3.14*2*R0))} см`],`3.14*${2*R0}`,{tol:.011}),
+()=>Q(`Довжина кола ${D(R2(2*3.14*R0))} см. Знайдіть радіус (π ≈ 3,14).`,R0,[`r = C/(2π) = ${D(R2(2*3.14*R0))}/6,28 = ${R0} см`],`${R2(2*3.14*R0)}/(2*3.14)`,{tol:.011}),
+()=>Q(`Площа круга ${R0*R0}π см². Знайдіть діаметр.`,2*R0,[`πr² = ${R0*R0}π → r² = ${R0*R0} → r = ${R0}`,`d = 2r = ${2*R0} см`]))};
+
+RG['Лінійні рівняння']=()=>{const x=r(-9,9);return M(
+()=>{const a=nz(-9,9),b=nz(-20,20),c=a*x+b;return Q(`${L(a,b)} = ${c}. x = ?`,x,[`${a}x = ${c} ${S(-b)} = ${c-b}`,`x = ${c-b} : ${P(a)} = ${x}`],`${Lt(a,b)}=${c}`)},
+()=>{const a=r(2,9),c=nz(-9,9);if(a==c)return RG['Лінійні рівняння']();const b=nz(-15,15),d=a*x+b-c*x;return Q(`${L(a,b)} = ${L(c,d)}. x = ?`,x,[`Невідомі вліво, числа вправо: ${a}x ${S(-c)}x = ${d} ${S(-b)}`,`${a-c}x = ${d-b}`,`x = ${d-b} : ${P(a-c)} = ${x}`],`${Lt(a,b)}=${Lt(c,d)}`)},
+()=>{const a=r(2,9),b=nz(-9,9),c=a*(x+b);return Q(`${a}(x ${S(b)}) = ${c}. x = ?`,x,[`Ділимо на ${a}: x ${S(b)} = ${c/a}`,`x = ${c/a} ${S(-b)} = ${x}`],`${a}(x${b<0?'-':'+'}${ab(b)})=${c}`)},
+()=>{const a=r(2,6),y=a*r(-6,6),b=nz(-9,9),c=y/a+b;return Q(`x/${a} ${S(b)} = ${c}. x = ?`,y,[`x/${a} = ${c} ${S(-b)} = ${c-b}`,`x = ${c-b}·${a} = ${y}`],`x/${a}${b<0?'-':'+'}${ab(b)}=${c}`)},
+()=>{const a=r(2,7),b=nz(-9,9),k=r(2,5),d=nz(-9,9);if(a==k)return RG['Лінійні рівняння']();const c=k*(x+d)-a*x-b;return Q(`${L(a,b)} + ${c<0?`(${c})`:c} = ${k}(x ${S(d)}). x = ?`,x,[`Розкриваємо дужки: ${L(a,b+c)} = ${L(k,k*d)}`,`${a-k}x = ${k*d-b-c}`,`x = ${x}`],`${Lt(a,b)}+(${c})=${k}(x${d<0?'-':'+'}${ab(d)})`)})};
+
+RG['Квадратні рівняння']=()=>M(
+()=>{let p=r(-9,9),q=r(-9,9);while(p==q)q=r(-9,9);const B=-(p+q),C=p*q,Dd=B*B-4*C;return Q(`x² ${B?S(B)+'x ':''}${C?S(C)+' ':''}= 0. Знайдіть корені (через пробіл)`,[p,q],[`a = 1, b = ${B}, c = ${C}`,`D = ${B}² − 4·${P(C)} = ${Dd}, √D = ${Math.sqrt(Dd)}`,`x = (${-B} ± ${Math.sqrt(Dd)})/2 → ${Math.max(p,q)} і ${Math.min(p,q)}`],`x^2${B?(B<0?'-':'+')+ab(B)+'x':''}${C?(C<0?'-':'+')+ab(C):''}=0`)},
+()=>{const a=r(2,5);let p=r(-6,6),q=r(-6,6);while(p==q)q=r(-6,6);const B=-a*(p+q),C=a*p*q,Dd=B*B-4*a*C;return Q(`${a}x² ${B?S(B)+'x ':''}${C?S(C)+' ':''}= 0. Знайдіть корені (через пробіл)`,[p,q],[`a = ${a}, b = ${B}, c = ${C}`,`D = ${B*B} − 4·${a}·${P(C)} = ${Dd}, √D = ${Math.sqrt(Dd)}`,`x = (${-B} ± ${Math.sqrt(Dd)})/${2*a} → ${Math.max(p,q)} і ${Math.min(p,q)}`],`${a}x^2${B?(B<0?'-':'+')+ab(B)+'x':''}${C?(C<0?'-':'+')+ab(C):''}=0`)},
+()=>{const k=r(1,12);return Q(`x² − ${k*k} = 0. Знайдіть корені (через пробіл)`,[k,-k],[`x² = ${k*k}`,`x = ±${k}`],`x^2-${k*k}=0`)},
+()=>{const b=nz(-12,12);return Q(`x² ${S(b)}x = 0. Знайдіть корені (через пробіл)`,[0,-b],[`Виносимо x: x(x ${S(b)}) = 0`,`x = 0 або x = ${-b}`],`x^2${b<0?'-':'+'}${ab(b)}x=0`)},
+()=>{const p=r(-6,6),B=-2*p,C=p*p,t=r(0,2),c2=t==0?C:t==1?C+r(1,9):C-r(1,9),Dd=B*B-4*c2,n=Dd>0?2:Dd==0?1:0;return Q(`Скільки дійсних коренів має рівняння x² ${B?S(B)+'x ':''}${c2?S(c2)+' ':''}= 0?`,n,[`D = ${B}² − 4·${P(c2)} = ${Dd}`,Dd>0?'D > 0 → два корені':Dd==0?'D = 0 → один корінь':'D < 0 → коренів немає'])});
+
+RG['Теорема Піфагора']=()=>{const m=r(1,4),[a,b,c]=pick([[3,4,5],[5,12,13],[8,15,17],[7,24,25],[20,21,29],[9,40,41],[6,8,10]]).map(v=>v*m);return M(
+()=>Q(`Катети ${a} і ${b}. Знайдіть гіпотенузу.`,c,[`c² = ${a}² + ${b}² = ${a*a} + ${b*b} = ${c*c}`,`c = √${c*c} = ${c}`],`sqrt(${a}^2+${b}^2)`),
+()=>Q(`Гіпотенуза ${c}, катет ${a}. Знайдіть другий катет.`,b,[`b² = ${c}² − ${a}² = ${c*c} − ${a*a} = ${b*b}`,`b = √${b*b} = ${b}`],`sqrt(${c}^2-${a}^2)`),
+()=>Q(`Сторони прямокутника ${a} і ${b}. Знайдіть діагональ.`,c,[`Діагональ — гіпотенуза: d² = ${a*a} + ${b*b} = ${c*c}`,`d = ${c}`],`sqrt(${a}^2+${b}^2)`),
+()=>Q(`Рівнобедрений трикутник: основа ${2*a}, бічна сторона ${c}. Знайдіть висоту, проведену до основи.`,b,[`Висота ділить основу навпіл: ${a}`,`h² = ${c}² − ${a}² = ${c*c-a*a}`,`h = ${b}`],`sqrt(${c}^2-${a}^2)`),
+()=>Q(`Чи є трикутник зі сторонами ${a}, ${b}, ${c} прямокутним? (1 — так, 0 — ні)`,1,[`${a}² + ${b}² = ${a*a+b*b}, ${c}² = ${c*c}`,`Рівні → прямокутний (обернена теорема Піфагора)`]))};
+
+RG['Розкладання на множники']=()=>M(
+()=>{const p=nz(-9,9),q=nz(-9,9),B=-(p+q),C=p*q;return Q(`Розкладіть x² ${B?S(B)+'x ':''}${S(C)} = (x − p)(x − q). Впишіть p і q через пробіл.`,[p,q],[`Шукаємо p і q: p + q = ${p+q}, p·q = ${C}`,`p = ${p}, q = ${q}`,`(x ${S(-p)})(x ${S(-q)})`],`x^2${B?(B<0?'-':'+')+ab(B)+'x':''}${C<0?'-':'+'}${ab(C)}=0`)},
+()=>{const g=r(2,9),a=r(1,6),b=nz(-9,9);if(gc(a,ab(b))>1)return RG['Розкладання на множники']();return Q(`Винесіть спільний множник: ${g*a}x ${S(g*b)} = k(${L(a,b)}). Знайдіть k.`,g,[`НСД(${g*a}; ${ab(g*b)}) = ${g}`,`${g*a}x ${S(g*b)} = ${g}(${L(a,b)})`])},
+()=>{const k=r(2,12);return Q(`x² − ${k*k} = (x − a)(x + a). Знайдіть a > 0.`,k,[`Різниця квадратів: x² − ${k}² = (x − ${k})(x + ${k})`,`a = ${k}`])},
+()=>{const k=r(2,9),s=r(0,1);return Q(`x² ${s?'+':'−'} ${2*k}x + ${k*k} = (x ${s?'+':'−'} a)². Знайдіть a.`,k,[`Повний квадрат: (x ${s?'+':'−'} ${k})² = x² ${s?'+':'−'} ${2*k}x + ${k*k}`,`a = ${k}`])},
+()=>{const m=r(2,9)*10,d=r(1,9);return Q(`Обчисліть через різницю квадратів: ${m+d}·${m-d}`,(m+d)*(m-d),[`(${m}+${d})(${m}−${d}) = ${m}² − ${d}²`,`= ${m*m} − ${d*d} = ${m*m-d*d}`],`${m+d}*${m-d}`)});
+
+RG['Раціональні дроби']=()=>{const a=r(1,9),x=r(10,20);return M(
+()=>Q(`Спростіть (x² − ${a*a})/(x − ${a}) і знайдіть значення при x = ${x}`,x+a,[`(x − ${a})(x + ${a})/(x − ${a}) = x + ${a}`,`${x} + ${a} = ${x+a}`],`(${x}^2-${a*a})/(${x}-${a})`),
+()=>Q(`Спростіть (x² + ${2*a}x + ${a*a})/(x + ${a}) і знайдіть значення при x = ${x}`,x+a,[`(x + ${a})²/(x + ${a}) = x + ${a}`,`${x} + ${a} = ${x+a}`],`(${x}^2+${2*a}*${x}+${a*a})/(${x}+${a})`),
+()=>{const k=r(2,9);return Q(`Спростіть (${k}x + ${k*a})/(x + ${a}) (x ≠ −${a})`,k,[`${k}x + ${k*a} = ${k}(x + ${a})`,`${k}(x + ${a})/(x + ${a}) = ${k}`])},
+()=>Q(`Спростіть (x² − ${a}x)/x і знайдіть значення при x = ${x}`,x-a,[`x(x − ${a})/x = x − ${a}`,`${x} − ${a} = ${x-a}`],`(${x}^2-${a}*${x})/${x}`),
+()=>{const b=r(2,9);return Q(`1/x + 1/${b} = (… )/(${b}x). Знайдіть значення суми при x = ${x} (дробом)`,1/x+1/b,[`Спільний знаменник ${b}x: (${b} + x)/(${b}x)`,`(${b} + ${x})/(${b}·${x}) = ${FR(b+x,b*x)}`],`1/${x}+1/${b}`,{as:FR(b+x,b*x)})})};
+
+RG['Нелінійні системи']=()=>M(
+()=>{const p=r(1,9);let q;do{q=r(1,9)}while(q==p);return Q(`x + y = ${p+q}, xy = ${p*q}. Знайдіть x (усі значення через пробіл).`,[p,q],[`x і y — корені t² − ${p+q}t + ${p*q} = 0`,`t = ${p} або t = ${q}`])},
+()=>{const y=r(1,8),d=r(1,6),x=y+d;return Q(`x − y = ${d}, xy = ${x*y}. Знайдіть x (усі значення через пробіл).`,[x,-y],[`y = x − ${d} → x(x − ${d}) = ${x*y}`,`x² − ${d}x − ${x*y} = 0`,`x = ${x} або x = ${-y}`],`x^2-${d}x-${x*y}=0`)},
+()=>{const x=r(2,12),y=r(1,x-1),Sm=x+y;return Q(`x + y = ${Sm}, x² − y² = ${(x-y)*Sm}. Знайдіть x.`,x,[`x² − y² = (x − y)(x + y) → x − y = ${(x-y)*Sm}/${Sm} = ${x-y}`,`2x = ${Sm} + ${x-y} → x = ${x}`])},
+()=>{const x=r(1,6),y=r(1,6);if(x==y)return RG['Нелінійні системи']();return Q(`y = ${L(1,y-x)}, x² + y² = ${x*x+y*y}, x > 0, y > 0. Знайдіть x.`,x,[`Підставляємо y: x² + (x ${S(y-x)})² = ${x*x+y*y}`,`Перебираємо або розв’язуємо квадратне рівняння → x = ${x}, y = ${y}`])});
+
+RG['Задачі на складання рівнянь']=()=>M(
+()=>{const x=r(5,40),d=r(2,9);return Q(`Одне число більше за інше на ${d}, а їх сума ${2*x+d}. Знайдіть менше число.`,x,[`x + (x + ${d}) = ${2*x+d}`,`2x = ${2*x} → x = ${x}`],`x+x+${d}=${2*x+d}`)},
+()=>{const s=r(4,15),k=r(3,6);return Q(`Батько старший за сина в ${k} рази(ів), а разом їм ${s*(k+1)} років. Скільки років сину?`,s,[`x + ${k}x = ${s*(k+1)}`,`${k+1}x = ${s*(k+1)} → x = ${s}`],`x+${k}x=${s*(k+1)}`)},
+()=>{const w=r(3,15),d=r(1,8);return Q(`Довжина прямокутника на ${d} см більша за ширину, периметр ${2*(2*w+d)} см. Знайдіть ширину.`,w,[`2(x + x + ${d}) = ${2*(2*w+d)}`,`2x + ${d} = ${2*w+d} → x = ${w}`],`2(x+x+${d})=${2*(2*w+d)}`)},
+()=>{const x=r(2,20),k=r(2,5),b=r(1,20);return Q(`Задумали число, помножили його на ${k} і додали ${b}. Отримали ${k*x+b}. Яке число задумали?`,x,[`${k}x + ${b} = ${k*x+b}`,`${k}x = ${k*x} → x = ${x}`],`${k}x+${b}=${k*x+b}`)},
+()=>{const p=5*r(2,10),d=5*r(1,6),n1=r(2,5),n2=r(1,4);return Q(`За ${n1} зошити і ${n2} ручки заплатили ${n1*p+n2*(p+d)} грн. Ручка дорожча за зошит на ${d} грн. Скільки коштує зошит?`,p,[`${n1}x + ${n2}(x + ${d}) = ${n1*p+n2*(p+d)}`,`${n1+n2}x = ${(n1+n2)*p} → x = ${p}`],`${n1}x+${n2}(x+${d})=${n1*p+n2*(p+d)}`)},
+()=>{const k=r(2,4),x=2*r(3,12),T1=x*(k-1)/2;return Q(`На першій полиці в ${k} рази більше книжок, ніж на другій. Коли з першої переставили на другу ${T1} книжок, на полицях стало порівну. Скільки книжок було на другій полиці?`,x,[`${k}x − ${T1} = x + ${T1}`,`${k-1}x = ${2*T1} → x = ${x}`],`${k}x-${T1}=x+${T1}`)});
+
+RG['Обернена пропорційність']=()=>M(
+()=>{const x=r(2,9),m=r(2,9),K=x*m,x2=pick([1,2,3,4,6,12].filter(d=>K%d==0));return Q(`y = ${K}/x. Знайдіть y при x = ${x2}.`,K/x2,[`y = ${K}/${x2} = ${K/x2}`],`${K}/${x2}`)},
+()=>{const K=pick([12,18,24,36,48]),y=pick([2,3,4,6].filter(d=>K%d==0));return Q(`y = ${K}/x. При якому x значення y = ${y}?`,K/y,[`${y} = ${K}/x → x = ${K}/${y} = ${K/y}`],`${K}/x=${y}`)},
+()=>{const x=r(2,9),y=r(2,9);return Q(`Графік y = k/x проходить через точку (${x}; ${y}). Знайдіть k.`,x*y,[`k = x·y = ${x}·${y} = ${x*y}`])},
+()=>{const v=pick([40,50,60,80]),t=pick([2,3,4,6]),v2=pick([30,40,60,80,100,120].filter(w=>w!=v&&v*t%w==0));return Q(`Зі швидкістю ${v} км/год дорога займає ${t} год. Скільки годин займе дорога зі швидкістю ${v2} км/год?`,v*t/v2,[`v·t = стала = ${v*t}`,`t = ${v*t}/${v2} = ${v*t/v2} год`],`${v}*${t}/${v2}`)});
+
+RG['Лінійні нерівності']=()=>{const a=nz(-6,6),b=r(-9,9),k=r(-8,8);
+const sig=pick(['<','>','≤','≥']),c=a*k+b+r(0,ab(a)-1),lim=(c-b)/a,flip=a<0,sig2=flip?{'<':'>','>':'<','≤':'≥','≥':'≤'}[sig]:sig,
+strict=sig2=='<'||sig2=='>',big=sig2=='<'||sig2=='≤',ans=big?(strict?Math.ceil(lim)-1:Math.floor(lim)):(strict?Math.floor(lim)+1:Math.ceil(lim));
+return Q(`${L(a,b)} ${sig} ${c}. Яке ${big?'найбільше':'найменше'} ціле x?`,ans,[`${a}x ${sig} ${c} ${S(-b)} = ${c-b}`,`Ділимо на ${P(a)}${flip?' — від’ємне, знак змінюємо':''}: x ${sig2} ${D(lim)}`,`${big?'Найбільше':'Найменше'} ціле: ${ans}`],`${Lt(a,b)}${sig}${c}`,{ktx:1})};
+
+RG['Квадратні нерівності']=()=>{const p=r(-6,3),q=p+r(2,8),B=-(p+q),C=p*q,lhs=`x² ${B?S(B)+'x ':''}${C?S(C)+' ':''}`,kt=`x^2${B?(B<0?'-':'+')+ab(B)+'x':''}${C?(C<0?'-':'+')+ab(C):''}`;return M(
+()=>Q(`${lhs}< 0. Скільки цілих розв’язків?`,q-p-1,[`Корені: ${p} і ${q}`,`Вітки вгору, менше нуля між коренями: ${p} < x < ${q}`,`Цілих: ${q-p-1}`],kt+'<0',{ktx:1}),
+()=>Q(`${lhs}≤ 0. Скільки цілих розв’язків?`,q-p+1,[`Корені: ${p} і ${q}`,`${p} ≤ x ≤ ${q} (корені входять)`,`Цілих: ${q-p+1}`],kt+'≤0',{ktx:1}),
+()=>Q(`${lhs}> 0. Яке найменше натуральне x є розв’язком?`,p>1?1:Math.max(q+1,1),[`Корені: ${p} і ${q}`,`Розв’язок поза коренями: x < ${p} або x > ${q}`,`Найменше натуральне: ${p>1?1:Math.max(q+1,1)}`],kt+'>0',{ktx:1}),
+()=>{const k=r(1,9);return Q(`x² < ${k*k}. Скільки цілих розв’язків?`,2*k-1,[`−${k} < x < ${k}`,`Цілих: ${2*k-1}`],`x^2<${k*k}`,{ktx:1})})};
+
+RG['Геометрична прогресія']=()=>{const b=r(1,5),q=pick([2,3,-2]),n=r(3,6);return M(
+()=>{const Sm=b*(q**n-1)/(q-1);return Q(`b₁ = ${b}, q = ${q}. Знайдіть суму перших ${n} членів.`,Sm,[`Sₙ = b₁(qⁿ − 1)/(q − 1)`,`S = ${b}·(${P(q)}${up(n)} − 1)/(${q} − 1) = ${Sm}`],`${b}*((${q})^${n}-1)/(${q}-1)`)},
+()=>Q(`b₁ = ${b}, q = ${q}. Знайдіть b${'₀₁₂₃₄₅₆₇₈₉'[n]}.`,b*q**(n-1),[`bₙ = b₁·qⁿ⁻¹`,`b${'₀₁₂₃₄₅₆₇₈₉'[n]} = ${b}·${P(q)}${up(n-1)} = ${b*q**(n-1)}`],`${b}*(${q})^${n-1}`),
+()=>Q(`b₁ = ${b}, b₄ = ${b*q**3}. Знайдіть q.`,q,[`b₄ = b₁·q³ → q³ = ${b*q**3}/${b} = ${q**3}`,`q = ${q}`]),
+()=>Q(`Знайдіть наступний член прогресії: ${[0,1,2,3].map(i=>b*q**i).join('; ')}; …`,b*q**4,[`q = ${b*q}/${b} = ${q}`,`${b*q**3}·${P(q)} = ${b*q**4}`],`${b*q**3}*(${q})`))};
+
+RG['Ймовірність']=()=>M(
+()=>{const a=r(1,8),b=r(1,8);return Q(`У коробці ${a} червоних і ${b} синіх куль. Яка ймовірність навмання витягти червону? (дробом)`,a/(a+b),[`Усього: ${a+b}, сприятливих: ${a}`,`P = ${a}/${a+b}${gc(a,a+b)>1?` = ${FR(a,a+b)}`:''}`],`${a}/(${a}+${b})`,{as:FR(a,a+b)})},
+()=>{const k=r(1,5),m=7-k;return Q(`Кидають гральний кубик. Яка ймовірність, що випаде більше ніж ${k}? (дробом)`,(6-k)/6,[`Сприятливі: ${Array.from({length:6-k},(_, i)=>k+1+i).join(', ')} — ${6-k}`,`P = ${6-k}/6${gc(6-k,6)>1?` = ${FR(6-k,6)}`:''}`],`${6-k}/6`,{as:FR(6-k,6)})},
+()=>Q(`Кидають гральний кубик. Яка ймовірність, що випаде парне число? (дробом)`,.5,[`Парні: 2, 4, 6 — 3 з 6`,`P = 3/6 = 1/2`],`3/6`,{as:'1/2'}),
+()=>{const s=r(2,12),n=[...Array(36)].filter((_,i)=>(i%6+1)+(Math.floor(i/6)+1)==s).length;return Q(`Кидають два кубики. Яка ймовірність, що сума очок дорівнює ${s}? (дробом)`,n/36,[`Усього наслідків: 6·6 = 36`,`Сума ${s}: ${n} варіант(и)`,`P = ${n}/36${gc(n,36)>1?` = ${FR(n,36)}`:''}`],`${n}/36`,{as:FR(n,36)})},
+()=>{const n=r(2,4);return Q(`Монету підкидають ${n} рази. Яка ймовірність, що щоразу випаде герб? (дробом)`,1/2**n,[`Кожен раз P = 1/2, події незалежні`,`P = (1/2)${up(n)} = 1/${2**n}`],`(1/2)^${n}`,{as:`1/${2**n}`})},
+()=>{const N=pick([20,25,30,40,50]),d=r(1,5);return Q(`Із ${N} лампочок ${d} браковані. Яка ймовірність узяти справну? (дробом)`,(N-d)/N,[`Справних: ${N} − ${d} = ${N-d}`,`P = ${N-d}/${N}${gc(N-d,N)>1?` = ${FR(N-d,N)}`:''}`],`${N-d}/${N}`,{as:FR(N-d,N)})});
+
+RG['Складні відсотки']=()=>{const S0=1000*r(1,10),p=pick([5,10,20]),n=r(2,3);return M(
+()=>{const v=R2(S0*(1+p/100)**n);return Q(`Вклад ${S0} грн під ${p}% річних, відсотки складні. Скільки буде через ${n} р.?`,v,[`S = S₀·(1 + p/100)ⁿ`,`= ${S0}·${D(1+p/100)}${up(n)} = ${D(v)} грн`],`${S0}*(1+${p}/100)^${n}`,{tol:.006})},
+()=>{const v=S0*(1+p*n/100);return Q(`Вклад ${S0} грн під ${p}% річних, прості відсотки. Скільки буде через ${n} р.?`,v,[`S = S₀·(1 + p·n/100)`,`= ${S0}·(1 + ${p}·${n}/100) = ${v} грн`],`${S0}*(1+${p}*${n}/100)`)},
+()=>{const c=S0*(1+p/100)**n,s=S0*(1+p*n/100),v=R2(c-s);return Q(`Вклад ${S0} грн на ${n} р. під ${p}% річних. На скільки гривень більше дадуть складні відсотки, ніж прості?`,v,[`Складні: ${D(R2(c))} грн`,`Прості: ${s} грн`,`Різниця: ${D(v)} грн`],`${S0}*(1+${p}/100)^${n}-${S0}*(1+${p}*${n}/100)`,{tol:.006})},
+()=>{const v=R2(S0*(1-p/100)**n);return Q(`Обладнання вартістю ${S0} грн щороку дешевшає на ${p}%. Скільки воно коштуватиме через ${n} р.?`,v,[`S = S₀·(1 − p/100)ⁿ`,`= ${S0}·${D(1-p/100)}${up(n)} = ${D(v)} грн`],`${S0}*(1-${p}/100)^${n}`,{tol:.006})})};
+
+RG['Арифметична прогресія']=()=>{const a=r(-5,10),d=nz(-4,6),n=r(5,15),an=a+(n-1)*d,sb='₀₁₂₃₄₅₆₇₈₉',ix=k=>String(k).split('').map(c=>sb[c]).join('');return M(
+()=>Q(`a₁ = ${a}, d = ${d}. Знайдіть суму перших ${n} членів.`,(a+an)*n/2,[`a${ix(n)} = ${a} + ${n-1}·${P(d)} = ${an}`,`S = (${a} + ${P(an)})·${n}/2 = ${(a+an)*n/2}`],`(${a}+(${an}))*${n}/2`),
+()=>Q(`a₁ = ${a}, d = ${d}. Знайдіть a${ix(n)}.`,an,[`aₙ = a₁ + (n − 1)d`,`a${ix(n)} = ${a} + ${n-1}·${P(d)} = ${an}`],`${a}+${n-1}*(${d})`),
+()=>Q(`a₁ = ${a}, a${ix(n)} = ${an}. Знайдіть d.`,d,[`a${ix(n)} = a₁ + ${n-1}d`,`d = (${an} − ${P(a)})/${n-1} = ${d}`],`(${an}-(${a}))/${n-1}`),
+()=>Q(`a₁ = ${a}, d = ${d}. Який номер має член ${an}?`,n,[`${an} = ${a} + (n − 1)·${P(d)}`,`n − 1 = ${(an-a)/d} → n = ${n}`]),
+()=>Q(`Знайдіть наступний член: ${[0,1,2,3].map(i=>a+i*d).join('; ')}; …`,a+4*d,[`d = ${a+d} − ${P(a)} = ${d}`,`${a+3*d} ${S(d)} = ${a+4*d}`]))};
+
+/* --- тригонометрія --- */
+const TV={sin:{0:'0',30:'1/2',45:'√2/2',60:'√3/2',90:'1'},cos:{0:'1',30:'√3/2',45:'√2/2',60:'1/2',90:'0'},tg:{0:'0',30:'√3/3',45:'1',60:'√3'}},
+Fv=(f,deg)=>{const x=deg*Math.PI/180,v=f=='sin'?Math.sin(x):f=='cos'?Math.cos(x):Math.tan(x);return Math.abs(v)<1e-12?0:v},
+TX=(v)=>{for(const f of['sin','tg'])for(const k in TV[f]){const t=Fv(f,+k);if(Math.abs(t-v)<1e-9)return TV[f][k];if(Math.abs(t+v)<1e-9)return'−'+TV[f][k]}return D(v)},
+RAD=deg=>{const g=gc(deg,180);const n=deg/g,d=180/g;return(n==1?'':n)+'π'+(d==1?'':'/'+d)};
+
+RG['Тригонометрія: значення та радіани']=()=>M(
+()=>{const deg=pick([30,45,60,90,120,135,150,180,210,270,360]);return Q(`Скільки градусів у ${RAD(deg)} рад?`,deg,[`π рад = 180°`,`${RAD(deg)} = ${deg}°`])},
+()=>{const deg=pick([30,45,60,90,120,135,150,270]);const g=gc(deg,180);return Q(`Запишіть ${deg}° у радіанах як частку π (напр. 1/3 для π/3).`,deg/180,[`1° = π/180`,`${deg}° = ${deg}π/180 = ${RAD(deg)}`],undefined,{as:FR(deg,180)})},
+()=>{const f=pick(['sin','cos']),k=pick([0,30,60,90]),g=pick(['sin','cos']),m=pick([0,30,60,90]),v=Fv(f,k)+Fv(g,m);return Q(`${f} ${k}° + ${g} ${m}° = ?`,v,[`${f} ${k}° = ${TV[f][k]}, ${g} ${m}° = ${TV[g][m]}`,`Сума: ${TX(v)}`],`${f}(${k})+${g}(${m})`,{as:TX(v),tol:.001})},
+()=>{const k=pick([30,45,60]);return Q(`sin² ${k}° + cos² ${k}° = ?`,1,[`Основна тотожність: sin²α + cos²α = 1`])},
+()=>{const k=pick([30,60]),a=r(2,8);return Q(`${a}·sin ${k}° · cos ${90-k}° = ? (дробом)`,a*Fv('sin',k)**2,[`cos ${90-k}° = sin ${k}° = ${TV.sin[k]}`,`${a}·(${TV.sin[k]})² = ${FR(a*(k==30?1:3),4)}`],`${a}*sin(${k})*cos(${90-k})`,{as:FR(a*(k==30?1:3),4),tol:1e-6})});
+
+RG['Формули зведення']=()=>{const f=pick(['sin','cos','tg']),b=pick([30,45,60]),base=pick([90,180,270,360]),sg1=base==360?-1:pick([-1,1]),ang=base+sg1*b;
+if(f=='tg'&&(ang%180==90))return RG['Формули зведення']();
+const v=Fv(f,ang),swap=base==90||base==270,g=swap?{sin:'cos',cos:'sin',tg:'ctg'}[f]:f,qd=ang<90?'I':ang<180?'II':ang<270?'III':'IV',sgn=v<0?'−':'+';
+return Q(`${f} ${ang}° = ? (можна десятковим, до тисячних)`,v,[`${ang}° = ${base}° ${sg1<0?'−':'+'} ${b}°, кут у ${qd} чверті`,`Знак ${f} у ${qd} чверті: «${sgn}»`,`${swap?`Біля 90° чи 270° функція змінюється: ${f} → ${g}`:`Біля 180° чи 360° функція не змінюється`}`,`${f} ${ang}° = ${sgn=='−'?'−':''}${g} ${b}° = ${TX(v)}`],`${f}(${ang})`,{as:TX(v),tol:.001})};
+
+RG['Тригонометричні рівняння й тотожності']=()=>M(
+()=>{const[a,b,c]=pick([[3,4,5],[5,12,13],[8,15,17],[7,24,25]]),t=r(0,2);return t==0?Q(`sin α = ${a}/${c}, α — гострий кут. Знайдіть cos α (дробом).`,b/c,[`cos²α = 1 − (${a}/${c})² = ${c*c-a*a}/${c*c}`,`cos α = ${b}/${c} (гострий кут → додатний)`],undefined,{as:`${b}/${c}`}):t==1?Q(`cos α = ${b}/${c}, α — гострий кут. Знайдіть tg α (дробом).`,a/b,[`sin α = √(1 − ${b*b}/${c*c}) = ${a}/${c}`,`tg α = sin α / cos α = ${a}/${b}`],undefined,{as:FR(a,b)}):Q(`sin α = ${a}/${c}, α — тупий кут. Знайдіть cos α (дробом).`,-b/c,[`cos²α = ${b*b}/${c*c}`,`Тупий кут (II чверть) → cos α < 0: −${b}/${c}`],undefined,{as:`-${b}/${c}`})},
+()=>{const f=pick(['sin','cos','tg']),cands=f=='tg'?[[1,'1'],[-1,'−1'],[Math.sqrt(3),'√3'],[0,'0']]:[[.5,'1/2'],[-.5,'−1/2'],[1,'1'],[-1,'−1'],[0,'0'],[Math.SQRT2/2,'√2/2']],[v,vs]=pick(cands);let x=1;while(x<=360&&Math.abs(Fv(f,x)-v)>1e-9)x++;
+return Q(`Найменший додатний розв’язок (у градусах): ${f} x = ${vs}`,x,[`${f} ${x}° = ${vs}`,`Перевіряємо менші кути: менших додатних розв’язків немає`],`${f}(${x})`,{ktx:1})},
+()=>{const k=pick([30,45,60]),f=pick(['sin','cos']),A1=r(2,6);return Q(`Спростіть ${A1}sin²x + ${A1}cos²x`,A1,[`${A1}(sin²x + cos²x) = ${A1}·1 = ${A1}`])},
+()=>{const[a,b,c]=pick([[3,4,5],[5,12,13],[8,15,17]]);return Q(`tg α = ${a}/${b}, α — гострий кут. Знайдіть sin α (дробом).`,a/c,[`1 + tg²α = 1/cos²α → cos²α = ${b*b}/${c*c}, cos α = ${b}/${c}`,`sin α = tg α · cos α = ${a}/${b}·${b}/${c} = ${a}/${c}`],undefined,{as:`${a}/${c}`})});
+
+RG['Екстремуми та монотонність']=()=>M(
+()=>{const p=r(1,6),mn=r(0,1);return Q(`f(x) = x³ − ${3*p*p}x. Знайдіть точку локального ${mn?'мінімуму':'максимуму'}.`,mn?p:-p,[`f′ = 3x² − ${3*p*p} = 0 → x = ±${p}`,mn?`f′ змінює знак з «−» на «+» при x = ${p} → мінімум`:`f′ змінює знак з «+» на «−» при x = −${p} → максимум`])},
+()=>{const m=nz(-6,6),c=r(-9,9);return Q(`f(x) = x² ${S(-2*m)}x ${S(c)}. Знайдіть точку мінімуму.`,m,[`f′ = 2x ${S(-2*m)} = 0 → x = ${m}`,`Ліворуч f′ < 0, праворуч f′ > 0 → мінімум`])},
+()=>{const m=nz(-6,6),c=r(-9,9);return Q(`f(x) = −x² ${S(2*m)}x ${S(c)}. Знайдіть найбільше значення функції.`,m*m+c,[`f′ = −2x ${S(2*m)} = 0 → x = ${m}`,`f(${m}) = −${m*m} ${S(2*m*m)} ${S(c)} = ${m*m+c}`],`-(${m})^2+${2*m}*(${m})+(${c})`)},
+()=>{let a=r(-4,3),b=r(a+1,5);const mn=r(0,1);return Q(`f(x) = 2x³ ${S(-3*(a+b))}x² ${S(6*a*b)}x. Знайдіть точку ${mn?'мінімуму':'максимуму'}.`,mn?b:a,[`f′ = 6x² ${S(-6*(a+b))}x ${S(6*a*b)} = 6(x ${S(-a)})(x ${S(-b)})`,`Критичні точки: ${a} і ${b}`,`f′: «+» до ${a}, «−» між ними, «+» після ${b}`,mn?`Мінімум у x = ${b}`:`Максимум у x = ${a}`])},
+()=>{const p=r(1,5);return Q(`Скільки критичних точок має f(x) = x³ − ${3*p*p}x + 1?`,2,[`f′ = 3x² − ${3*p*p} = 0 → x = ±${p}`,`Дві критичні точки`])});
+
+RG['Площа криволінійної трапеції']=()=>M(
+()=>{const b=r(1,4),a=3*r(1,3);return Q(`Знайдіть площу під графіком y = ${a}x² на [0; ${b}].`,a*b**3/3,[`F(x) = ${a/3}x³`,`S = F(${b}) − F(0) = ${a/3}·${b**3} = ${a*b**3/3}`],`${a}/3*${b}^3`)},
+()=>{const k=r(1,4),m=r(0,5),a=r(0,2),b=a+r(1,3),v=k*(b*b-a*a)/2+m*(b-a);return Q(`Знайдіть площу під графіком y = ${L(k,m)} на [${a}; ${b}].`,v,[`F(x) = ${D(k/2)}x² ${m?S(m)+'x':''}`,`S = F(${b}) − F(${a}) = ${D(k*b*b/2+m*b)} − ${D(k*a*a/2+m*a)} = ${D(v)}`],`${k}*(${b}^2-${a}^2)/2+${m}*(${b}-${a})`)},
+()=>{const b=pick([2,4]);return Q(`Знайдіть площу під графіком y = x³ на [0; ${b}].`,b**4/4,[`F(x) = x⁴/4`,`S = ${b**4}/4 = ${b**4/4}`],`${b}^4/4`)},
+()=>{const c=r(1,4);return Q(`Знайдіть площу фігури між y = x² і y = ${c*c}.`,4*c**3/3,[`Межі: x² = ${c*c} → x = ±${c}`,`S = ∫ (${c*c} − x²)dx від −${c} до ${c}`,`= 2·(${c*c}·${c} − ${c}³/3) = ${FR(4*c**3,3)}`],`4*${c}^3/3`,{as:FR(4*c**3,3)})},
+()=>Q(`Знайдіть площу під графіком y = sin x на [0; π].`,2,[`F(x) = −cos x`,`S = −cos π + cos 0 = 1 + 1 = 2`]));
+
+RG['Показникові рівняння й нерівності']=()=>{const b=pick([2,3,5]),k=r(2,4);return M(
+()=>Q(`${b}^x = ${b**k}. Знайдіть x.`,k,[`${b**k} = ${b}${up(k)} → x = ${k}`],`${b}^x=${b**k}`),
+()=>{const m=r(1,3);return Q(`${b}^(x + ${m}) = ${b**k}. Знайдіть x.`,k-m,[`${b**k} = ${b}${up(k)}`,`x + ${m} = ${k} → x = ${k-m}`],`${b}^(x+${m})=${b**k}`)},
+()=>Q(`(1/${b})^x = ${b**k}. Знайдіть x.`,-k,[`1/${b} = ${b}⁻¹, тому ${b}^(−x) = ${b}${up(k)}`,`x = −${k}`],`(1/${b})^x=${b**k}`),
+()=>{const[ba,e,ans]=pick([[4,8,'3/2'],[9,27,'3/2'],[8,4,'2/3'],[4,32,'5/2'],[25,125,'3/2']]),bb=ba==4||ba==8?2:ba==9?3:5;return Q(`${ba}^x = ${e}. Знайдіть x (дробом).`,eval(ans),[`Зводимо до основи ${bb}: ${ba} = ${bb}${up(Math.round(Math.log(ba)/Math.log(bb)))}, ${e} = ${bb}${up(Math.round(Math.log(e)/Math.log(bb)))}`,`${Math.round(Math.log(ba)/Math.log(bb))}x = ${Math.round(Math.log(e)/Math.log(bb))} → x = ${ans}`],`${ba}^x=${e}`,{as:ans})},
+()=>Q(`${b}^x > ${b**k}. Найменше ціле x?`,k+1,[`Основа ${b} > 1 — знак зберігається: x > ${k}`,`Найменше ціле: ${k+1}`],`${b}^x>${b**k}`,{ktx:1}),
+()=>Q(`(1/${b})^x > 1/${b**k}. Найбільше ціле x?`,k-1,[`(1/${b})^x > (1/${b})${up(k)}`,`Основа менша за 1 — знак змінюється: x < ${k}`,`Найбільше ціле: ${k-1}`],`(1/${b})^x>1/${b**k}`,{ktx:1}))};
+
+RG['Степенева функція']=()=>{const c=r(2,5),n=r(2,4);return M(
+()=>Q(`f(x) = x${up(n)}. Знайдіть f(−${c}).`,(-c)**n,[`(−${c})${up(n)} = ${(-c)**n}`,n%2?'Непарний степінь — знак зберігається':'Парний степінь — результат додатний'],`(-${c})^${n}`),
+()=>Q(`x${up(n)} = ${c**n}, x > 0. Знайдіть x.`,c,[`x = ${n==2?'√':n==3?'∛':'⁴√'}${c**n} = ${c}`],`x^${n}=${c**n}`,{ktx:1}),
+()=>{const[ba,p,q2,v]=pick([[16,1,2,4],[27,2,3,9],[8,2,3,4],[32,3,5,8],[81,3,4,27],[64,1,3,4]]);return Q(`${ba}^(${p}/${q2}) = ?`,v,[`x^(p/q) — це корінь ${q2}-го степеня з x, піднесений до степеня ${p}`,`Корінь ${q2}-го степеня з ${ba} = ${Math.round(ba**(1/q2))}`,`${Math.round(ba**(1/q2))}${up(p)} = ${v}`],`${ba}^(${p}/${q2})`)},
+()=>{const[ba,q2,v]=pick([[8,3,'1/2'],[27,3,'1/3'],[16,4,'1/2'],[25,2,'1/5']]);return Q(`${ba}^(−1/${q2}) = ? (дробом)`,eval(v),[`Від’ємний показник: 1/${ba}^(1/${q2})`,`= ${v}`],`${ba}^(-1/${q2})`,{as:v})},
+()=>Q(`Функція f(x) = x${up(n)} — парна (1) чи непарна (−1)?`,n%2?-1:1,[n%2?`f(−x) = (−x)${up(n)} = −x${up(n)} → непарна`:`f(−x) = (−x)${up(n)} = x${up(n)} → парна`]))};
+
+RG['Похідна степеневої функції']=()=>{const x=r(-3,4);return M(
+()=>{const a=r(1,6),n=r(2,5),v=a*n*x**(n-1);return Q(`f(x) = ${a==1?'':a}x${up(n)}. Знайдіть f′(${x}).`,v,[`f′(x) = ${a*n}x${n-1>1?up(n-1):''}`,`f′(${x}) = ${a*n}·${P(x)}${n-1>1?up(n-1):''} = ${v}`],`${a*n}*(${x})^${n-1}`)},
+()=>{const a=r(1,4),b=r(-6,6),c=r(-9,9),v=3*a*x*x+2*b*x+c;return Q(`f(x) = ${a==1?'':a}x³ ${S(b)}x² ${S(c)}x. Знайдіть f′(${x}).`,v,[`f′(x) = ${3*a}x² ${S(2*b)}x ${S(c)}`,`f′(${x}) = ${3*a*x*x} ${S(2*b*x)} ${S(c)} = ${v}`],`${3*a}*(${x})^2+${2*b}*(${x})+(${c})`)},
+()=>{const a=r(1,5),b=nz(-5,5),v=2*a*x+b;return Q(`f(x) = (${a}x ${S(b)})·x. Знайдіть f′(${x}).`,v,[`f(x) = ${a}x² ${S(b)}x`,`f′(x) = ${2*a}x ${S(b)}`,`f′(${x}) = ${v}`],`${2*a}*(${x})+(${b})`)},
+()=>{const xx=nz(1,4),v=-1/(xx*xx);return Q(`f(x) = 1/x. Знайдіть f′(${xx}) (дробом).`,v,[`1/x = x⁻¹, f′ = −x⁻² = −1/x²`,`f′(${xx}) = −1/${xx*xx}`],`-1/${xx}^2`,{as:`-1/${xx*xx}`})},
+()=>{const xx=pick([1,4,9,16]),v=1/(2*Math.sqrt(xx));return Q(`f(x) = √x. Знайдіть f′(${xx}) (дробом).`,v,[`(√x)′ = 1/(2√x)`,`f′(${xx}) = 1/(2·${Math.sqrt(xx)}) = 1/${2*Math.sqrt(xx)}`],`1/(2*sqrt(${xx}))`,{as:`1/${2*Math.sqrt(xx)}`})})};
+
+RG['Визначений інтеграл']=()=>M(
+()=>{const n=r(1,3),b=r(1,3),a=(n+1)*r(1,3),v=a/(n+1)*b**(n+1);return Q(`∫₀${up(b)} ${a}x${n>1?up(n):''} dx = ?`,v,[`F(x) = ${a/(n+1)==1?'':a/(n+1)}x${up(n+1)}`,`F(${b}) − F(0) = ${a/(n+1)}·${b**(n+1)} = ${v}`],`${a}/${n+1}*${b}^${n+1}`)},
+()=>{const a=r(1,3),b=a+r(1,3),v=b*b-a*a;return Q(`∫ від ${a} до ${b} 2x dx = ?`,v,[`F(x) = x²`,`${b}² − ${a}² = ${v}`],`${b}^2-${a}^2`)},
+()=>{const k=r(1,5),m=r(1,9),b=r(1,4),v=k*b*b/2+m*b;return Q(`∫₀${up(b)} (${k==1?'':k}x + ${m}) dx = ?`,v,[`F(x) = ${D(k/2)}x² + ${m}x`,`F(${b}) = ${D(k*b*b/2)} + ${m*b} = ${D(v)}`],`${k}*${b}^2/2+${m}*${b}`)},
+()=>Q(`∫ від 0 до π/2 cos x dx = ?`,1,[`F(x) = sin x`,`sin(π/2) − sin 0 = 1`]),
+()=>{const b=pick([1,2,3]);return Q(`∫ від 1 до e${b>1?up(b):''} (1/x) dx = ?`,b,[`F(x) = ln x`,`ln e${b>1?up(b):''} − ln 1 = ${b}`])},
+()=>{const a=r(1,3),c=r(1,4),v=a*(Math.exp(c)-1);return Q(`∫₀${up(c)} ${a==1?'':a}eˣ dx = ? (до сотих)`,R2(v),[`F(x) = ${a==1?'':a}eˣ`,`${a}(e${up(c)} − 1) ≈ ${D(R2(v))}`],`${a}*(e^${c}-1)`,{tol:.011})});
+
+for(const [g,ts] of T)for(const t of ts)if(RG[t.n])t.g=RG[t.n];
+})();
+
+let cur,ex;
+function thHTML(t){if(H[t.n])return H[t.n].split('<br>').map(x=>`<p>${x}</p>`).join('');
+const P=[];let d=0,c='';for(let i=0;i<t.h.length;i++){const ch=t.h[i];d+=ch=='('||ch=='['?1:ch==')'||ch==']'?-1:0;if(d<=0&&(ch==';'||ch=='.'&&/\s\S/.test(t.h.slice(i+1,i+3)))&&/\s/.test(t.h[i+1]||' ')){P.push(c);c=''}else c+=ch}P.push(c);
+return '<ul class="thl">'+P.map(x=>x.trim().replace(/\.$/,'')).filter(Boolean).map(x=>{const m=x.match(/^([^:=]{2,40}):\s*(.+)$/);return '<li>'+(m?`<b>${m[1]}:</b> ${m[2]}`:x)+'</li>'}).join('')+'</ul>'}
+function mxShow(){const L=[],seen=new Set(),ty=new Set(),C=[];for(let k=0;k<80;k++){const e=cur.g();if(!seen.has(e.q)){seen.add(e.q);C.push(e)}}const tk=e=>e.q.replace(/\d+/g,'#');C.forEach(e=>{if(L.length<5&&!ty.has(tk(e))){ty.add(tk(e));L.push(e)}});C.forEach(e=>{if(L.length<5&&!L.includes(e))L.push(e)});
+$('#mxl').innerHTML=L.map((e,i)=>`<div class="mxi"><div class="mxn">${i+1}</div><div class="mxb"><div class="mxq">${esc(e.q)}</div><ol>${e.s.filter(x=>!/^Відповідь:/.test(x)).map(x=>`<li>${esc(x)}</li>`).join('')}</ol><div class="mxa">Відповідь: ${e.as?esc(e.as):e.a.map(v=>esc(String(fmt(v)).replace('-','−'))).join('; ')}</div></div></div>`).join('');$('#mx').textContent='Інші 5 прикладів';$('#mxc').hidden=false;const cb=document.createElement('button');cb.className='bt';cb.textContent='✕ Закрити приклади';cb.style.marginTop='12px';cb.onclick=mxHide;$('#mxl').append(cb)}
+function mxHide(){$('#mxl').innerHTML='';$('#mx').textContent='Показати 5 прикладів';$('#mxc').hidden=true;$('#mx').closest('.card').scrollIntoView({block:'nearest'})}
+$('#mx').onclick=mxShow;$('#mxc').onclick=mxHide;
+const pl=n=>n%10==1&&n%100!=11?'тема':n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?'теми':'тем';
+function lbuild(){const L0=$('#list');L0.innerHTML='';const per={};LOG.forEach(x=>{const p=per[x.tp]=per[x.tp]||{n:0,ok:0};p.n++;if(x.ok)p.ok++});
+T.forEach(([g,ts])=>{const h=document.createElement('h3');h.innerHTML=`${g}<small>${ts.length} ${pl(ts.length)}</small>`;const gr=document.createElement('div');gr.className='tg';
+ts.forEach(t=>{const b=document.createElement('button');b.className='tp';const p=per[t.n];b.innerHTML=`<span>${t.n}</span>${p?`<em class="${p.ok==p.n?'gd':''}" title="правильних відповідей">${p.ok}/${p.n}</em>`:''}`;
+b.onclick=()=>{cur=t;$('#list').hidden=true;$('#det').hidden=false;$('#tn').textContent=t.n;$('#th').innerHTML=thHTML(t);gen();$('#mxl').innerHTML='';$('#mx').textContent='Показати 5 прикладів';$('#mxc').hidden=true;window.scrollTo(0,0)};gr.append(b)});L0.append(h,gr)})}
+function gen(){ex=cur.g();$('#q').textContent=ex.q;$('#st').hidden=true;$('#st').innerHTML=ex.s.filter(x=>!/^Відповідь:/.test(x)).map(s=>`<li>${s}</li>`).join('')+`<li><b>Відповідь: ${ex.as?ex.as:ex.a.map(fmt).join('; ')}</b></li>`;$('#in').value='';$('#res').textContent='';$('#oc').hidden=!(ex.k||ex.kt);$('#res').className='res'}
+$('#bk').onclick=()=>{$('#list').hidden=false;$('#det').hidden=true;lbuild()};$('#nw').onclick=gen;$('#sh').onclick=()=>{$('#st').hidden=!$('#st').hidden};
+const num=s=>{s=s.replace(',','.').replace(/−/g,'-');s=s.replace(/sqrt\(?(\d+(?:\.\d+)?)\)?/gi,'√$1').replace(/(\d*(?:\.\d+)?)√(\d+(?:\.\d+)?)/g,(m,k,n)=>String((k?+k:1)*Math.sqrt(+n)));if(s.includes('_')){const[w,f]=s.split('_'),[a,b]=f.split('/');return(+w<0||w=='-0'?-1:1)*(Math.abs(+w)+a/b)}if(s.includes('/')){const[a,b]=s.split('/');return a/b}return parseFloat(s)};
+$('#ck').onclick=()=>{const ok=chk($('#in').value,ex.a,ex.tol);$('#res').textContent=ok?'✓ Правильно!':'✗ Не так. Спробуйте ще раз або відкрийте розв’язання';$('#res').className='res '+(ok?'gd':'bd')};$('#in').onkeydown=e=>{if(e.key=='Enter')$('#ck').click()};
+let LOG=[];try{LOG=JSON.parse(localStorage.getItem('mlog')||'[]')}catch(e){}
+const sv=()=>{try{localStorage.setItem('mlog',JSON.stringify(LOG.slice(-1000)))}catch(e){}},esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])),ALL=T.flatMap(([g,ts])=>ts);
+function rec(tp,q,ok,u,test,ca){LOG.push({t:Date.now(),tp,q,ok,u,test:test||0,ca});sv()}
+function chk(v,A,t){t=t||1e-6;v=String(v).replace(/(-?\d+)\s+(\d+)\s*\/\s*(\d+)/g,'$1_$2/$3').replace(/\s*\/\s*/g,'/');const u=v.split(/[;\s]+/).filter(Boolean).map(num).sort((a,b)=>a-b),a=[...A].sort((a,b)=>a-b);return u.length==a.length&&u.every((x,i)=>Math.abs(x-a[i])<t)}
+$('#ck').addEventListener('click',()=>{const v=$('#in').value.trim();if(!v||ex.done)return;ex.done=1;rec(cur.n,ex.q,chk(v,ex.a,ex.tol),v,0,ex.a.map(fmt).join('; '))});
+let TS=null;
+function tsetup(){const B=$('#test');B.innerHTML=`<div class="card"><b>Кількість прикладів:</b> <input id="tn2" type="number" min="1" max="50" value="10" style="width:90px"></div><div class="card" id="tl"></div><div id="tmsg" style="color:var(--mu);margin:4px 0"></div><button class="bt" id="tgo" style="width:100%">Почати тест</button>`;
+const tl=$('#tl');tl.innerHTML='<b>Теми</b> <label style="margin-left:8px"><input type="checkbox" id="tall" style="width:auto"> усі</label>';
+ALL.forEach((t,i)=>{const l=document.createElement('label');l.style.cssText='display:block;padding:5px 0';l.innerHTML=`<input type="checkbox" class="tc" data-i="${i}" style="width:auto"> ${t.n}`;tl.append(l)});
+$('#tall').onchange=e=>document.querySelectorAll('.tc').forEach(c=>c.checked=e.target.checked);
+$('#tgo').onclick=()=>{const sel=[...document.querySelectorAll('.tc')].filter(c=>c.checked).map(c=>ALL[c.dataset.i]);if(!sel.length){$('#tmsg').textContent='Оберіть хоча б одну тему';return}const n=Math.max(1,Math.min(50,+$('#tn2').value||10));TS={id:Date.now(),n,k:0,sel,res:[]};tnext()}}
+function lv(v){document.querySelectorAll('#lt button').forEach((b,i)=>b.className=i==v?'on':'');$('#list').hidden=v!=0;$('#det').hidden=true;$('#test').hidden=v!=1;$('#hist').hidden=v!=2;if(v==1&&!TS)tsetup();if(v==2)thist();if(v==0)lbuild()}
+document.querySelectorAll('#lt button').forEach((b,i)=>b.onclick=()=>lv(i));
+function tnext(){if(TS.k>=TS.n)return tend();const B=$('#test'),t=TS.sel[r(0,TS.sel.length-1)],e=t.g();
+B.innerHTML=`<div class='card'><small>Приклад ${TS.k+1} з ${TS.n} · ${t.n}</small><div class='q'>${esc(e.q)}</div><input id='ta' placeholder='Ваша відповідь' autocomplete='off'> <button class='bt' id='tok'>Відповісти</button><div id='tv' style='margin-top:8px;font-weight:600'></div></div>`;
+const a=$('#ta'),b=$('#tok');a.focus();let done=false;
+const go=()=>{if(!done){const v=a.value,ok=chk(v,e.a,e.tol),ca=e.a.map(fmt).join('; ');done=true;TS.res.push({tp:t.n,q:e.q,u:v,ok,a:ca});rec(t.n,e.q,ok,v,TS.id,ca);a.disabled=true;const tv=$('#tv');tv.className=ok?'gd':'bd';tv.innerHTML=ok?'✓ Правильно!':'✗ Неправильно. Правильна відповідь: '+esc(ca)+`<div style='font-weight:400;font-size:14px;margin-top:4px'>${e.s.map(esc).join('<br>')}</div>`;b.textContent=TS.k+1==TS.n?'Завершити':'Далі';b.focus()}else{TS.k++;tnext()}};
+b.onclick=go;a.onkeydown=ev=>{if(ev.key=='Enter')go()}}
+function tend(){const ok=TS.res.filter(x=>x.ok).length,B=$('#test');B.innerHTML=`<div class='card'><div class='q'>Результат: ${ok} з ${TS.n} (${Math.round(ok/TS.n*100)}%)</div><span class='gd'>✓ ${ok}</span> · <span class='bd'>✗ ${TS.n-ok}</span></div>`+TS.res.map((x,i)=>`<div class='card ${x.ok?'gd':'bd'}' style='border-left:4px solid currentColor'>${x.ok?'✓':'✗'} <b>${i+1}.</b> <small style='color:var(--mu)'>${esc(x.tp||'')}</small><br>${esc(x.q)}<br><small>Ваша відповідь: ${esc(x.u||'—')}${x.ok?'':' · Правильно: '+esc(x.a)}</small></div>`).join('')+`<button class='bt' id='tre'>Новий тест</button>`;$('#tre').onclick=()=>{TS=null;tsetup()};TS=null}
+function thist(){const B=$('#hist'),ok=LOG.filter(x=>x.ok).length,n=LOG.length,per={},T2={};
+LOG.forEach(x=>{const p=per[x.tp]=per[x.tp]||{n:0,ok:0};p.n++;if(x.ok)p.ok++;if(x.test)(T2[x.test]=T2[x.test]||[]).push(x)});
+const row=x=>`<div class='${x.ok?'gd':'bd'}'>${x.ok?'✓':'✗'} ${esc(x.q)} <small>(${esc(x.u||'—')}${x.ok||!x.ca?'':' · правильно: '+esc(x.ca)})</small></div>`;
+B.innerHTML=`<div class='card'><div class='q'>Усього прикладів: ${n}</div><span class='gd'>✓ правильно: <b>${ok}</b></span> · <span class='bd'>✗ неправильно: <b>${n-ok}</b></span>${n?` · ${Math.round(ok/n*100)}%`:''}</div>`
++`<div class='card'><b>За темами</b><br>${Object.entries(per).map(([k,p])=>`<span class='${p.ok==p.n?'gd':p.ok==0?'bd':''}'>${esc(k)}: ${p.ok}/${p.n}</span>`).join('<br>')||'—'}</div>`
++`<h3>Тести</h3>`+(Object.keys(T2).reverse().map(id=>{const L2=T2[id],g=L2.filter(x=>x.ok).length,tp=[...new Set(L2.map(x=>x.tp))];return `<details class='card'><summary><b>${new Date(+id).toLocaleString('uk')}</b> — <span class='${g==L2.length?'gd':g*2<L2.length?'bd':''}'>${g}/${L2.length}</span><br><small style='color:var(--mu)'>Теми: ${tp.map(esc).join(', ')}</small></summary><div style='margin-top:8px'>${L2.map(row).join('')}</div></details>`}).join('')||`<div class='card'>Тестів ще немає</div>`)
++`<details class='card'><summary><b>Окремі приклади (останні 30)</b></summary><div style='margin-top:8px'>${LOG.filter(x=>!x.test).slice(-30).reverse().map(row).join('')||'—'}</div></details><button class='bt' id='hclr'>Очистити історію</button>`;
+$('#hclr').onclick=()=>{const b=$('#hclr');if(b.dataset.s){LOG=[];sv();thist()}else{b.dataset.s=1;b.textContent='Точно очистити? Натисніть ще раз'}}}
+$('#oc').onclick=()=>{if(ser(wins[act].root))nl();const w=wins[act];if(ex.kt)fromText(w,ex.kt);else{key(w,'C');for(const ch of ex.k)key(w,ch)}snap(w);tab(1);render()};
+
+/* ---- Графік ---- */
+const G={f:['x^2-2x-3','sin(x)',''],cx:0,cy:0,s:40,F:[],pt:null},GC=['--g1','--g2','--g3'],SUB='₁₂₃';
+try{const s=JSON.parse(localStorage.getItem('mgraph')||'null');if(s&&Array.isArray(s.f))G.f=[0,1,2].map(i=>String(s.f[i]||''))}catch(e){}
+const gsave=()=>{try{localStorage.setItem('mgraph',JSON.stringify({f:G.f}))}catch(e){}};
+function gcomp(){G.F=G.f.map(s=>{s=(s||'').trim().replace(/^y\s*=/,'');if(!s)return null;if(/[=<>≤≥]/.test(s))return{err:'тут потрібен лише вираз з x, без «=»'};try{const w=newWin();fromText(w,s);const q=parse(ser(w.root),{});const bad=[...q.vs].filter(v=>v!='x');if(bad.length)return{err:'невідома змінна '+bad.join(', ')+' — використовуйте x'};return{f:q.f}}catch(e){return{err:'вираз не дописано'}}})}
+function gui(){const B=$('#gfs');B.innerHTML='';G.f.forEach((s,i)=>{const l=document.createElement('label');l.className='gf';l.innerHTML=`<span class="sw" style="background:var(${GC[i]})"></span><span class="gl">f${SUB[i]}(x) =</span><input id="gf${i}" autocomplete="off" spellcheck="false" placeholder="${['напр. x^2-4','напр. sin(x)','напр. 1/x'][i]}">`;const inp=l.querySelector('input');inp.value=s;inp.oninput=()=>{G.f[i]=inp.value;gcomp();gdraw();gsave()};B.append(l)})}
+const gf=(F,x)=>{const d0=deg;deg=false;try{return F.f({x})}catch(e){return NaN}finally{deg=d0}},n4=v=>String(+(+v).toFixed(4)).replace('-','−');
+function gzeros(h,a,b,n){const Z=[];let px=a,pv=h(a);for(let k=1;k<=n;k++){const x=a+(b-a)*k/n,v=h(x);if(isFinite(v)&&isFinite(pv)&&(v==0||pv*v<0)){let L=px,R=x;for(let j=0;j<55;j++){const m=(L+R)/2;h(L)*h(m)<=0?R=m:L=m}const z=(L+R)/2;if(Math.abs(h(z))<1e-6&&!Z.some(q=>Math.abs(q-z)<(b-a)/n))Z.push(Math.abs(z-Math.round(z))<1e-7?Math.round(z):z)}px=x;pv=v}return Z}
+function gdraw(){const c=$('#gc'),W=c.clientWidth,H=c.clientHeight;if(!W||!H)return;const dp=window.devicePixelRatio||1;c.width=Math.round(W*dp);c.height=Math.round(H*dp);const x=c.getContext('2d');x.setTransform(dp,0,0,dp,0,0);
+const cs=getComputedStyle(document.documentElement),col=n=>cs.getPropertyValue(n).trim()||'#888';
+x.fillStyle=col('--sheet');x.fillRect(0,0,W,H);
+const X=px=>(px-W/2)/G.s+G.cx,PX=v=>(v-G.cx)*G.s+W/2,PY=v=>H/2-(v-G.cy)*G.s,x0=X(0),x1=X(W),y0=G.cy-H/2/G.s,y1=G.cy+H/2/G.s;
+const raw=55/G.s,p10=10**Math.floor(Math.log10(raw)),st=[1,2,5,10].map(m=>m*p10).find(v=>v>=raw-1e-12),lab=v=>String(+v.toPrecision(6)).replace('-','−');
+x.lineWidth=1;x.strokeStyle=col('--grid');x.beginPath();
+for(let v=Math.ceil(x0/st)*st;v<=x1;v+=st){const p=Math.round(PX(v))+.5;x.moveTo(p,0);x.lineTo(p,H)}
+for(let v=Math.ceil(y0/st)*st;v<=y1;v+=st){const p=Math.round(PY(v))+.5;x.moveTo(0,p);x.lineTo(W,p)}x.stroke();
+const ax=PX(0),ay=PY(0);x.strokeStyle=col('--mu');x.lineWidth=1.2;x.beginPath();x.moveTo(ax,0);x.lineTo(ax,H);x.moveTo(0,ay);x.lineTo(W,ay);x.stroke();
+x.fillStyle=col('--mu');x.font='11px "Golos Text",system-ui,sans-serif';
+const ly=Math.min(Math.max(ay+5,4),H-16);x.textAlign='center';x.textBaseline='top';
+for(let v=Math.ceil(x0/st)*st;v<=x1;v+=st){if(Math.abs(v)<st/2)continue;const p=PX(v);if(p>14&&p<W-14)x.fillText(lab(v),p,ly)}
+const lxr=ax<W-44;x.textAlign=lxr?'left':'right';x.textBaseline='middle';const lx=lxr?Math.max(ax+5,4):Math.min(ax-5,W-4);
+for(let v=Math.ceil(y0/st)*st;v<=y1;v+=st){if(Math.abs(v)<st/2)continue;const p=PY(v);if(p>10&&p<H-10)x.fillText(lab(v),lx,p)}
+x.font='italic 15px "STIX Two Text",serif';x.textAlign='right';x.textBaseline='top';x.fillText('x',W-6,Math.min(Math.max(ay+18,4),H-20));x.textAlign='left';x.fillText('y',Math.min(Math.max(ax+8,4),W-14),4);
+const info=[],pts=[];
+G.F.forEach((F,i)=>{if(!F)return;if(F.err){info.push(`<span class="bd">f${SUB[i]}: ${F.err}</span>`);return}
+x.strokeStyle=col(GC[i]);x.lineWidth=2.4;x.lineJoin='round';x.beginPath();let pen=false,py=0;
+for(let px=0;px<=W;px+=.5){const y=PY(gf(F,X(px)));if(!isFinite(y)||Math.abs(y)>H*20){pen=false;continue}if(pen&&Math.abs(y-py)>H*1.5)pen=false;pen?x.lineTo(px,y):x.moveTo(px,y);pen=true;py=y}x.stroke();
+const Z=gzeros(v=>gf(F,v),x0,x1,Math.ceil(W));Z.forEach(z=>pts.push([z,0,col(GC[i])]));
+info.push(`<span style="color:var(${GC[i]})">●</span> f${SUB[i]}: ${Z.length?'нулі <b>x = '+Z.slice(0,8).map(n4).join('; ')+'</b>'+(Z.length>8?' …':''):'нулів на видимій ділянці немає'}`)});
+for(let i=0;i<3;i++)for(let j=i+1;j<3;j++){const A1=G.F[i],B1=G.F[j];if(!A1||!B1||!A1.f||!B1.f)continue;const Z=gzeros(v=>gf(A1,v)-gf(B1,v),x0,x1,Math.ceil(W));if(Z.length){Z.forEach(z=>pts.push([z,gf(A1,z),col('--ink')]));info.push(`f${SUB[i]} і f${SUB[j]} перетинаються: <b>${Z.slice(0,5).map(z=>'('+n4(z)+'; '+n4(gf(A1,z))+')').join(', ')}</b>`)}}
+pts.forEach(([a,b,cl])=>{const px=PX(a),py=PY(b);if(px<0||px>W||py<0||py>H)return;x.fillStyle=col('--sheet');x.strokeStyle=cl;x.lineWidth=2;x.beginPath();x.arc(px,py,4.5,0,7);x.fill();x.stroke()});
+if(G.pt!=null){const xv=X(G.pt);x.strokeStyle=col('--mu');x.setLineDash([4,4]);x.lineWidth=1;x.beginPath();x.moveTo(G.pt,0);x.lineTo(G.pt,H);x.stroke();x.setLineDash([]);
+const vals=[];G.F.forEach((F,i)=>{if(!F||!F.f)return;const v=gf(F,xv);if(isFinite(v)){vals.push(`f${SUB[i]} = ${n4(v)}`);const py=PY(v);if(py>=0&&py<=H){x.fillStyle=col(GC[i]);x.beginPath();x.arc(G.pt,py,4,0,7);x.fill()}}});
+info.unshift(`<b>x = ${n4(xv)}</b>${vals.length?': '+vals.join(', '):''}`)}
+if(!G.F.some(Boolean))info.push('Впишіть функцію в одне з полів вище.');$('#gi').innerHTML=info.join('<br>')}
+function gzoom(k,px,py,nd){const c=$('#gc'),W=c.clientWidth,H=c.clientHeight;px=px??W/2;py=py??H/2;const wx=(px-W/2)/G.s+G.cx,wy=G.cy-(py-H/2)/G.s;G.s=Math.min(20000,Math.max(.05,G.s*k));G.cx=wx-(px-W/2)/G.s;G.cy=wy+(py-H/2)/G.s;if(!nd)gdraw()}
+(()=>{const c=$('#gc'),P=new Map();let moved=false;const pos=e=>{const b=c.getBoundingClientRect();return{x:e.clientX-b.left,y:e.clientY-b.top}};
+c.onpointerdown=e=>{c.setPointerCapture(e.pointerId);P.set(e.pointerId,pos(e));moved=false};
+c.onpointermove=e=>{const p=pos(e);if(!P.has(e.pointerId)){if(e.pointerType=='mouse'){G.pt=p.x;gdraw()}return}const o=P.get(e.pointerId);
+if(P.size==1){const dx=p.x-o.x,dy=p.y-o.y;if(Math.abs(dx)+Math.abs(dy)>1)moved=true;G.cx-=dx/G.s;G.cy+=dy/G.s}
+else{const ot=[...P].find(([k])=>k!=e.pointerId)[1],d1=Math.hypot(o.x-ot.x,o.y-ot.y),d2=Math.hypot(p.x-ot.x,p.y-ot.y);if(d1>10)gzoom(d2/d1,(p.x+ot.x)/2,(p.y+ot.y)/2,1);moved=true}
+P.set(e.pointerId,p);gdraw()};
+c.onpointerup=c.onpointercancel=e=>{if(!moved&&P.size==1)G.pt=pos(e).x;P.delete(e.pointerId);gdraw()};
+c.onpointerleave=e=>{if(e.pointerType=='mouse'&&!P.size){G.pt=null;gdraw()}};
+c.addEventListener('wheel',e=>{e.preventDefault();const p=pos(e);gzoom(e.deltaY<0?1.2:1/1.2,p.x,p.y)},{passive:false});
+$('#gzi').onclick=()=>gzoom(1.5);$('#gzo').onclick=()=>gzoom(1/1.5);$('#g0').onclick=()=>{G.cx=0;G.cy=0;G.s=40;G.pt=null;gdraw()};
+let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{if(!$('#gr').hidden)gdraw()},80)});
+try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(!$('#gr').hidden)gdraw()})}catch(e){}})();
+
+lbuild();try{const t=+localStorage.getItem('mtab');if(t==2||t==3)tab(t)}catch(e){}
+</script>
+
+<script>
+/* Реєстрація сервіс-воркера: програма працює офлайн після першого відкриття */
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(e=>console.warn('SW:',e))})}
+</script>
+</body>
+</html>
