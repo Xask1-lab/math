@@ -32,7 +32,7 @@ img{max-width:100%}
 :root[data-theme="dark"]{--paper:#0f131a;--sheet:#171d27;--grid:#212a37;--ink:#e7ebf2;--mu:#9aa5b7;--ac:#8aa9ff;--acs:#1f2b4a;--onac:#0f131a;--red:#ff7f72;--ok:#5ed398;--key:#1e2531;--dig:#232b38;--op:#22305a;--line:#2c3545;--edge:#0a0d12;--g1:#8aa9ff;--g2:#ff7f72;--g3:#5ed398;color-scheme:dark}
 [hidden]{display:none!important}
 body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.45 var(--ui)}
-main{max-width:620px;margin:0 auto;padding-block:14px 32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:12px}
+main{max-width:620px;margin:0 auto;padding-block:calc(14px + var(--topx,0px)) 32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:12px}
 section{display:flex;flex-direction:column;gap:10px}
 button{font:inherit;color:inherit;background:var(--key);border:1px solid var(--line);border-radius:10px;cursor:pointer;touch-action:manipulation}
 button:active{transform:translateY(1px)}
@@ -82,7 +82,7 @@ input{font:inherit;color:var(--ink);background:var(--sheet);border:1px solid var
 .warea{position:relative;flex:1;min-height:90px;display:flex;flex-direction:column}
 #exs,#sol{position:absolute;left:0;right:0;bottom:0;max-height:78%;overflow-y:auto;z-index:3;box-shadow:0 -6px 24px rgba(0,0,0,.25)}
 /* калькулятор уміщується в екран: рядки забирають вільне місце, клавіатура внизу */
-main:has(#calc:not([hidden])){height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));box-sizing:border-box;padding-block:10px 8px;gap:8px}
+main:has(#calc:not([hidden])){height:calc(100dvh - env(safe-area-inset-top,0px) - var(--topx,0px) - env(safe-area-inset-bottom,0px));box-sizing:border-box;padding-block:calc(10px + var(--topx,0px)) 8px;gap:8px}
 #calc:not([hidden]){flex:1;min-height:0;gap:8px}
 #calc .ctl,#calc .pad,#nl,#calc .note{flex:none}
 .warea{flex:1}
@@ -98,6 +98,15 @@ main:has(#calc:not([hidden])){height:calc(100dvh - env(safe-area-inset-top,0px) 
 .addrow{display:block;margin:8px 0 10px 50px;width:44px;height:36px;padding:0;font-size:22px;line-height:1;color:var(--ac);background:var(--sheet);border:1.5px dashed var(--ac);border-radius:10px}
 .addrow:hover{background:var(--acs)}.addrow:disabled{opacity:.4}
 .pad .nlk.on{background:var(--acs);border-color:var(--ac)}
+@media (max-width:480px){
+  .ctl{flex-wrap:nowrap;gap:6px}
+  #wst{gap:4px;flex:none}
+  #wst button{width:30px;height:32px;font-size:14px}
+  .chip{padding:6px 8px;font-size:12.5px;white-space:nowrap}
+  #pad3 button{font-size:11.5px}
+}
+/* iOS: системне розмиття під статус-баром у встановленому застосунку — відсуваємо вміст нижче */
+@media (display-mode:standalone){:root{--topx:22px}}
 .wide{width:100%;padding:11px;font-weight:600;background:var(--sheet);color:var(--ac);border-style:dashed}
 /* клавіатура */
 .pad{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
@@ -108,7 +117,9 @@ main:has(#calc:not([hidden])){height:calc(100dvh - env(safe-area-inset-top,0px) 
 .pad .clr{color:var(--red);font-weight:700}
 .pad .fn{font-size:17px}
 #pad2{grid-template-columns:repeat(6,1fr)}#pad2 button{font:italic 22px var(--math);height:46px}
-#pad3{grid-template-columns:repeat(7,1fr)}#pad3 button{font-size:13px;height:44px;padding:0}
+#pad3{grid-template-columns:repeat(8,1fr)}
+#calc #pad3 .dgk{height:auto}
+#pad3 .dgk{grid-row:span 2;color:var(--ac);font-weight:700;background:var(--acs);border-color:var(--ac)}#pad3 button{font-size:13px;height:44px;padding:0}
 .note{color:var(--mu);font-size:13px;margin:0}
 /* уроки */
 h3{display:flex;justify-content:space-between;align-items:baseline;margin:14px 0 6px;font:600 21px var(--math);text-wrap:balance}h3 small{font:500 13px var(--ui);color:var(--mu)}
@@ -148,7 +159,7 @@ label{cursor:pointer}
 <header class="top"><div class="brand">Математика <i>у&nbsp;клітинку</i></div>
 <nav class="tabs" aria-label="Розділи"><button id="t1" class="on">Калькулятор</button><button id="t3">Графік</button><button id="t2">Уроки</button></nav></header>
 <section id="calc">
-<div class="ctl"><div id="wst"></div><span class="sp"></span><button id="sv" class="chip" title="Покроковий розв’язок рівняння в активному рядку">Розв’язок</button><button id="ex" class="chip" title="Готові приклади, як користуватися калькулятором">Приклади</button><button id="dg" class="chip" title="Одиниці кутів для sin, cos, tg">Градуси</button><button id="fx" class="chip" hidden title="Тригонометрія, логарифми, нерівності">sin·ln·≤</button></div>
+<div class="ctl"><div id="wst"></div><span class="sp"></span><button id="sv" class="chip" title="Покроковий розв’язок рівняння в активному рядку">Розв’язок</button><button id="ex" class="chip" title="Готові приклади, як користуватися калькулятором">Приклади</button><button id="fx" class="chip" hidden title="Тригонометрія, логарифми, нерівності">sin·ln·≤</button></div>
 <div class="warea"><div id="wins"></div><div id="exs" class="card" hidden></div><div id="sol" class="card" hidden></div></div>
 <button id="nl" class="wide" hidden>＋ Новий рядок</button>
 <div class="pad" id="pad3" hidden></div>
@@ -264,9 +275,9 @@ function press(k){if(k=='N')return nl();const w=wins[act];key(w,k);snap(w);rende
 const L={B:'⌫',E:'▢/▢',N:'sin·ln·≤',Q:'x²',S:'√',D:'÷','*':'×','-':'−','^':'xⁿ','<':'◀','>':'▶','!':'n!'},TT={C:'Очистити рядок',B:'Стерти',N:'Новий рядок',E:'Дріб',D:'Ділення',Q:'Квадрат',S:'Корінь','^':'Степінь','<':'Курсор вліво','>':'Курсор вправо'};
 'C B < > N ( ) E ^ S 7 8 9 D Q 4 5 6 * π 1 2 3 - e 0 . = + !'.split(' ').forEach(k=>{const b=document.createElement('button');b.textContent=L[k]||k;if(TT[k])b.title=TT[k];b.className=/^[0-9.]$/.test(k)?'dg':k=='='?'eq':'*D-+'.includes(k)?'op':k=='C'?'clr':'fn';if(k=='N'){b.classList.add('nlk');b.id='fxk';b.title='Функції та знаки нерівностей: sin, cos, tg, ln, lg, |x|, <, >, ≤, ≥';b.onclick=()=>$('#fx').click();$('#pad').append(b);return}b.onclick=()=>press(k);$('#pad').append(b)});
 'x y z a b c'.split(' ').forEach(k=>{const b=document.createElement('button');b.textContent=k;b.onclick=()=>press(k);$('#pad2').append(b)});
-[['sin','@sin'],['cos','@cos'],['tg','@tg'],['ctg','@ctg'],['ln','@ln'],['lg','@lg'],['|x|','@abs'],['arcsin','@arcsin'],['arccos','@arccos'],['arctg','@arctg'],['<','{'],['>','}'],['≤','≤'],['≥','≥']].forEach(([l,k])=>{const b=document.createElement('button');b.textContent=l;b.onclick=()=>press(k);$('#pad3').append(b)});
+[['DG','DG'],['sin','@sin'],['cos','@cos'],['tg','@tg'],['ctg','@ctg'],['ln','@ln'],['lg','@lg'],['|x|','@abs'],['arcsin','@arcsin'],['arccos','@arccos'],['arctg','@arctg'],['<','{'],['>','}'],['≤','≤'],['≥','≥']].forEach(([l,k])=>{const b=document.createElement('button');b.textContent=l;if(k=='DG'){b.id='dg';b.className='dgk';b.title='Одиниці кутів для sin, cos, tg: градуси або радіани';$('#pad3').append(b);return}b.onclick=()=>press(k);$('#pad3').append(b)});
 $('#fx').onclick=()=>{$('#pad3').hidden=!$('#pad3').hidden;$('#fx').classList.toggle('on',!$('#pad3').hidden);$('#fxk').classList.toggle('on',!$('#pad3').hidden);render()};
-let rzT;window.addEventListener('resize',()=>{clearTimeout(rzT);rzT=setTimeout(()=>{if(!$('#calc').hidden)render()},120)});$('#fx2').onclick=()=>{if($('#pad3').hidden)$('#fx').click();$('#pad3').scrollIntoView({block:'nearest',behavior:'smooth'})};$('#nl').onclick=nl;$('#dg').onclick=()=>{deg=!deg;$('#dg').textContent=deg?'Градуси':'Радіани';WS.forEach(a=>{const s0=wins;wins=a;a.forEach(w=>w.ans=calc(w));wins=s0});saveSoon();render()};
+let rzT;window.addEventListener('resize',()=>{clearTimeout(rzT);rzT=setTimeout(()=>{if(!$('#calc').hidden)render()},120)});$('#fx2').onclick=()=>{if($('#pad3').hidden)$('#fx').click();$('#pad3').scrollIntoView({block:'nearest',behavior:'smooth'})};$('#nl').onclick=nl;$('#dg').onclick=()=>{deg=!deg;$('#dg').textContent=deg?'° град':'рад';WS.forEach(a=>{const s0=wins;wins=a;a.forEach(w=>w.ans=calc(w));wins=s0});saveSoon();render()};
 document.addEventListener('keydown',e=>{if($('#calc').hidden||e.target.tagName=='INPUT'||e.ctrlKey||e.metaKey)return;let k=e.key;
 k={Backspace:'B',ArrowLeft:'<',ArrowRight:'>',r:'S',p:'π',Enter:'N','<':'{','>':'}'}[k]||k;if(/^[0-9.+\-*=^()\/xyzabc<>BSπ{}N]$/.test(k)){e.preventDefault();press(k)}});
 function tab(n){$('#calc').hidden=n!=1;$('#les').hidden=n!=2;$('#gr').hidden=n!=3;[1,2,3].forEach(k=>$('#t'+k).className=n==k?'on':'');if(n==3){gui();gcomp();requestAnimationFrame(gdraw)}try{localStorage.setItem('mtab',n)}catch(e){}}
@@ -356,7 +367,7 @@ let sT=0;function saveSoon(){clearTimeout(sT);sT=setTimeout(()=>{try{localStorag
 (()=>{let S=null;try{S=JSON.parse(localStorage.getItem('mcalc')||'null')}catch(e){}
 const W0=S&&Array.isArray(S.W)&&S.W.length?S.W:[['']];if(S&&S.deg===false)deg=false;
 WS=W0.slice(0,5).map(L0=>{const a=mkW();wins=a;a.length=0;(Array.isArray(L0)&&L0.length?L0:['']).slice(0,50).forEach(t=>{const w=newWin();a.push(w);if(t)try{fromText(w,String(t))}catch(e){}});act=0;snap(a[0]);return a});
-cw=Math.min((S&&S.cw)|0,WS.length-1);wins=WS[cw];act=0;$('#dg').textContent=deg?'Градуси':'Радіани';render()})();
+cw=Math.min((S&&S.cw)|0,WS.length-1);wins=WS[cw];act=0;$('#dg').textContent=deg?'° град':'рад';render()})();
 /* ---- Уроки ---- */
 const r=(a,b)=>a+Math.floor(Math.random()*(b-a+1)),gc=(a,b)=>b?gc(b,a%b):a,up=n=>String(n).split('').map(c=>'⁰¹²³⁴⁵⁶⁷⁸⁹'[c]||'⁻').join(''),sg=n=>n<0?'-':'+';
 const T=[['1–4 клас',[

@@ -2,7 +2,7 @@
    - файли програми кешуються при встановленні → працює без інтернету;
    - шрифти Google кешуються при першому завантаженні;
    - щоб користувачі отримали оновлення, змініть VERSION. */
-const VERSION = 'math-v1';
+const VERSION = 'math-v2';
 const APP = ['./', 'index.html', 'manifest.webmanifest',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png'];
 
