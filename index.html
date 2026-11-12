@@ -26,10 +26,10 @@ img{max-width:100%}
 <body>
 <style>
 /* Шкільний зошит у клітинку: синє чорнило, червоне поле з номерами рядків, клавіатура як у калькулятора */
-:root{--paper:#edf0f5;--sheet:#ffffff;--grid:#e1e8f2;--ink:#1a2333;--mu:#5c6779;--ac:#2a54c9;--acs:#e6ecfc;--onac:#ffffff;--red:#c4372d;--ok:#1b7646;--key:#f3f5f9;--dig:#ffffff;--op:#e4eafb;--line:#d5dbe5;--edge:#c9d1de;--g1:#2a54c9;--g2:#c4372d;--g3:#1b7646;
+:root{--paper:#edf0f5;--sheet:#ffffff;--grid:#e1e8f2;--ink:#1a2333;--mu:#5c6779;--ac:#2a54c9;--acs:#e6ecfc;--onac:#ffffff;--red:#c4372d;--ok:#1b7646;--key:#f3f5f9;--dig:#ffffff;--op:#e4eafb;--line:#d5dbe5;--edge:#c9d1de;--g1:#2a54c9;--g2:#c4372d;--g3:#1b7646;--g4:#9a5b00;--g5:#7a3fb5;
 --ui:"Golos Text",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--math:"STIX Two Text","Cambria Math","Times New Roman",serif}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#0f131a;--sheet:#171d27;--grid:#212a37;--ink:#e7ebf2;--mu:#9aa5b7;--ac:#8aa9ff;--acs:#1f2b4a;--onac:#0f131a;--red:#ff7f72;--ok:#5ed398;--key:#1e2531;--dig:#232b38;--op:#22305a;--line:#2c3545;--edge:#0a0d12;--g1:#8aa9ff;--g2:#ff7f72;--g3:#5ed398;color-scheme:dark}}
-:root[data-theme="dark"]{--paper:#0f131a;--sheet:#171d27;--grid:#212a37;--ink:#e7ebf2;--mu:#9aa5b7;--ac:#8aa9ff;--acs:#1f2b4a;--onac:#0f131a;--red:#ff7f72;--ok:#5ed398;--key:#1e2531;--dig:#232b38;--op:#22305a;--line:#2c3545;--edge:#0a0d12;--g1:#8aa9ff;--g2:#ff7f72;--g3:#5ed398;color-scheme:dark}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#0f131a;--sheet:#171d27;--grid:#212a37;--ink:#e7ebf2;--mu:#9aa5b7;--ac:#8aa9ff;--acs:#1f2b4a;--onac:#0f131a;--red:#ff7f72;--ok:#5ed398;--key:#1e2531;--dig:#232b38;--op:#22305a;--line:#2c3545;--edge:#0a0d12;--g1:#8aa9ff;--g2:#ff7f72;--g3:#5ed398;--g4:#f0b45a;--g5:#c79bff;color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#0f131a;--sheet:#171d27;--grid:#212a37;--ink:#e7ebf2;--mu:#9aa5b7;--ac:#8aa9ff;--acs:#1f2b4a;--onac:#0f131a;--red:#ff7f72;--ok:#5ed398;--key:#1e2531;--dig:#232b38;--op:#22305a;--line:#2c3545;--edge:#0a0d12;--g1:#8aa9ff;--g2:#ff7f72;--g3:#5ed398;--g4:#f0b45a;--g5:#c79bff;color-scheme:dark}
 [hidden]{display:none!important}
 body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.45 var(--ui)}
 main{max-width:620px;margin:0 auto;padding-block:calc(14px + var(--topx,0px)) 32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:12px}
@@ -99,6 +99,8 @@ main:has(#calc:not([hidden])){height:calc(100dvh - env(safe-area-inset-top,0px) 
 .addrow:hover{background:var(--acs)}.addrow:disabled{opacity:.4}
 .pad .nlk.on{background:var(--acs);border-color:var(--ac)}
 @media (max-width:480px){
+  .brand{font-size:21px;white-space:nowrap}
+  .hb button{width:32px;height:32px;font-size:15px}
   .ctl{flex-wrap:nowrap;gap:6px}
   #wst{gap:4px;flex:none}
   #wst button{width:30px;height:32px;font-size:14px}
@@ -107,6 +109,44 @@ main:has(#calc:not([hidden])){height:calc(100dvh - env(safe-area-inset-top,0px) 
 }
 /* iOS: системне розмиття під статус-баром у встановленому застосунку — відсуваємо вміст нижче */
 @media (display-mode:standalone){:root{--topx:22px}}
+.bw{display:flex;align-items:center;justify-content:space-between;gap:10px;flex:1 1 auto}
+.hb{display:flex;gap:6px}.hb button{width:36px;height:34px;padding:0;font-size:17px;color:var(--mu);background:var(--sheet)}
+.modal{position:fixed;inset:0;z-index:50;background:rgba(10,14,22,.55);display:flex;align-items:flex-start;justify-content:center;padding:calc(16px + env(safe-area-inset-top,0px) + var(--topx,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px));overflow-y:auto}
+.mcard{width:100%;max-width:520px;display:flex;flex-direction:column;gap:10px;box-shadow:0 12px 40px rgba(0,0,0,.35)}
+.mcard h4{margin:8px 0 0;font:600 17px var(--math)}.mcard h4 small{display:block;font:400 12px var(--ui);color:var(--mu)}
+.mcard select,.mcard textarea{font:inherit;color:var(--ink);background:var(--sheet);border:1px solid var(--line);border-radius:10px;padding:9px 10px;min-width:0}
+.mcard textarea{width:100%;box-sizing:border-box;resize:vertical;font-size:12px}
+.frow{display:flex;align-items:center;gap:10px}.frow select{flex:1}
+.ugrid{display:grid;grid-template-columns:1fr 1fr auto 1fr;gap:6px;align-items:center}
+.ures{font:600 20px var(--math);color:var(--ok);overflow-wrap:anywhere}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px}.cgrid .exi code{font-size:16px}
+.wn{cursor:pointer;border-bottom:1px dashed var(--line)}.wni{font:600 13px var(--ui);padding:2px 6px;width:150px;border-radius:6px}
+.fig{display:block;width:min(240px,72%);margin:4px 0 12px;color:var(--ink)}
+.fig .ln{fill:var(--acs);stroke:var(--ink);stroke-width:2;stroke-linejoin:round}
+.fig .ds{fill:none;stroke:var(--mu);stroke-width:1.4;stroke-dasharray:5 4}
+.fig .ac{fill:none;stroke:var(--red);stroke-width:1.8}
+.fig text{font:italic 15px var(--math);fill:var(--ink)}
+.mxb .fig{width:min(200px,70%)}
+.lhead{display:flex;flex-direction:column;gap:8px}.lhead input{width:100%;box-sizing:border-box}
+.lfil{display:flex;gap:6px;flex-wrap:wrap}.lsum{font-size:14px;line-height:1.6}.lsum .bt{padding:4px 10px;margin-left:6px;font-size:13px}
+.tp.dn{border-color:var(--ok)}.tp.wk{border-color:var(--red)}.tp em.bd{color:var(--red)}
+.tblw{overflow-x:auto}.gt{border-collapse:collapse;width:100%;font:15px var(--math);font-variant-numeric:tabular-nums}
+.gt th,.gt td{padding:4px 10px;text-align:right;border-bottom:1px solid var(--line)}.gt th{font-style:italic;font-weight:600}
+.gbtns .on{color:var(--ac);border-color:var(--ac);background:var(--acs)}
+#sheet{display:flex;flex-direction:column;gap:12px}#sheet[hidden]{display:none!important}
+.shpage{background:var(--sheet);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.shpage h2{margin:0 0 8px;font:600 22px var(--math)}.shmeta{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--mu);font-size:14px;margin-bottom:10px}
+.shl{margin:0;padding-left:24px;font:17px/1.45 var(--math)}.shl li{margin:0 0 14px;break-inside:avoid}.shl .fig{width:170px;margin:6px 0}
+.shans{color:var(--mu);font:14px var(--ui);margin-top:6px}
+.shk{margin:0;padding-left:24px;font:16px/1.6 var(--math);columns:2;column-gap:32px}
+/* друк: лишаємо тільки аркуш, чорним по білому; відповіді — з нової сторінки */
+@media print{
+  :root,:root:not([data-theme="light"]),:root[data-theme="dark"]{--paper:#fff;--sheet:#fff;--ink:#000;--mu:#444;--line:#999;--acs:#eef2fb;--red:#000;--ok:#000;color-scheme:light}
+  body{background:#fff}
+  .top,#lt,.noprint,.modal{display:none!important}
+  main{max-width:none;padding:0!important;height:auto!important}
+  .shpage{border:0;padding:0;border-radius:0}.shkey{break-before:page}
+}
 .wide{width:100%;padding:11px;font-weight:600;background:var(--sheet);color:var(--ac);border-style:dashed}
 /* клавіатура */
 .pad{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
@@ -156,7 +196,7 @@ label{cursor:pointer}
 #gi{font-size:14px;line-height:1.6;font-variant-numeric:tabular-nums}#gi b{font-family:var(--math)}
 </style>
 <main>
-<header class="top"><div class="brand">Математика <i>у&nbsp;клітинку</i></div>
+<header class="top"><div class="bw"><div class="brand">Математика <i>у&nbsp;клітинку</i></div><span class="hb"><button id="bu" title="Одиниці вимірювання та константи" aria-label="Одиниці та константи">⇄</button><button id="bs" title="Налаштування та резервна копія" aria-label="Налаштування">⚙</button></span></div>
 <nav class="tabs" aria-label="Розділи"><button id="t1" class="on">Калькулятор</button><button id="t3">Графік</button><button id="t2">Уроки</button></nav></header>
 <section id="calc">
 <div class="ctl"><div id="wst"></div><span class="sp"></span><button id="sv" class="chip" title="Покроковий розв’язок рівняння в активному рядку">Розв’язок</button><button id="ex" class="chip" title="Готові приклади, як користуватися калькулятором">Приклади</button><button id="fx" class="chip" hidden title="Тригонометрія, логарифми, нерівності">sin·ln·≤</button></div>
@@ -169,17 +209,24 @@ label{cursor:pointer}
 </section>
 <section id="gr" hidden>
 <div id="gfs" class="card" style="display:flex;flex-direction:column;gap:8px"></div>
-<div class="gwrap"><canvas id="gc" aria-label="Графік функцій"></canvas><div class="gbtns"><button id="gzi" title="Збільшити">＋</button><button id="gzo" title="Зменшити">−</button><button id="g0" title="Початковий вигляд">⌂</button></div></div>
+<div class="gwrap"><canvas id="gc" aria-label="Графік функцій"></canvas><div class="gbtns"><button id="gzi" title="Збільшити">＋</button><button id="gzo" title="Зменшити">−</button><button id="g0" title="Початковий вигляд">⌂</button><button id="gtb" title="Таблиця значень" aria-label="Таблиця значень">▦</button></div></div>
 <div id="gi" class="card"></div>
-<p class="note">Тягніть графік, щоб зсунути; колесо миші або два пальці змінюють масштаб; дотик показує значення. Кути в графіках — у радіанах.</p>
+<div id="gtab" class="card" hidden></div>
+<p class="note">Тягніть графік, щоб зсунути; колесо миші або два пальці змінюють масштаб; дотик показує значення. Трикутнички позначають максимуми й мінімуми, кружечки — нулі та перетини. Кути в графіках — у радіанах.</p>
 </section>
-<section id="les" hidden><div class="tabs" id="lt"><button class="on">Теми</button><button>Тест</button><button>Історія</button></div><div id="test" hidden></div><div id="hist" hidden></div><div id="list"></div><div id="det" hidden>
+<section id="les" hidden><div class="tabs" id="lt"><button class="on">Теми</button><button>Тест</button><button>Історія</button></div><div id="test" hidden></div><div id="hist" hidden></div><div id="list"></div><div id="sheet" hidden></div><div id="det" hidden>
 <div><button class="bt" id="bk">← Усі теми</button></div><h2 id="tn"></h2><div class="card" id="th"></div>
-<div class="card"><div class="q" id="q"></div><div class="ansrow"><input id="in" placeholder="Відповідь, напр. 7/6 або 2 1/4" autocomplete="off"><button class="bt pri" id="ck">Перевірити</button></div><div class="res" id="res"></div>
-<div class="acts"><button class="bt" id="sh">Розв’язання</button><button class="bt" id="nw">Новий приклад</button><button class="bt" id="oc">У калькулятор</button></div><ol id="st" hidden></ol></div>
+<div class="card"><div class="q" id="q"></div><div id="fig"></div><div class="ansrow"><input id="in" placeholder="Відповідь, напр. 7/6 або 2 1/4" autocomplete="off"><button class="bt pri" id="ck">Перевірити</button></div><div class="res" id="res"></div>
+<div class="acts"><button class="bt" id="sh">Розв’язання</button><button class="bt" id="nw">Новий приклад</button><button class="bt" id="oc">У калькулятор</button><button class="bt" id="ws" title="12 завдань цієї теми з відповідями на окремій сторінці">Аркуш завдань</button></div><ol id="st" hidden></ol></div>
 <div class="card"><div class="mxh"><b>Розв’язані приклади</b><span class="acts" style="margin:0"><button class="bt" id="mx">Показати 5 прикладів</button><button class="bt" id="mxc" hidden>✕ Закрити</button></span></div><div id="mxl"></div></div></div></section>
 </main>
+<div id="modal" class="modal" hidden></div>
 <script>
+/* Показ чисел з десятковою комою (всередині програма рахує з крапкою) */
+const cm=s=>String(s).replace(/(\d)\.(\d)/g,'$1,$2');
+/* Екранування тексту перед вставкою в HTML */
+const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
 const $=s=>document.querySelector(s),mk=()=>({items:[]});
 let wins=[],act=0,WS=[],cw=0;
 const rowAt=(w,p=w.path)=>{let r=w.root;for(const[k,f]of p)r=r.items[k][f];return r};
@@ -200,13 +247,13 @@ const isD=x=>x.t=='c'&&/^\d$/.test(x.v),mixAt=(A,k)=>{let m=k;while(A[m]&&isD(A[
 const CM=(o,a,b,e=1e-9)=>o=='<'?a<b-e:o=='>'?a>b+e:o=='≤'?a<=b+e:o=='≥'?a>=b-e:Math.abs(a-b)<=Math.max(e,1e-9)*(1+Math.abs(b));
 function snapR(z,g){const gz=Math.abs(g(z));for(let q=1;q<=60;q++){const c=Math.round(z*q)/q;if(Math.abs(c-z)<1e-5*(1+Math.abs(z))&&Math.abs(g(c))<=gz*1.0000001+1e-14)return c}return z}
 function roots(g){const X=[];for(let k=-100000;k<=100000;k++)X.push(k/100);for(let s=1;s<=3500;s++){const t=1000*Math.pow(1.004,s);X.push(t,-t)}X.sort((a,b)=>a-b);
-const Y=X.map(x=>{const y=g(x);return isFinite(y)?y:NaN}),R=[],add=z=>{z=snapR(z,g);if(!R.some(q=>Math.abs(q-z)<1e-6*(1+Math.abs(z))))R.push(z)},ab=Math.abs;
+const Y=X.map(x=>{const y=g(x);return isFinite(y)?y:NaN}),R=[],add=z=>{const dz=1e-3*(1+Math.abs(z));if(g(z+dz)===0||g(z-dz)===0){R.zf=1;return}z=snapR(z,g);if(!R.some(q=>Math.abs(q-z)<1e-6*(1+Math.abs(z))))R.push(z)},ab=Math.abs;
 for(let i=0;i<X.length;i++){const y=Y[i];if(y===0){add(X[i]);continue}if(!(y==y))continue;
 if(i&&Y[i-1]*y<0){let a=X[i-1],b=X[i];for(let j=0;j<70;j++){const m=(a+b)/2;if(g(a)*g(m)<=0)b=m;else a=m}const z=(a+b)/2;if(ab(g(z))<1e-6*(1+ab(z)))add(z)}
 else if(i>0&&i<X.length-1&&Y[i-1]*y>0&&Y[i+1]*y>0&&ab(y)<ab(Y[i-1])&&ab(y)<=ab(Y[i+1])){let a=X[i-1],b=X[i+1];const k=.381966;for(let j=0;j<80;j++){const m1=a+(b-a)*k,m2=b-(b-a)*k;if(ab(g(m1))<ab(g(m2)))b=m2;else a=m1}const z=(a+b)/2,gz=ab(g(z)),sc=Math.max(ab(Y[i-1]),ab(Y[i+1]));if(gz<1e-12||gz<1e-9*sc)add(z)}}
-return R.sort((a,b)=>a-b)}
+const fl=R.zf;R.sort((a,b)=>a-b);R.zf=fl;return R}
 const rat=v=>{for(let q=1;q<=1000;q++){const p=Math.round(v*q);if(Math.abs(p/q-v)<1e-9)return[p,q]}return null};
-function exact(v){if(!isFinite(v))return'не визначено';const d=fmt(v);if(Number.isInteger(+d))return d;let R=rat(v);if(R)return`${R[0]}/${R[1]} ≈ ${d}`;
+function exact(v){if(!isFinite(v))return'не визначено';if(Math.abs(v)<1e-12)v=0;const av=Math.abs(v);if(av&&(av<1e-6||(av>=1e9&&!(Number.isInteger(v)&&av<1e15)))){const e=Math.floor(Math.log10(av)),m=+(v/10**e).toPrecision(8);return(m==1?'':m==-1?'−':m+'·')+'10'+up(e)}const d=fmt(v);if(Number.isInteger(+d))return d;let R=rat(v);if(R)return`${R[0]}/${R[1]} ≈ ${d}`;
 for(const k of[2,3,5,6,7,10,11,13]){R=rat(v/Math.sqrt(k));if(R&&R[1]<=100){const p=R[0],q=R[1];const t=p==1?'':p==-1?'−':p;return(q==1?`${t}√${k}`:`${t}√${k}/${q}`)+` ≈ ${d}`}}return d}
 const pq=s=>/^[\da-zπ.]+$/.test(s)&&!/^\d+[a-zπ]/.test(s)?s:'('+s+')',lin=r=>r.items.map((x,k,A)=>x.t=='c'?x.v:x.t=='f'?(k&&isD(A[k-1])&&/^\d+$/.test(lin(x.n))&&/^\d+$/.test(lin(x.d))?' '+lin(x.n)+'/'+lin(x.d):pq(lin(x.n))+'/'+pq(lin(x.d))):x.t=='p'?'^'+pq(lin(x.e)):x.t=='g'?(x.fn=='abs'?'|'+lin(x.r)+'|':(x.fn||'')+'('+lin(x.r)+')'):'√('+lin(x.r)+')').join('');
 function unwrap(w){const P=w.path;if(!P.length)return;const[ix]=P[P.length-1],f=rowAt(w,P.slice(0,-1)).items[ix];if(f&&f.t=='f'&&f.n.items.length==1&&f.n.items[0].t=='g'&&!f.n.items[0].fn)f.n.items=f.n.items[0].r.items}
@@ -218,9 +265,9 @@ else if(c=='/'){if(mx){key(w,'>');mx=0}else{key(w,'/');unwrap(w)}opd();key(w,'>'
 else if(c=='('){i--;key(w,'(');feed(w,grp());key(w,')')}
 else if(/[a-z]/.test(c)&&(m=s.slice(i-1).match(/^(arcsin|arccos|arctg|sin|cos|ctg|tg|ln|lg|abs|sqrt)\(/))){const n=m[1];i+=n.length-1;key(w,n=='sqrt'?'S':'@'+n);feed(w,grp());key(w,n=='sqrt'?'>':')')}
 else key(w,c=='<'?'{':c=='>'?'}':c)}}
-function fromText(w,s){key(w,'C');feed(w,s.replace(/(\d)\s+(\d+\/)/g,'$1¦$2').replace(/\s+/g,'').replace(/[×·]/g,'*').replace(/÷/g,'/').replace(/−/g,'-').replace(/<=/g,'≤').replace(/>=/g,'≥').replace(/\|([^|]*)\|/g,'abs($1)').replace(/√/g,'sqrt').replace(/arctan\(|atan\(/g,'arctg(').replace(/asin\(/g,'arcsin(').replace(/acos\(/g,'arccos(').replace(/cot\(/g,'ctg(').replace(/tan\(/g,'tg(').replace(/log\(/g,'lg('))}
-function calc(w){const env={};for(const o of wins){if(o==w)break;if(o.def)env[o.def[0]]=o.def[1]}w.def=null;const r=calc2(w,env),ks=Object.keys(env);return r&&ks.length&&!w.def?r+'    ['+ks.map(k=>k+'='+fmt(env[k])).join(', ')+']':r}
-function rc(w){const k=wins.indexOf(w);w.ans=calc(w);wins.forEach((o,j)=>{if(j>k)o.ans=calc(o)})}function calc2(w,env){const s=ser(w.root);if(!s)return'';try{
+function fromText(w,s){key(w,'C');feed(w,s.replace(/(\d),(\d)/g,'$1.$2').replace(/(\d)\s+(\d+\/)/g,'$1¦$2').replace(/\s+/g,'').replace(/[×·]/g,'*').replace(/÷/g,'/').replace(/−/g,'-').replace(/<=/g,'≤').replace(/>=/g,'≥').replace(/\|([^|]*)\|/g,'abs($1)').replace(/√/g,'sqrt').replace(/arctan\(|atan\(/g,'arctg(').replace(/asin\(/g,'arcsin(').replace(/acos\(/g,'arccos(').replace(/cot\(/g,'ctg(').replace(/tan\(/g,'tg(').replace(/log\(/g,'lg('))}
+function calc(w){const env={};for(const o of wins){if(o==w)break;if(o.def)env[o.def[0]]=o.def[1]}w.def=null;let r=calc2(w,env);const ks=Object.keys(env);if(/^Кілька невідомих/.test(r)){const k=wins.indexOf(w);let sy=k>0&&sysTry(k-1,k);if(sy)r='Система: '+sy.txt;else if(k>=0&&(sy=sysTry(k,k+1)))r=`Система з рядком ${k+2} ↓`}return r&&ks.length&&!w.def?r+'    ['+ks.map(k=>k+'='+fmt(env[k])).join(', ')+']':r}
+function rc(w){wins.forEach(o=>o.ans=calc(o))}function calc2(w,env){const s=ser(w.root);if(!s)return'';try{
 const TK=s.split(/([<>≤≥=])/),P=[],O=[];TK.forEach((t,k)=>{if(k%2==0){if(t!=='')P.push(t)}else O.push(t)});O.length=Math.max(P.length-1,0);if(!P.length)return'';const ineq=O.some(o=>o!='=');
 const dl=P.length==2&&O[0]=='='&&/^[a-df-z]$/.test(P[0]),E0={...env};if(dl)delete E0[P[0]];const Q=P.map((p,k)=>parse(p,dl&&k==0?E0:env)),vs=new Set();Q.forEach(q=>q.vs.forEach(v=>vs.add(v)));const names=[...vs].join(', ');if(dl&&!Q[1].vs.size){const dv=Q[1].f({});if(isFinite(dv))w.def=[P[0],dv]}
 if(ineq&&!vs.size){const V=Q.map(q=>q.f({}));return Q.every((q,k)=>!k||CM(O[k-1],V[k-1],V[k]))?'✓ нерівність істинна':'✗ нерівність хибна'}
@@ -238,7 +285,8 @@ if(!ineq&&C.length&&C.every(v=>Math.abs(v-C[0])<=1e-9*(1+Math.abs(v)))&&Q.every(
 return'Кілька невідомих ('+names+') — залиште одне'}
 const v=[...vs][0],G=Q.map(q=>x=>q.f({[v]:x})),i0=Q.findIndex((q,i)=>i<Q.length-1&&(q.vs.size||Q[i+1].vs.size)),g=x=>G[i0](x)-G[i0+1](x),R=roots(g);
 const good=R.filter(r=>G.every(h=>Math.abs(h(r)-G[0](r))<=1e-6*(1+Math.abs(G[0](r)))));
-return good.length?good.map(r=>v+' = '+exact(r)).join(';  '):R.length?'✗ рівність хибна: ланцюжок не збігається':'Дійсних розв’язків немає'}catch(e){return''}}
+if(good.length>8){const near=[...good].sort((a,b)=>Math.abs(a)-Math.abs(b)).slice(0,6).sort((a,b)=>a-b);return near.map(r=>v+' = '+exact(r)).join(';  ')+`;  … (коренів багато: показано 6 найближчих до нуля)`}
+return good.length?good.map(r=>v+' = '+exact(r)).join(';  '):R.length?'✗ рівність хибна: ланцюжок не збігається':R.zf?([-7.3,.5,3.1,100].every(t=>g(t)===0)?v+' — будь-яке число':'Рівність виконується на цілому проміжку — окремих коренів немає'):'Дійсних розв’язків немає'}catch(e){return''}}
 const first=x=>x.t=='f'?'n':x.t=='p'?'e':'r',last=x=>x.t=='f'?'d':x.t=='p'?'e':'r';
 function key(w,k){const it=rowAt(w).items,P=w.path,comp=x=>x.t!='c';
 if(k=='C'){w.root=mk();w.path=[];w.i=0}
@@ -252,7 +300,7 @@ else if(k=='/'||k=='F'){let j=w.i;while(j>0&&(it[j-1].t!='c'||/[0-9.a-zπ]/.test
 else if(k=='^'){it.splice(w.i,0,{t:'p',e:mk()});P.push([w.i,'e']);w.i=0}
 else if(k=='Q'){it.splice(w.i,0,{t:'p',e:{items:[{t:'c',v:'2'}]}});w.i++}
 else if(k=='('){it.splice(w.i,0,{t:'g',r:mk()});P.push([w.i,'r']);w.i=0}
-else if(k==')'){if(P.length){const[ix]=P[P.length-1];if(rowAt(w,P.slice(0,-1)).items[ix].t=='g'){P.pop();w.i=ix+1}}}
+else if(k==')'){if(P.length){const[ix]=P[P.length-1];if(/^[gs]$/.test(rowAt(w,P.slice(0,-1)).items[ix].t)){P.pop();w.i=ix+1}}}
 else if(k=='S'){it.splice(w.i,0,{t:'s',r:mk()});P.push([w.i,'r']);w.i=0}
 else if(k=='D')it.splice(w.i++,0,{t:'c',v:'/'});
 else if(k[0]=='@'){it.splice(w.i,0,{t:'g',r:mk(),fn:k.slice(1)});P.push([w.i,'r']);w.i=0}
@@ -272,14 +320,25 @@ e.onclick=ev=>{ev.stopPropagation();const b=e.getBoundingClientRect();w.path=pat
 if(tail){const tb=document.createElement('span');tb.className='tb';if(cur&&w.i==r.items.length)car(tb);el.append(tb)}else if(cur&&w.i==r.items.length)car();return el}
 function sw(n){wins.act=act;cw=n;wins=WS[n];act=Math.min(wins.act||0,wins.length-1);wins.forEach(w=>w.ans=calc(w));render()}
 function press(k){if(k=='N')return nl();const w=wins[act];key(w,k);snap(w);render()}
-const L={B:'⌫',E:'▢/▢',N:'sin·ln·≤',Q:'x²',S:'√',D:'÷','*':'×','-':'−','^':'xⁿ','<':'◀','>':'▶','!':'n!'},TT={C:'Очистити рядок',B:'Стерти',N:'Новий рядок',E:'Дріб',D:'Ділення',Q:'Квадрат',S:'Корінь','^':'Степінь','<':'Курсор вліво','>':'Курсор вправо'};
+const L={'.':',',B:'⌫',E:'▢/▢',N:'sin·ln·≤',Q:'x²',S:'√',D:'÷','*':'×','-':'−','^':'xⁿ','<':'◀','>':'▶','!':'n!'},TT={C:'Очистити рядок',B:'Стерти',N:'Новий рядок',E:'Дріб',D:'Ділення',Q:'Квадрат',S:'Корінь','^':'Степінь','<':'Курсор вліво','>':'Курсор вправо'};
 'C B < > N ( ) E ^ S 7 8 9 D Q 4 5 6 * π 1 2 3 - e 0 . = + !'.split(' ').forEach(k=>{const b=document.createElement('button');b.textContent=L[k]||k;if(TT[k])b.title=TT[k];b.className=/^[0-9.]$/.test(k)?'dg':k=='='?'eq':'*D-+'.includes(k)?'op':k=='C'?'clr':'fn';if(k=='N'){b.classList.add('nlk');b.id='fxk';b.title='Функції та знаки нерівностей: sin, cos, tg, ln, lg, |x|, <, >, ≤, ≥';b.onclick=()=>$('#fx').click();$('#pad').append(b);return}b.onclick=()=>press(k);$('#pad').append(b)});
 'x y z a b c'.split(' ').forEach(k=>{const b=document.createElement('button');b.textContent=k;b.onclick=()=>press(k);$('#pad2').append(b)});
 [['DG','DG'],['sin','@sin'],['cos','@cos'],['tg','@tg'],['ctg','@ctg'],['ln','@ln'],['lg','@lg'],['|x|','@abs'],['arcsin','@arcsin'],['arccos','@arccos'],['arctg','@arctg'],['<','{'],['>','}'],['≤','≤'],['≥','≥']].forEach(([l,k])=>{const b=document.createElement('button');b.textContent=l;if(k=='DG'){b.id='dg';b.className='dgk';b.title='Одиниці кутів для sin, cos, tg: градуси або радіани';$('#pad3').append(b);return}b.onclick=()=>press(k);$('#pad3').append(b)});
 $('#fx').onclick=()=>{$('#pad3').hidden=!$('#pad3').hidden;$('#fx').classList.toggle('on',!$('#pad3').hidden);$('#fxk').classList.toggle('on',!$('#pad3').hidden);render()};
 let rzT;window.addEventListener('resize',()=>{clearTimeout(rzT);rzT=setTimeout(()=>{if(!$('#calc').hidden)render()},120)});$('#fx2').onclick=()=>{if($('#pad3').hidden)$('#fx').click();$('#pad3').scrollIntoView({block:'nearest',behavior:'smooth'})};$('#nl').onclick=nl;$('#dg').onclick=()=>{deg=!deg;$('#dg').textContent=deg?'° град':'рад';WS.forEach(a=>{const s0=wins;wins=a;a.forEach(w=>w.ans=calc(w));wins=s0});saveSoon();render()};
-document.addEventListener('keydown',e=>{if($('#calc').hidden||e.target.tagName=='INPUT'||e.ctrlKey||e.metaKey)return;let k=e.key;
-k={Backspace:'B',ArrowLeft:'<',ArrowRight:'>',r:'S',p:'π',Enter:'N','<':'{','>':'}'}[k]||k;if(/^[0-9.+\-*=^()\/xyzabc<>BSπ{}N]$/.test(k)){e.preventDefault();press(k)}});
+let kbuf='';const KFN=['arcsin','arccos','arctg','sqrt','sin','cos','ctg','tg','ln','lg','abs'];
+document.addEventListener('keydown',e=>{if($('#calc').hidden||/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)||e.ctrlKey||e.metaKey||!$('#modal').hidden)return;let k=e.key;
+// букви запам'ятовуємо: якщо перед «(» набрано назву функції, вставляємо функцію замість окремих букв
+if(/^[a-zA-Z]$/.test(k)){e.preventDefault();const lc=k.toLowerCase(),prev=kbuf;kbuf+=lc;
+// лишаємо в буфері тільки хвіст, з якого може початися назва функції
+while(kbuf&&!KFN.some(f=>f.startsWith(kbuf)))kbuf=kbuf.slice(1);
+if(/^[xyzabce]$/.test(lc))press(lc);else if(!prev&&(lc=='r'||lc=='p')){kbuf='';press(lc=='r'?'S':'π')}return}
+else if(k=='('){const fn=KFN.find(f=>kbuf.endsWith(f));if(fn){e.preventDefault();const w=wins[act],del=(fn.match(/[xyzabc]/g)||[]).length;for(let j=0;j<del;j++)key(w,'B');kbuf='';press(fn=='sqrt'?'S':'@'+fn);return}kbuf=''}
+else kbuf='';
+
+k={Backspace:'B',ArrowLeft:'<',ArrowRight:'>',r:'S',p:'π',Enter:'N','<':'{','>':'}',',':'.'}[k]||k;if(/^[0-9.+\-*=^()\/xyzabc<>BSπ{}N!]$/.test(k)){e.preventDefault();
+const w=wins[act],P=w.path;if(P.length&&P[P.length-1][1]=='e'&&/^[+\-*={}]$/.test(k)&&rowAt(w).items.length&&w.i==rowAt(w).items.length)key(w,'>');
+if(k=='N'){nl();return}press(k)}});
 function tab(n){$('#calc').hidden=n!=1;$('#les').hidden=n!=2;$('#gr').hidden=n!=3;[1,2,3].forEach(k=>$('#t'+k).className=n==k?'on':'');if(n==3){gui();gcomp();requestAnimationFrame(gdraw)}try{localStorage.setItem('mtab',n)}catch(e){}}
 $('#t1').onclick=()=>tab(1);$('#t2').onclick=()=>tab(2);$('#t3').onclick=()=>tab(3);
 function newWin(){return{root:mk(),path:[],i:0,txt:null,ans:'',def:null}}
@@ -318,7 +377,11 @@ if(P.length==1){if(vs.size)return{st:[...st,`Це вираз зі змінною
 return{st:[...st,'Обчислюємо за порядком дій: дужки → степені й корені → множення й ділення → додавання й віднімання'],fin:ans}}
 if(P.length==2&&O[0]=='='&&/^[a-df-z]$/.test(P[0])&&!Q[1].vs.size)return{st:[...st,`Це задання змінної: ${P[0]} = ${sF(Q[1].f({}))}`,`Значення ${P[0]} використовується в рядках нижче`],fin:ans};
 if(P.length>2)return{st:[...st,'Подвійна нерівність — розв’язуємо обидві частини й беремо перетин'],fin:ans};
-if(vs.size!=1)return{st:[...st,vs.size?`Кілька невідомих (${[...vs].join(', ')}) — одне рівняння їх не визначає однозначно. Задайте зайві змінні рядками вище.`:'Невідомої немає — перевіряємо рівність чисел'],fin:ans};
+if(vs.size==2){const k=wins.indexOf(w),a=sysTry(k-1,k)?k-1:sysTry(k,k+1)?k:-1;if(a>=0){const R=sysTry(a,a+1),{u,v:vv}=R,t1=lin(wins[a].root),t2=lin(wins[a+1].root),S2=[`Система: { ${t1};  ${t2} }`];
+if(R.lin){const[[a1,b1,c1],[a2,b2,c2]]=R.lin,eqs=(a,b,c)=>`${sPoly([a,0],u)==='0'?'':sPoly([a,0],u)}${b<0?' − ':a?' + ':''}${sPoly([Math.abs(b),0],vv)} = ${sF(c)}`;S2.push(`Зводимо до вигляду a${u} + b${vv} = c:  ${eqs(a1,b1,c1)};  ${eqs(a2,b2,c2)}`,`Головний визначник: D = ${sP(a1)}·${sP(b2)} − ${sP(a2)}·${sP(b1)} = ${sF(R.D)}`);
+if(!R.D)return{st:[...S2,'D = 0 — єдиного розв’язку немає'],fin:R.txt};const Dx=c1*b2-c2*b1,Dy=a1*c2-a2*c1;S2.push(`D${u} = ${sP(c1)}·${sP(b2)} − ${sP(c2)}·${sP(b1)} = ${sF(Dx)}`,`D${vv} = ${sP(a1)}·${sP(c2)} − ${sP(a2)}·${sP(c1)} = ${sF(Dy)}`,`${u} = D${u}/D = ${sF(Dx)}/${sP(R.D)} = ${sF(Dx/R.D)}`,`${vv} = D${vv}/D = ${sF(Dy)}/${sP(R.D)} = ${sF(Dy/R.D)}`,`Перевірка: підставляємо в обидва рівняння — рівності виконуються ✓`);return{st:S2,fin:R.txt}}
+return{st:[...S2,'Система нелінійна — розв’язки знайдено чисельно (метод Ньютона з кількох початкових точок)','Знайдені пари перевірено підстановкою в обидва рівняння'],fin:R.txt}}}
+if(vs.size!=1)return{st:[...st,vs.size?`Кілька невідомих (${[...vs].join(', ')}) — одне рівняння їх не визначає однозначно. Допишіть друге рівняння сусіднім рядком (вийде система) або задайте зайві змінні рядками вище.`:'Невідомої немає — перевіряємо рівність чисел'],fin:ans};
 const v=[...vs][0],op=O[0],G=x=>Q[0].f({[v]:x})-Q[1].f({[v]:x}),C=polyFit(G);
 if(Math.abs(Q[1].f({[v]:0}))>1e-12||Q[1].vs.size)st.push(`Переносимо все в ліву частину: (${TP[0]}) − (${TP[1]}) ${op} 0`);
 if(!C)return{st:[...st,'Рівняння не лінійне й не квадратне (дроби з невідомою, корені, функції або вищий степінь)','Корені знайдено чисельно — підбором і уточненням з точністю до 10⁻⁸'],fin:ans};
@@ -341,32 +404,105 @@ if(op=='='){st.push(`Перевірка за Вієтою: ${v}₁ + ${v}₂ = �
 const inside=(op=='<'||op=='≤')==(a>0);st.push(`Вітки параболи ${a>0?'вгору':'вниз'}, тому вираз ${op=='<'||op=='≤'?'менший':'більший'} за нуль ${inside?'між коренями':'поза коренями'}`,inside?`${xs(lo)} ${op=='≤'||op=='≥'?'≤':'<'} ${v} ${op=='≤'||op=='≥'?'≤':'<'} ${xs(hi)}`:`${v} ${op=='≤'||op=='≥'?'≤':'<'} ${xs(lo)} або ${v} ${op=='≤'||op=='≥'?'≥':'>'} ${xs(hi)}`);
 return{st,fin:ans}}
 function solBuild(){const B=$('#sol'),w=wins[act],R=solveSteps(w);
-B.innerHTML=`<div class="exh solh"><b>Розв’язок рядка ${act+1}</b><button class="bt" id="solc" title="Закрити">✕</button></div>`+(R.err?`<p class="note">${esc(R.err)}</p>`:`<ol class="solst">${R.st.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>${R.fin?`<div class="mxa">Відповідь: ${esc(R.fin)}</div>`:''}`);
+B.innerHTML=`<div class="exh solh"><b>Розв’язок рядка ${act+1}</b><button class="bt" id="solc" title="Закрити">✕</button></div>`+(R.err?`<p class="note">${esc(R.err)}</p>`:`<ol class="solst">${R.st.map(x=>`<li>${esc(cm(x))}</li>`).join('')}</ol>${R.fin?`<div class="mxa">Відповідь: ${esc(cm(R.fin))}</div>`:''}`);
 $('#solc').onclick=()=>{B.hidden=true;$('#sv').classList.remove('on')}}
 $('#sv').onclick=()=>{const B=$('#sol');B.hidden=!B.hidden;$('#sv').classList.toggle('on',!B.hidden);if(!B.hidden){$('#exs').hidden=true;$('#ex').classList.remove('on');solBuild()}};
 
 function nl(){if(wins.length>=50)return;wins.splice(act+1,0,newWin());act++;snap(wins[act]);render()}
 function render(){const W=$('#wins'),o0=W.querySelector('.rws'),st0=o0?o0.scrollTop:0,sw0=o0&&o0.dataset.w==cw;W.innerHTML='';const box=document.createElement('div');box.className='win on';
-box.innerHTML=`<div class="wh"><b>Вікно ${cw+1}</b><span>крок ${wins.hi}/${wins.h.length-1}<button title="Скасувати">↶</button><button title="Повторити">↷</button><button title="Видалити всі рядки цього вікна">Очистити</button></span></div>`;
+box.innerHTML=`<div class="wh"><b class="wn" title="Натисніть, щоб перейменувати">${esc(wins.name||'Вікно '+(cw+1))}</b><span>крок ${wins.hi}/${wins.h.length-1}<button title="Скасувати">↶</button><button title="Повторити">↷</button><button title="Видалити всі рядки цього вікна">Очистити</button></span></div>`;
 const bs=box.querySelectorAll('button');bs[0].onclick=()=>hist(-1);bs[1].onclick=()=>hist(1);bs[2].onclick=clearWin;
+box.querySelector('.wn').onclick=e=>{const b=e.currentTarget,inp=document.createElement('input');inp.className='wni';inp.maxLength=24;inp.value=wins.name||'';inp.placeholder='Вікно '+(cw+1);b.replaceWith(inp);inp.focus();let done=0;const ok=()=>{if(done)return;done=1;wins.name=inp.value.trim()||null;saveSoon();render()};inp.onblur=ok;inp.onkeydown=ev=>{if(ev.key=='Enter')ok();if(ev.key=='Escape'){done=1;render()}}};
 const rws=document.createElement('div');rws.className='rws';rws.dataset.w=cw;
 wins.forEach((w,i)=>{const d=document.createElement('div');d.className='rw'+(i==act?' on':'');d.onclick=()=>{act=i;render()};
-const tx=document.createElement('input');tx.className='tx';tx.autocomplete='off';tx.placeholder='Введіть вираз, напр. 2x+3=11';tx.value=w.txt??lin(w.root);tx.onclick=e=>e.stopPropagation();
+const tx=document.createElement('input');tx.className='tx';tx.autocomplete='off';tx.placeholder='Введіть вираз, напр. 2x+3=11';tx.value=w.txt??cm(lin(w.root));tx.onclick=e=>e.stopPropagation();
 tx.oninput=()=>{const v=tx.value,p=tx.selectionStart;act=i;fromText(w,v);snap(w);w.txt=v;render();const n=$('#wins').querySelectorAll('.tx')[i];n.focus();n.setSelectionRange(p,p)};
 tx.onkeydown=e=>{if(e.key=='Enter'){e.preventDefault();act=i;nl();setTimeout(()=>{const n=$('#wins').querySelectorAll('.tx')[act];n&&n.focus()},0)}};
-const ed=document.createElement('div');ed.className='ed';ed.append(rr(w.root,[],w));const a=document.createElement('div');a.className='ans';a.textContent=w.ans||'';if(/^✗/.test(a.textContent))a.className='ans bad';else if(/^(Додайте|Впишіть|Кілька)/.test(a.textContent))a.className='ans hint';
-const L1=lin(w.root);if(L1.includes('x')&&!/[<>≤≥]/.test(L1)&&L1.split('=').length<=2&&!/^x=[^x]*$/.test(L1)){const gb=document.createElement('button');gb.className='gb';gb.textContent='Графік';gb.title='Побудувати графік цього виразу';gb.onclick=e=>{e.stopPropagation();const P2=L1.split('=');G.f[0]=P2.length==2?(P2[0]=='y'?P2[1]:`(${P2[0]})-(${P2[1]})`):L1;gsave();tab(3)};a.append(gb)}
+const ed=document.createElement('div');ed.className='ed';ed.append(rr(w.root,[],w));const a=document.createElement('div');a.className='ans';a.textContent=cm(w.ans||'');if(/^✗/.test(a.textContent))a.className='ans bad';else if(/^(Додайте|Впишіть|Кілька|Система з рядком)/.test(a.textContent))a.className='ans hint';
+const L1=lin(w.root);if(L1.includes('x')&&!/[yzabc]/.test(L1.replace(/arcsin|arccos|arctg|abs|cos|ctg/g,''))&&!/[<>≤≥]/.test(L1)&&L1.split('=').length<=2&&!/^x=[^x]*$/.test(L1)){const gb=document.createElement('button');gb.className='gb';gb.textContent='Графік';gb.title='Побудувати графік цього виразу';gb.onclick=e=>{e.stopPropagation();const P2=L1.split('=');G.f[0]=P2.length==2?(P2[0]=='y'?P2[1]:`(${P2[0]})-(${P2[1]})`):L1;gsave();tab(3)};a.append(gb)}
 const xb=document.createElement('button');xb.className='rx';xb.textContent='✕';xb.title=wins.length>1?'Видалити рядок':'Очистити рядок';xb.setAttribute('aria-label',xb.title);xb.onclick=e=>{e.stopPropagation();delRow(i)};
 d.append(tx,ed,a,xb);rws.append(d)});
 const ad=document.createElement('button');ad.className='addrow';ad.textContent='＋';ad.title='Новий рядок';ad.setAttribute('aria-label','Новий рядок');ad.disabled=wins.length>=50;
 ad.onclick=e=>{e.stopPropagation();if(wins.length>=50)return;wins.push(newWin());act=wins.length-1;snap(wins[act]);render();const R=$('#wins .rws');if(R)R.scrollTop=R.scrollHeight};rws.append(ad);
-box.append(rws);W.append(box);if(!$('#sol').hidden)solBuild();if(sw0)rws.scrollTop=st0;const ar=rws.querySelector('.rw.on');if(ar){const t=ar.offsetTop,h=ar.offsetHeight;if(t<rws.scrollTop)rws.scrollTop=t;else if(t+h>rws.scrollTop+rws.clientHeight)rws.scrollTop=t+h-rws.clientHeight}if(act==wins.length-1){const ad=rws.querySelector('.addrow'),e=ad.offsetTop+ad.offsetHeight+10;if(e>rws.scrollTop+rws.clientHeight)rws.scrollTop=e-rws.clientHeight}const c=rws.querySelector('.rw.on .cr');if(c){const ed=c.closest('.ed'),cl=c.offsetLeft;if(ed&&(cl<ed.scrollLeft||cl>ed.scrollLeft+ed.clientWidth-8))ed.scrollLeft=Math.max(0,cl-ed.clientWidth/2)}
+box.append(rws);W.append(box);if(!$('#sol').hidden)solBuild();if(sw0)rws.scrollTop=st0;const ar=rws.querySelector('.rw.on');if(ar){const t=ar.offsetTop,h=ar.offsetHeight;if(t<rws.scrollTop)rws.scrollTop=t;else if(t+h>rws.scrollTop+rws.clientHeight)rws.scrollTop=t+h-rws.clientHeight}if(act==wins.length-1){const ad=rws.querySelector('.addrow'),e=ad.offsetTop+ad.offsetHeight+10;if(e>rws.scrollTop+rws.clientHeight)rws.scrollTop=e-rws.clientHeight;if(ar&&ar.offsetTop<rws.scrollTop)rws.scrollTop=ar.offsetTop}const c=rws.querySelector('.rw.on .cr');if(c){const ed=c.closest('.ed'),cl=c.offsetLeft;if(ed&&(cl<ed.scrollLeft||cl>ed.scrollLeft+ed.clientWidth-8))ed.scrollLeft=Math.max(0,cl-ed.clientWidth/2)}
 const ts=$('#wst');ts.innerHTML='';WS.forEach((_,n)=>{const b=document.createElement('button');b.textContent=n+1;b.className=n==cw?'on':'';b.onclick=()=>sw(n);ts.append(b)});
 if(WS.length<5){const b=document.createElement('button');b.textContent='+';b.onclick=()=>{wins.act=act;const a=mkW();WS.push(a);cw=WS.length-1;wins=a;act=0;snap(wins[0]);render()};ts.append(b)}}
-let sT=0;function saveSoon(){clearTimeout(sT);sT=setTimeout(()=>{try{localStorage.setItem('mcalc',JSON.stringify({cw,deg,W:WS.map(a=>a.map(w=>w.txt??lin(w.root)))}))}catch(e){}},300)}
+/* ---- Системи двох рівнянь (два сусідні рядки з двома невідомими) ---- */
+// розбір рядка як рівняння L=R; повертає null, якщо це не рівняння
+function eqOf(w,env){const s=ser(w.root);if(!s||/[<>≤≥]/.test(s))return null;const P=s.split('=');if(P.length!=2||!P[0]||!P[1])return null;
+try{const A=parse(P[0],env),B=parse(P[1],env);return{vs:new Set([...A.vs,...B.vs]),F:e=>A.f(e)-B.f(e)}}catch(e){return null}}
+function sysTry(i,j){if(i<0||j>=wins.length)return null;const env={};for(let k=0;k<i;k++)if(wins[k].def)env[wins[k].def[0]]=wins[k].def[1];
+const E1=eqOf(wins[i],env),E2=eqOf(wins[j],env);if(!E1||!E2||!E1.vs.size||!E2.vs.size)return null;const V=[...new Set([...E1.vs,...E2.vs])].sort();if(V.length!=2||(E1.vs.size<2&&E2.vs.size<2&&[...E1.vs][0]==[...E2.vs][0]))return null;
+const[u,v]=V,f=(E,x,y)=>{const t=E.F({[u]:x,[v]:y});return isFinite(t)?t:NaN},
+lin1=E=>{const c=f(E,0,0),a=f(E,1,0)-c,b=f(E,0,1)-c;for(const[x,y]of[[2.3,-1.7],[-3.1,4.2],[7,11]]){const t=f(E,x,y);if(!(Math.abs(t-(a*x+b*y+c))<=1e-7*(1+Math.abs(t))))return null}return[a,b,-c]},
+L1=lin1(E1),L2=lin1(E2);
+if(L1&&L2){const[a1,b1,c1]=L1,[a2,b2,c2]=L2,D=a1*b2-a2*b1;if(Math.abs(D)<1e-12){const same=Math.abs(a1*c2-a2*c1)<1e-9&&Math.abs(b1*c2-b2*c1)<1e-9;return{u,v,lin:[L1,L2],D:0,txt:same?'Система має безліч розв’язків (рівняння рівносильні)':'Система не має розв’язків (прямі паралельні)'}}
+const x=(c1*b2-c2*b1)/D,y=(a1*c2-a2*c1)/D;return{u,v,lin:[L1,L2],D,sol:[[x,y]],txt:`${u} = ${sF(x)};  ${v} = ${sF(y)}`}}
+// нелінійна система: метод Ньютона з кількох початкових точок
+const S=[],h=1e-6;for(const x0 of[-7,-3,-1,.5,2,5,9])for(const y0 of[-7,-3,-1,.5,2,5,9]){let x=x0,y=y0,ok=false;for(let it=0;it<60;it++){const p=f(E1,x,y),q=f(E2,x,y);if(!(p==p&&q==q))break;if(Math.abs(p)+Math.abs(q)<1e-11){ok=true;break}
+const px=(f(E1,x+h,y)-p)/h,py=(f(E1,x,y+h)-p)/h,qx=(f(E2,x+h,y)-q)/h,qy=(f(E2,x,y+h)-q)/h,d=px*qy-py*qx;if(!(Math.abs(d)>1e-14))break;x-=(p*qy-q*py)/d;y-=(px*q-qx*p)/d;if(!(Math.abs(x)<1e7&&Math.abs(y)<1e7))break}
+if(ok){const sn=t=>{const R=rat(t);return R&&R[1]<=60?R[0]/R[1]:t};x=sn(x);y=sn(y);if(Math.abs(f(E1,x,y))+Math.abs(f(E2,x,y))<1e-7&&!S.some(([a,b])=>Math.abs(a-x)+Math.abs(b-y)<1e-6))S.push([x,y])}}
+if(!S.length)return{u,v,txt:'Розв’язків системи не знайдено'};S.sort((a,b)=>a[0]-b[0]||a[1]-b[1]);
+return{u,v,sol:S,txt:S.length==1?`${u} = ${sF(S[0][0])};  ${v} = ${sF(S[0][1])}`:`(${u}; ${v}) = `+S.slice(0,6).map(([x,y])=>`(${sF(x)}; ${sF(y)})`).join(' або ')}}
+
+/* ---- Вікна з панелями: одиниці й константи, налаштування та резервна копія ---- */
+const UN={'Довжина':{'мм':.001,'см':.01,'дм':.1,'м':1,'км':1000,'дюйм':.0254,'фут':.3048,'миля':1609.344},
+'Маса':{'мг':1e-6,'г':.001,'кг':1,'ц':100,'т':1000,'фунт':.45359237},
+'Час':{'с':1,'хв':60,'год':3600,'доба':86400},
+'Площа':{'мм²':1e-6,'см²':1e-4,'м²':1,'ар (сотка)':100,'га':1e4,'км²':1e6},
+'Об’єм':{'мл':1e-6,'см³':1e-6,'л':.001,'м³':1},
+'Швидкість':{'м/с':1,'км/год':1/3.6,'вузол':.514444},
+'Тиск':{'Па':1,'кПа':1e3,'МПа':1e6,'бар':1e5,'атм':101325,'кгс/см²':98066.5,'мм рт. ст.':133.322,'мм вод. ст.':9.80665},
+'Енергія':{'Дж':1,'кДж':1e3,'МДж':1e6,'кал':4.1868,'ккал':4186.8,'Вт·год':3600,'кВт·год':3.6e6},
+'Потужність':{'Вт':1,'кВт':1e3,'МВт':1e6,'к. с.':735.49875},
+'Температура':{'°C':0,'K':0,'°F':0},
+'Кут':{'градус':Math.PI/180,'радіан':1,'оберт':2*Math.PI},
+'Префікси':{'нано (н)':1e-9,'мікро (мк)':1e-6,'мілі (м)':1e-3,'одиниця':1,'кіло (к)':1e3,'мега (М)':1e6,'гіга (Г)':1e9}},
+CONST=[['π',Math.PI,'число пі'],['e',Math.E,'основа натурального логарифма'],['g',9.80665,'прискорення вільного падіння, м/с²'],['c',299792458,'швидкість світла, м/с'],['R',8.314462618,'газова стала, Дж/(моль·К)'],['Nₐ',6.02214076e23,'стала Авогадро, 1/моль'],['k',1.380649e-23,'стала Больцмана, Дж/К'],['e⁻',1.602176634e-19,'елементарний заряд, Кл'],['h',6.62607015e-34,'стала Планка, Дж·с'],['G',6.6743e-11,'гравітаційна стала, Н·м²/кг²'],['ε₀',8.8541878128e-12,'електрична стала, Ф/м'],['μ₀',1.25663706212e-6,'магнітна стала, Гн/м'],['σ',5.670374419e-8,'стала Стефана–Больцмана, Вт/(м²·К⁴)'],['атм',101325,'нормальний атмосферний тиск, Па']];
+// число у вигляді, який розуміє калькулятор (великі й малі — через 10^n)
+const cNum=v=>{const a=Math.abs(v);if(!a||(a>=1e-4&&a<1e10))return String(+v.toPrecision(10));const e=Math.floor(Math.log10(a));return`${+(v/10**e).toPrecision(10)}*10^(${e})`},
+sci=v=>{const a=Math.abs(v);if(!a||(a>=1e-4&&a<1e9))return cm(String(+v.toPrecision(8)));const e=Math.floor(Math.log10(a));return cm(String(+(v/10**e).toPrecision(8)))+'·10'+up(e)};
+function toCalc(v){tab(1);feed(wins[act],cNum(v));snap(wins[act]);render();mClose()}
+function tConv(v,a,b){const K={'°C':x=>x+273.15,'K':x=>x,'°F':x=>(x-32)*5/9+273.15}[a](v);return{'°C':k=>k-273.15,'K':k=>k,'°F':k=>(k-273.15)*9/5+32}[b](K)}
+function mOpen(html){const M=$('#modal');M.innerHTML=`<div class="card mcard" role="dialog">${html}</div>`;M.hidden=false;M.onclick=e=>{if(e.target==M)mClose()}}
+function mClose(){$('#modal').hidden=true;$('#modal').innerHTML=''}
+function unitsOpen(){mOpen(`<div class="exh solh"><b>Одиниці та константи</b><button class="bt" id="mx0">✕</button></div>
+<label class="frow">Величина <select id="uc">${Object.keys(UN).map(k=>`<option>${k}</option>`).join('')}</select></label>
+<div class="ugrid"><input id="uv" inputmode="decimal" value="1" autocomplete="off"><select id="ua"></select><span>→</span><select id="ub"></select></div>
+<div class="ures" id="ur"></div><button class="bt" id="ui">Вставити результат у калькулятор</button>
+<h4>Константи <small>торкніться, щоб вставити в калькулятор</small></h4><div class="cgrid">${CONST.map(([n,v,d],i)=>`<button class="exi" data-i="${i}"><code>${n} = ${sci(v)}</code><small>${d}</small></button>`).join('')}</div>`);
+$('#mx0').onclick=mClose;let last=0;try{const c=localStorage.getItem('munit');if(c&&UN[c])$('#uc').value=c}catch(e){}
+const fill=()=>{const U=Object.keys(UN[$('#uc').value]);$('#ua').innerHTML=$('#ub').innerHTML=U.map(u=>`<option>${u}</option>`).join('');$('#ub').selectedIndex=Math.min(1,U.length-1);calcU()},
+calcU=()=>{const c=$('#uc').value,v=num($('#uv').value.trim()||'0'),a=$('#ua').value,b=$('#ub').value;if(!isFinite(v)){$('#ur').textContent='Введіть число';last=NaN;return}last=c=='Температура'?tConv(v,a,b):v*UN[c][a]/UN[c][b];$('#ur').textContent=`${cm(String(v))} ${a} = ${sci(last)} ${b}`};
+$('#uc').onchange=()=>{try{localStorage.setItem('munit',$('#uc').value)}catch(e){}fill()};$('#uv').oninput=$('#ua').onchange=$('#ub').onchange=calcU;$('#ui').onclick=()=>{if(isFinite(last))toCalc(last)};
+document.querySelectorAll('.cgrid .exi').forEach(b=>b.onclick=()=>toCalc(CONST[b.dataset.i][1]));fill()}
+const DKEYS=['mcalc','mlog','mgraph','mtab','mtheme','munit','mdone'];
+function dataDump(){const o={app:'Математика у клітинку',v:1,date:new Date().toISOString(),data:{}};DKEYS.forEach(k=>{try{const v=localStorage.getItem(k);if(v!=null)o.data[k]=v}catch(e){}});return JSON.stringify(o)}
+function applyTheme(){let t='';try{t=localStorage.getItem('mtheme')||''}catch(e){}if(t)document.documentElement.dataset.theme=t;else delete document.documentElement.dataset.theme;if(!$('#gr').hidden)gdraw()}
+function setOpen(){let th='';try{th=localStorage.getItem('mtheme')||''}catch(e){}
+mOpen(`<div class="exh solh"><b>Налаштування</b><button class="bt" id="mx0">✕</button></div>
+<h4>Тема</h4><div class="tabs" id="thm">${[['','Як у системі'],['light','Світла'],['dark','Темна']].map(([v,n])=>`<button data-v="${v}" class="${v==th?'on':''}">${n}</button>`).join('')}</div>
+<h4>Резервна копія <small>вікна калькулятора, графіки, історія уроків</small></h4>
+<div class="acts"><button class="bt" id="bcp">Скопіювати дані</button><button class="bt" id="bdl">Зберегти у файл</button></div><div class="note" id="bmsg"></div>
+<h4>Відновлення <small>вставте скопійовані дані або оберіть файл</small></h4>
+<textarea id="bin" rows="3" placeholder="Вставте сюди дані резервної копії" spellcheck="false"></textarea>
+<div class="acts"><input type="file" id="bfile" accept=".json,application/json,text/plain"><button class="bt pri" id="brs">Відновити</button></div><div class="note" id="rmsg"></div>
+<h4>Очищення</h4><div class="acts"><button class="bt" id="bwipe">Стерти всі дані програми</button></div>`);
+$('#mx0').onclick=mClose;
+document.querySelectorAll('#thm button').forEach(b=>b.onclick=()=>{try{b.dataset.v?localStorage.setItem('mtheme',b.dataset.v):localStorage.removeItem('mtheme')}catch(e){}applyTheme();document.querySelectorAll('#thm button').forEach(x=>x.className=x==b?'on':'')});
+$('#bcp').onclick=()=>{const d=dataDump();navigator.clipboard.writeText(d).then(()=>{$('#bmsg').textContent='Скопійовано. Вставте в нотатки або надішліть собі повідомленням.'}).catch(()=>{$('#bin').value=d;$('#bin').select();$('#bmsg').textContent='Не вдалося скопіювати автоматично — дані в полі нижче, скопіюйте їх вручну.'})};
+$('#bdl').onclick=()=>{try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([dataDump()],{type:'application/json'}));a.download='matematyka-kopiya-'+new Date().toISOString().slice(0,10)+'.json';document.body.append(a);a.click();a.remove();$('#bmsg').textContent='Якщо файл не з’явився в завантаженнях, скористайтесь кнопкою «Скопіювати дані».'}catch(e){$('#bmsg').textContent='Тут зберегти файл не можна — скористайтесь кнопкою «Скопіювати дані».'}};
+$('#bfile').onchange=e=>{const f=e.target.files[0];if(!f)return;const R=new FileReader();R.onload=()=>{$('#bin').value=R.result;$('#rmsg').textContent='Файл прочитано. Натисніть «Відновити».'};R.readAsText(f)};
+let armed=0;$('#brs').onclick=()=>{let o;try{o=JSON.parse($('#bin').value)}catch(e){$('#rmsg').textContent='Це не схоже на резервну копію: дані пошкоджені або неповні.';return}if(!o||!o.data||typeof o.data!='object'){$('#rmsg').textContent='У цих даних немає резервної копії програми.';return}
+if(!armed){armed=1;$('#brs').textContent='Замінити поточні дані?';$('#rmsg').textContent='Поточні вікна й історію буде замінено. Натисніть ще раз для підтвердження.';return}
+try{DKEYS.forEach(k=>{if(typeof o.data[k]=='string')localStorage.setItem(k,o.data[k])})}catch(e){$('#rmsg').textContent='Браузер не дозволив зберегти дані.';return}location.reload()};
+let w2=0;$('#bwipe').onclick=()=>{if(!w2){w2=1;$('#bwipe').textContent='Точно стерти? Натисніть ще раз';return}try{DKEYS.forEach(k=>localStorage.removeItem(k))}catch(e){}location.reload()}}
+$('#bu').onclick=unitsOpen;$('#bs').onclick=setOpen;document.addEventListener('keydown',e=>{if(e.key=='Escape'&&!$('#modal').hidden)mClose()});applyTheme();
+
+let sT=0;function saveSoon(){clearTimeout(sT);sT=setTimeout(()=>{try{localStorage.setItem('mcalc',JSON.stringify({cw,deg,N:WS.map(a=>a.name||''),W:WS.map(a=>a.map(w=>w.txt??lin(w.root)))}))}catch(e){}},300)}
 (()=>{let S=null;try{S=JSON.parse(localStorage.getItem('mcalc')||'null')}catch(e){}
 const W0=S&&Array.isArray(S.W)&&S.W.length?S.W:[['']];if(S&&S.deg===false)deg=false;
-WS=W0.slice(0,5).map(L0=>{const a=mkW();wins=a;a.length=0;(Array.isArray(L0)&&L0.length?L0:['']).slice(0,50).forEach(t=>{const w=newWin();a.push(w);if(t)try{fromText(w,String(t))}catch(e){}});act=0;snap(a[0]);return a});
+WS=W0.slice(0,5).map((L0,wi)=>{const a=mkW();if(S&&Array.isArray(S.N)&&S.N[wi])a.name=String(S.N[wi]).slice(0,24);wins=a;a.length=0;(Array.isArray(L0)&&L0.length?L0:['']).slice(0,50).forEach(t=>{const w=newWin();a.push(w);if(t)try{fromText(w,String(t))}catch(e){}});act=0;snap(a[0]);return a});
 cw=Math.min((S&&S.cw)|0,WS.length-1);wins=WS[cw];act=0;$('#dg').textContent=deg?'° град':'рад';render()})();
 /* ---- Уроки ---- */
 const r=(a,b)=>a+Math.floor(Math.random()*(b-a+1)),gc=(a,b)=>b?gc(b,a%b):a,up=n=>String(n).split('').map(c=>'⁰¹²³⁴⁵⁶⁷⁸⁹'[c]||'⁻').join(''),sg=n=>n<0?'-':'+';
@@ -761,35 +897,31 @@ function thHTML(t){if(H[t.n])return H[t.n].split('<br>').map(x=>`<p>${x}</p>`).j
 const P=[];let d=0,c='';for(let i=0;i<t.h.length;i++){const ch=t.h[i];d+=ch=='('||ch=='['?1:ch==')'||ch==']'?-1:0;if(d<=0&&(ch==';'||ch=='.'&&/\s\S/.test(t.h.slice(i+1,i+3)))&&/\s/.test(t.h[i+1]||' ')){P.push(c);c=''}else c+=ch}P.push(c);
 return '<ul class="thl">'+P.map(x=>x.trim().replace(/\.$/,'')).filter(Boolean).map(x=>{const m=x.match(/^([^:=]{2,40}):\s*(.+)$/);return '<li>'+(m?`<b>${m[1]}:</b> ${m[2]}`:x)+'</li>'}).join('')+'</ul>'}
 function mxShow(){const L=[],seen=new Set(),ty=new Set(),C=[];for(let k=0;k<80;k++){const e=cur.g();if(!seen.has(e.q)){seen.add(e.q);C.push(e)}}const tk=e=>e.q.replace(/\d+/g,'#');C.forEach(e=>{if(L.length<5&&!ty.has(tk(e))){ty.add(tk(e));L.push(e)}});C.forEach(e=>{if(L.length<5&&!L.includes(e))L.push(e)});
-$('#mxl').innerHTML=L.map((e,i)=>`<div class="mxi"><div class="mxn">${i+1}</div><div class="mxb"><div class="mxq">${esc(e.q)}</div><ol>${e.s.filter(x=>!/^Відповідь:/.test(x)).map(x=>`<li>${esc(x)}</li>`).join('')}</ol><div class="mxa">Відповідь: ${e.as?esc(e.as):e.a.map(v=>esc(String(fmt(v)).replace('-','−'))).join('; ')}</div></div></div>`).join('');$('#mx').textContent='Інші 5 прикладів';$('#mxc').hidden=false;const cb=document.createElement('button');cb.className='bt';cb.textContent='✕ Закрити приклади';cb.style.marginTop='12px';cb.onclick=mxHide;$('#mxl').append(cb)}
+$('#mxl').innerHTML=L.map((e,i)=>`<div class="mxi"><div class="mxn">${i+1}</div><div class="mxb"><div class="mxq">${esc(e.q)}</div>${e.fig||''}<ol>${e.s.filter(x=>!/^Відповідь:/.test(x)).map(x=>`<li>${esc(x)}</li>`).join('')}</ol><div class="mxa">Відповідь: ${e.as?esc(e.as):e.a.map(v=>esc(cm(fmt(v)).replace('-','−'))).join('; ')}</div></div></div>`).join('');$('#mx').textContent='Інші 5 прикладів';$('#mxc').hidden=false;const cb=document.createElement('button');cb.className='bt';cb.textContent='✕ Закрити приклади';cb.style.marginTop='12px';cb.onclick=mxHide;$('#mxl').append(cb)}
 function mxHide(){$('#mxl').innerHTML='';$('#mx').textContent='Показати 5 прикладів';$('#mxc').hidden=true;$('#mx').closest('.card').scrollIntoView({block:'nearest'})}
 $('#mx').onclick=mxShow;$('#mxc').onclick=mxHide;
 const pl=n=>n%10==1&&n%100!=11?'тема':n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?'теми':'тем';
-function lbuild(){const L0=$('#list');L0.innerHTML='';const per={};LOG.forEach(x=>{const p=per[x.tp]=per[x.tp]||{n:0,ok:0};p.n++;if(x.ok)p.ok++});
-T.forEach(([g,ts])=>{const h=document.createElement('h3');h.innerHTML=`${g}<small>${ts.length} ${pl(ts.length)}</small>`;const gr=document.createElement('div');gr.className='tg';
-ts.forEach(t=>{const b=document.createElement('button');b.className='tp';const p=per[t.n];b.innerHTML=`<span>${t.n}</span>${p?`<em class="${p.ok==p.n?'gd':''}" title="правильних відповідей">${p.ok}/${p.n}</em>`:''}`;
-b.onclick=()=>{cur=t;$('#list').hidden=true;$('#det').hidden=false;$('#tn').textContent=t.n;$('#th').innerHTML=thHTML(t);gen();$('#mxl').innerHTML='';$('#mx').textContent='Показати 5 прикладів';$('#mxc').hidden=true;window.scrollTo(0,0)};gr.append(b)});L0.append(h,gr)})}
-function gen(){ex=cur.g();$('#q').textContent=ex.q;$('#st').hidden=true;$('#st').innerHTML=ex.s.filter(x=>!/^Відповідь:/.test(x)).map(s=>`<li>${s}</li>`).join('')+`<li><b>Відповідь: ${ex.as?ex.as:ex.a.map(fmt).join('; ')}</b></li>`;$('#in').value='';$('#res').textContent='';$('#oc').hidden=!(ex.k||ex.kt);$('#res').className='res'}
+function gen(){ex=cur.g();$('#q').textContent=ex.q;$('#fig').innerHTML=ex.fig||'';$('#st').hidden=true;$('#st').innerHTML=ex.s.filter(x=>!/^Відповідь:/.test(x)).map(s=>`<li>${s}</li>`).join('')+`<li><b>Відповідь: ${ex.as?ex.as:cm(ex.a.map(fmt).join('; '))}</b></li>`;$('#in').value='';$('#res').textContent='';$('#oc').hidden=!(ex.k||ex.kt);$('#res').className='res'}
 $('#bk').onclick=()=>{$('#list').hidden=false;$('#det').hidden=true;lbuild()};$('#nw').onclick=gen;$('#sh').onclick=()=>{$('#st').hidden=!$('#st').hidden};
 const num=s=>{s=s.replace(',','.').replace(/−/g,'-');s=s.replace(/sqrt\(?(\d+(?:\.\d+)?)\)?/gi,'√$1').replace(/(\d*(?:\.\d+)?)√(\d+(?:\.\d+)?)/g,(m,k,n)=>String((k?+k:1)*Math.sqrt(+n)));if(s.includes('_')){const[w,f]=s.split('_'),[a,b]=f.split('/');return(+w<0||w=='-0'?-1:1)*(Math.abs(+w)+a/b)}if(s.includes('/')){const[a,b]=s.split('/');return a/b}return parseFloat(s)};
 $('#ck').onclick=()=>{const ok=chk($('#in').value,ex.a,ex.tol);$('#res').textContent=ok?'✓ Правильно!':'✗ Не так. Спробуйте ще раз або відкрийте розв’язання';$('#res').className='res '+(ok?'gd':'bd')};$('#in').onkeydown=e=>{if(e.key=='Enter')$('#ck').click()};
 let LOG=[];try{LOG=JSON.parse(localStorage.getItem('mlog')||'[]')}catch(e){}
-const sv=()=>{try{localStorage.setItem('mlog',JSON.stringify(LOG.slice(-1000)))}catch(e){}},esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])),ALL=T.flatMap(([g,ts])=>ts);
+const sv=()=>{try{localStorage.setItem('mlog',JSON.stringify(LOG.slice(-1000)))}catch(e){}},ALL=T.flatMap(([g,ts])=>ts);
 function rec(tp,q,ok,u,test,ca){LOG.push({t:Date.now(),tp,q,ok,u,test:test||0,ca});sv()}
 function chk(v,A,t){t=t||1e-6;v=String(v).replace(/(-?\d+)\s+(\d+)\s*\/\s*(\d+)/g,'$1_$2/$3').replace(/\s*\/\s*/g,'/');const u=v.split(/[;\s]+/).filter(Boolean).map(num).sort((a,b)=>a-b),a=[...A].sort((a,b)=>a-b);return u.length==a.length&&u.every((x,i)=>Math.abs(x-a[i])<t)}
-$('#ck').addEventListener('click',()=>{const v=$('#in').value.trim();if(!v||ex.done)return;ex.done=1;rec(cur.n,ex.q,chk(v,ex.a,ex.tol),v,0,ex.a.map(fmt).join('; '))});
+$('#ck').addEventListener('click',()=>{const v=$('#in').value.trim();if(!v||ex.done)return;ex.done=1;rec(cur.n,ex.q,chk(v,ex.a,ex.tol),v,0,cm(ex.a.map(fmt).join('; ')))});
 let TS=null;
 function tsetup(){const B=$('#test');B.innerHTML=`<div class="card"><b>Кількість прикладів:</b> <input id="tn2" type="number" min="1" max="50" value="10" style="width:90px"></div><div class="card" id="tl"></div><div id="tmsg" style="color:var(--mu);margin:4px 0"></div><button class="bt" id="tgo" style="width:100%">Почати тест</button>`;
 const tl=$('#tl');tl.innerHTML='<b>Теми</b> <label style="margin-left:8px"><input type="checkbox" id="tall" style="width:auto"> усі</label>';
 ALL.forEach((t,i)=>{const l=document.createElement('label');l.style.cssText='display:block;padding:5px 0';l.innerHTML=`<input type="checkbox" class="tc" data-i="${i}" style="width:auto"> ${t.n}`;tl.append(l)});
 $('#tall').onchange=e=>document.querySelectorAll('.tc').forEach(c=>c.checked=e.target.checked);
 $('#tgo').onclick=()=>{const sel=[...document.querySelectorAll('.tc')].filter(c=>c.checked).map(c=>ALL[c.dataset.i]);if(!sel.length){$('#tmsg').textContent='Оберіть хоча б одну тему';return}const n=Math.max(1,Math.min(50,+$('#tn2').value||10));TS={id:Date.now(),n,k:0,sel,res:[]};tnext()}}
-function lv(v){document.querySelectorAll('#lt button').forEach((b,i)=>b.className=i==v?'on':'');$('#list').hidden=v!=0;$('#det').hidden=true;$('#test').hidden=v!=1;$('#hist').hidden=v!=2;if(v==1&&!TS)tsetup();if(v==2)thist();if(v==0)lbuild()}
+function lv(v){document.querySelectorAll('#lt button').forEach((b,i)=>b.className=i==v?'on':'');$('#list').hidden=v!=0;$('#det').hidden=true;$('#sheet').hidden=true;$('#test').hidden=v!=1;$('#hist').hidden=v!=2;if(v==1&&!TS)tsetup();if(v==2)thist();if(v==0)lbuild()}
 document.querySelectorAll('#lt button').forEach((b,i)=>b.onclick=()=>lv(i));
 function tnext(){if(TS.k>=TS.n)return tend();const B=$('#test'),t=TS.sel[r(0,TS.sel.length-1)],e=t.g();
 B.innerHTML=`<div class='card'><small>Приклад ${TS.k+1} з ${TS.n} · ${t.n}</small><div class='q'>${esc(e.q)}</div><input id='ta' placeholder='Ваша відповідь' autocomplete='off'> <button class='bt' id='tok'>Відповісти</button><div id='tv' style='margin-top:8px;font-weight:600'></div></div>`;
 const a=$('#ta'),b=$('#tok');a.focus();let done=false;
-const go=()=>{if(!done){const v=a.value,ok=chk(v,e.a,e.tol),ca=e.a.map(fmt).join('; ');done=true;TS.res.push({tp:t.n,q:e.q,u:v,ok,a:ca});rec(t.n,e.q,ok,v,TS.id,ca);a.disabled=true;const tv=$('#tv');tv.className=ok?'gd':'bd';tv.innerHTML=ok?'✓ Правильно!':'✗ Неправильно. Правильна відповідь: '+esc(ca)+`<div style='font-weight:400;font-size:14px;margin-top:4px'>${e.s.map(esc).join('<br>')}</div>`;b.textContent=TS.k+1==TS.n?'Завершити':'Далі';b.focus()}else{TS.k++;tnext()}};
+const go=()=>{if(!done){const v=a.value,ok=chk(v,e.a,e.tol),ca=cm(e.a.map(fmt).join('; '));done=true;TS.res.push({tp:t.n,q:e.q,u:v,ok,a:ca});rec(t.n,e.q,ok,v,TS.id,ca);a.disabled=true;const tv=$('#tv');tv.className=ok?'gd':'bd';tv.innerHTML=ok?'✓ Правильно!':'✗ Неправильно. Правильна відповідь: '+esc(ca)+`<div style='font-weight:400;font-size:14px;margin-top:4px'>${e.s.map(esc).join('<br>')}</div>`;b.textContent=TS.k+1==TS.n?'Завершити':'Далі';b.focus()}else{TS.k++;tnext()}};
 b.onclick=go;a.onkeydown=ev=>{if(ev.key=='Enter')go()}}
 function tend(){const ok=TS.res.filter(x=>x.ok).length,B=$('#test');B.innerHTML=`<div class='card'><div class='q'>Результат: ${ok} з ${TS.n} (${Math.round(ok/TS.n*100)}%)</div><span class='gd'>✓ ${ok}</span> · <span class='bd'>✗ ${TS.n-ok}</span></div>`+TS.res.map((x,i)=>`<div class='card ${x.ok?'gd':'bd'}' style='border-left:4px solid currentColor'>${x.ok?'✓':'✗'} <b>${i+1}.</b> <small style='color:var(--mu)'>${esc(x.tp||'')}</small><br>${esc(x.q)}<br><small>Ваша відповідь: ${esc(x.u||'—')}${x.ok?'':' · Правильно: '+esc(x.a)}</small></div>`).join('')+`<button class='bt' id='tre'>Новий тест</button>`;$('#tre').onclick=()=>{TS=null;tsetup()};TS=null}
 function thist(){const B=$('#hist'),ok=LOG.filter(x=>x.ok).length,n=LOG.length,per={},T2={};
@@ -803,18 +935,28 @@ $('#hclr').onclick=()=>{const b=$('#hclr');if(b.dataset.s){LOG=[];sv();thist()}e
 $('#oc').onclick=()=>{if(ser(wins[act].root))nl();const w=wins[act];if(ex.kt)fromText(w,ex.kt);else{key(w,'C');for(const ch of ex.k)key(w,ch)}snap(w);tab(1);render()};
 
 /* ---- Графік ---- */
-const G={f:['x^2-2x-3','sin(x)',''],cx:0,cy:0,s:40,F:[],pt:null},GC=['--g1','--g2','--g3'],SUB='₁₂₃';
-try{const s=JSON.parse(localStorage.getItem('mgraph')||'null');if(s&&Array.isArray(s.f))G.f=[0,1,2].map(i=>String(s.f[i]||''))}catch(e){}
-const gsave=()=>{try{localStorage.setItem('mgraph',JSON.stringify({f:G.f}))}catch(e){}};
+const GMAX=5,G={f:['x^2-2x-3','sin(x)',''],cx:0,cy:0,s:40,F:[],pt:null,tb:false},GC=['--g1','--g2','--g3','--g4','--g5'],SUB='₁₂₃₄₅';
+try{const s=JSON.parse(localStorage.getItem('mgraph')||'null');if(s&&Array.isArray(s.f)){G.f=s.f.slice(0,GMAX).map(x=>String(x||''));G.tb=!!s.tb}}catch(e){}
+const gsave=()=>{try{localStorage.setItem('mgraph',JSON.stringify({f:G.f,tb:G.tb}))}catch(e){}};
 function gcomp(){G.F=G.f.map(s=>{s=(s||'').trim().replace(/^y\s*=/,'');if(!s)return null;if(/[=<>≤≥]/.test(s))return{err:'тут потрібен лише вираз з x, без «=»'};try{const w=newWin();fromText(w,s);const q=parse(ser(w.root),{});const bad=[...q.vs].filter(v=>v!='x');if(bad.length)return{err:'невідома змінна '+bad.join(', ')+' — використовуйте x'};return{f:q.f}}catch(e){return{err:'вираз не дописано'}}})}
-function gui(){const B=$('#gfs');B.innerHTML='';G.f.forEach((s,i)=>{const l=document.createElement('label');l.className='gf';l.innerHTML=`<span class="sw" style="background:var(${GC[i]})"></span><span class="gl">f${SUB[i]}(x) =</span><input id="gf${i}" autocomplete="off" spellcheck="false" placeholder="${['напр. x^2-4','напр. sin(x)','напр. 1/x'][i]}">`;const inp=l.querySelector('input');inp.value=s;inp.oninput=()=>{G.f[i]=inp.value;gcomp();gdraw();gsave()};B.append(l)})}
-const gf=(F,x)=>{const d0=deg;deg=false;try{return F.f({x})}catch(e){return NaN}finally{deg=d0}},n4=v=>String(+(+v).toFixed(4)).replace('-','−');
+// поля функцій: показуємо заповнені + одне порожнє (щонайменше 3, щонайбільше 5)
+function gfield(i){const l=document.createElement('label');l.className='gf';l.innerHTML=`<span class="sw" style="background:var(${GC[i]})"></span><span class="gl">f${SUB[i]}(x) =</span><input id="gf${i}" autocomplete="off" spellcheck="false" placeholder="${['напр. x^2-4','напр. sin(x)','напр. 1/x','напр. 2x+1','напр. sqrt(x)'][i]}">`;
+const inp=l.querySelector('input');inp.value=G.f[i]||'';inp.oninput=()=>{G.f[i]=inp.value;if(inp.value.trim()&&i==$('#gfs').children.length-1&&i<GMAX-1){G.f[i+1]=G.f[i+1]||'';$('#gfs').append(gfield(i+1))}gcomp();gdraw();gsave()};return l}
+function gui(){const B=$('#gfs');B.innerHTML='';while(G.f.length<3)G.f.push('');let n=3;G.f.forEach((s,i)=>{if((s||'').trim())n=Math.max(n,i+2)});n=Math.min(n,GMAX);while(G.f.length<n)G.f.push('');for(let i=0;i<n;i++)B.append(gfield(i));$('#gtb').classList.toggle('on',G.tb)}
+const gf=(F,x)=>{const d0=deg;deg=false;try{return F.f({x})}catch(e){return NaN}finally{deg=d0}},n4=v=>cm(String(+(+v).toFixed(4))).replace('-','−');
 function gzeros(h,a,b,n){const Z=[];let px=a,pv=h(a);for(let k=1;k<=n;k++){const x=a+(b-a)*k/n,v=h(x);if(isFinite(v)&&isFinite(pv)&&(v==0||pv*v<0)){let L=px,R=x;for(let j=0;j<55;j++){const m=(L+R)/2;h(L)*h(m)<=0?R=m:L=m}const z=(L+R)/2;if(Math.abs(h(z))<1e-6&&!Z.some(q=>Math.abs(q-z)<(b-a)/n))Z.push(Math.abs(z-Math.round(z))<1e-7?Math.round(z):z)}px=x;pv=v}return Z}
+// локальні максимуми й мінімуми на видимій ділянці: [x, y, 'max'|'min']
+function gextr(h,a,b,n){const E=[],dx=(b-a)/n;let y0=h(a),y1=h(a+dx);for(let k=2;k<=n;k++){const x2=a+dx*k,y2=h(x2);if(isFinite(y0)&&isFinite(y1)&&isFinite(y2)){const up=y1>y0&&y1>y2,dn=y1<y0&&y1<y2;if(up||dn){let L=x2-2*dx,R=x2;const q=.381966,s=up?-1:1;for(let j=0;j<60;j++){const m1=L+(R-L)*q,m2=R-(R-L)*q;if(s*h(m1)<s*h(m2))R=m2;else L=m1}let z=(L+R)/2;if(Math.abs(z-Math.round(z*2)/2)<1e-5)z=Math.round(z*2)/2;const yz=h(z);
+// відсікаємо розриви (напр. tg x): значення в точці має бути близьким до сусідніх
+if(isFinite(yz)&&Math.abs(yz-y1)<=Math.abs(y1-y0)+Math.abs(y1-y2)+1e-9)E.push([z,yz,up?'max':'min'])}}y0=y1;y1=y2}return E}
+function gtable(st,x0,x1){const T=$('#gtab');if(!G.tb){T.hidden=true;return}T.hidden=false;const act=G.F.map((F,i)=>F&&F.f?i:-1).filter(i=>i>=0);if(!act.length){T.innerHTML='<p class="note">Впишіть функцію, щоб побачити таблицю значень.</p>';return}
+const c=Math.round(G.cx/st)*st,X=[];for(let k=-6;k<=6;k++)X.push(+(c+k*st).toPrecision(12));
+T.innerHTML=`<div class="tblw"><table class="gt"><thead><tr><th>x</th>${act.map(i=>`<th style="color:var(${GC[i]})">f${SUB[i]}(x)</th>`).join('')}</tr></thead><tbody>${X.map(x=>`<tr><td>${n4(x)}</td>${act.map(i=>{const v=gf(G.F[i],x);return`<td>${isFinite(v)?n4(v):'—'}</td>`}).join('')}</tr>`).join('')}</tbody></table></div><p class="note">Крок таблиці дорівнює кроку сітки (${n4(st)}). Зсуньте або масштабуйте графік, щоб змінити діапазон.</p>`}
 function gdraw(){const c=$('#gc'),W=c.clientWidth,H=c.clientHeight;if(!W||!H)return;const dp=window.devicePixelRatio||1;c.width=Math.round(W*dp);c.height=Math.round(H*dp);const x=c.getContext('2d');x.setTransform(dp,0,0,dp,0,0);
 const cs=getComputedStyle(document.documentElement),col=n=>cs.getPropertyValue(n).trim()||'#888';
 x.fillStyle=col('--sheet');x.fillRect(0,0,W,H);
 const X=px=>(px-W/2)/G.s+G.cx,PX=v=>(v-G.cx)*G.s+W/2,PY=v=>H/2-(v-G.cy)*G.s,x0=X(0),x1=X(W),y0=G.cy-H/2/G.s,y1=G.cy+H/2/G.s;
-const raw=55/G.s,p10=10**Math.floor(Math.log10(raw)),st=[1,2,5,10].map(m=>m*p10).find(v=>v>=raw-1e-12),lab=v=>String(+v.toPrecision(6)).replace('-','−');
+const raw=55/G.s,p10=10**Math.floor(Math.log10(raw)),st=[1,2,5,10].map(m=>m*p10).find(v=>v>=raw-1e-12),lab=v=>cm(String(+v.toPrecision(6))).replace('-','−');
 x.lineWidth=1;x.strokeStyle=col('--grid');x.beginPath();
 for(let v=Math.ceil(x0/st)*st;v<=x1;v+=st){const p=Math.round(PX(v))+.5;x.moveTo(p,0);x.lineTo(p,H)}
 for(let v=Math.ceil(y0/st)*st;v<=y1;v+=st){const p=Math.round(PY(v))+.5;x.moveTo(0,p);x.lineTo(W,p)}x.stroke();
@@ -825,18 +967,22 @@ for(let v=Math.ceil(x0/st)*st;v<=x1;v+=st){if(Math.abs(v)<st/2)continue;const p=
 const lxr=ax<W-44;x.textAlign=lxr?'left':'right';x.textBaseline='middle';const lx=lxr?Math.max(ax+5,4):Math.min(ax-5,W-4);
 for(let v=Math.ceil(y0/st)*st;v<=y1;v+=st){if(Math.abs(v)<st/2)continue;const p=PY(v);if(p>10&&p<H-10)x.fillText(lab(v),lx,p)}
 x.font='italic 15px "STIX Two Text",serif';x.textAlign='right';x.textBaseline='top';x.fillText('x',W-6,Math.min(Math.max(ay+18,4),H-20));x.textAlign='left';x.fillText('y',Math.min(Math.max(ax+8,4),W-14),4);
-const info=[],pts=[];
+const info=[],pts=[],exs=[];
 G.F.forEach((F,i)=>{if(!F)return;if(F.err){info.push(`<span class="bd">f${SUB[i]}: ${F.err}</span>`);return}
 x.strokeStyle=col(GC[i]);x.lineWidth=2.4;x.lineJoin='round';x.beginPath();let pen=false,py=0;
 for(let px=0;px<=W;px+=.5){const y=PY(gf(F,X(px)));if(!isFinite(y)||Math.abs(y)>H*20){pen=false;continue}if(pen&&Math.abs(y-py)>H*1.5)pen=false;pen?x.lineTo(px,y):x.moveTo(px,y);pen=true;py=y}x.stroke();
-const Z=gzeros(v=>gf(F,v),x0,x1,Math.ceil(W));Z.forEach(z=>pts.push([z,0,col(GC[i])]));
-info.push(`<span style="color:var(${GC[i]})">●</span> f${SUB[i]}: ${Z.length?'нулі <b>x = '+Z.slice(0,8).map(n4).join('; ')+'</b>'+(Z.length>8?' …':''):'нулів на видимій ділянці немає'}`)});
-for(let i=0;i<3;i++)for(let j=i+1;j<3;j++){const A1=G.F[i],B1=G.F[j];if(!A1||!B1||!A1.f||!B1.f)continue;const Z=gzeros(v=>gf(A1,v)-gf(B1,v),x0,x1,Math.ceil(W));if(Z.length){Z.forEach(z=>pts.push([z,gf(A1,z),col('--ink')]));info.push(`f${SUB[i]} і f${SUB[j]} перетинаються: <b>${Z.slice(0,5).map(z=>'('+n4(z)+'; '+n4(gf(A1,z))+')').join(', ')}</b>`)}}
+const h=v=>gf(F,v),Z=gzeros(h,x0,x1,Math.ceil(W)),E=gextr(h,x0,x1,Math.ceil(W/2)).filter(e=>e[1]>=y0-1e-9&&e[1]<=y1+1e-9).slice(0,8);
+Z.forEach(z=>pts.push([z,0,col(GC[i])]));E.forEach(e=>exs.push([...e,col(GC[i])]));
+let ln=`<span style="color:var(${GC[i]})">●</span> f${SUB[i]}: ${Z.length?'нулі <b>x = '+Z.slice(0,8).map(n4).join('; ')+'</b>'+(Z.length>8?' …':''):'нулів на видимій ділянці немає'}`;
+if(E.length)ln+='; '+E.slice(0,4).map(e=>`${e[2]=='max'?'максимум':'мінімум'} <b>(${n4(e[0])}; ${n4(e[1])})</b>`).join(', ')+(E.length>4?' …':'');info.push(ln)});
+for(let i=0;i<GMAX;i++)for(let j=i+1;j<GMAX;j++){const A1=G.F[i],B1=G.F[j];if(!A1||!B1||!A1.f||!B1.f)continue;const Z=gzeros(v=>gf(A1,v)-gf(B1,v),x0,x1,Math.ceil(W));if(Z.length){Z.forEach(z=>pts.push([z,gf(A1,z),col('--ink')]));info.push(`f${SUB[i]} і f${SUB[j]} перетинаються: <b>${Z.slice(0,5).map(z=>'('+n4(z)+'; '+n4(gf(A1,z))+')').join(', ')}</b>`)}}
 pts.forEach(([a,b,cl])=>{const px=PX(a),py=PY(b);if(px<0||px>W||py<0||py>H)return;x.fillStyle=col('--sheet');x.strokeStyle=cl;x.lineWidth=2;x.beginPath();x.arc(px,py,4.5,0,7);x.fill();x.stroke()});
+// екстремуми — трикутнички: вершиною вгору для максимуму, вниз для мінімуму
+exs.forEach(([a,b,t,cl])=>{const px=PX(a),py=PY(b),d=t=='max'?-1:1;x.fillStyle=cl;x.beginPath();x.moveTo(px,py+d*3);x.lineTo(px-5,py+d*11);x.lineTo(px+5,py+d*11);x.closePath();x.fill()});
 if(G.pt!=null){const xv=X(G.pt);x.strokeStyle=col('--mu');x.setLineDash([4,4]);x.lineWidth=1;x.beginPath();x.moveTo(G.pt,0);x.lineTo(G.pt,H);x.stroke();x.setLineDash([]);
 const vals=[];G.F.forEach((F,i)=>{if(!F||!F.f)return;const v=gf(F,xv);if(isFinite(v)){vals.push(`f${SUB[i]} = ${n4(v)}`);const py=PY(v);if(py>=0&&py<=H){x.fillStyle=col(GC[i]);x.beginPath();x.arc(G.pt,py,4,0,7);x.fill()}}});
 info.unshift(`<b>x = ${n4(xv)}</b>${vals.length?': '+vals.join(', '):''}`)}
-if(!G.F.some(Boolean))info.push('Впишіть функцію в одне з полів вище.');$('#gi').innerHTML=info.join('<br>')}
+if(!G.F.some(Boolean))info.push('Впишіть функцію в одне з полів вище.');$('#gi').innerHTML=info.join('<br>');gtable(st,x0,x1)}
 function gzoom(k,px,py,nd){const c=$('#gc'),W=c.clientWidth,H=c.clientHeight;px=px??W/2;py=py??H/2;const wx=(px-W/2)/G.s+G.cx,wy=G.cy-(py-H/2)/G.s;G.s=Math.min(20000,Math.max(.05,G.s*k));G.cx=wx-(px-W/2)/G.s;G.cy=wy+(py-H/2)/G.s;if(!nd)gdraw()}
 (()=>{const c=$('#gc'),P=new Map();let moved=false;const pos=e=>{const b=c.getBoundingClientRect();return{x:e.clientX-b.left,y:e.clientY-b.top}};
 c.onpointerdown=e=>{c.setPointerCapture(e.pointerId);P.set(e.pointerId,pos(e));moved=false};
@@ -848,8 +994,134 @@ c.onpointerup=c.onpointercancel=e=>{if(!moved&&P.size==1)G.pt=pos(e).x;P.delete(
 c.onpointerleave=e=>{if(e.pointerType=='mouse'&&!P.size){G.pt=null;gdraw()}};
 c.addEventListener('wheel',e=>{e.preventDefault();const p=pos(e);gzoom(e.deltaY<0?1.2:1/1.2,p.x,p.y)},{passive:false});
 $('#gzi').onclick=()=>gzoom(1.5);$('#gzo').onclick=()=>gzoom(1/1.5);$('#g0').onclick=()=>{G.cx=0;G.cy=0;G.s=40;G.pt=null;gdraw()};
+$('#gtb').onclick=()=>{G.tb=!G.tb;$('#gtb').classList.toggle('on',G.tb);gsave();gdraw()};
 let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{if(!$('#gr').hidden)gdraw()},80)});
 try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(!$('#gr').hidden)gdraw()})}catch(e){}})();
+
+/* ---- Малюнки до геометричних задач (SVG, кольори беруться з теми) ---- */
+(()=>{
+const SV=inner=>`<svg class="fig" viewBox="0 0 230 150" role="img" aria-label="Малюнок до задачі">${inner}</svg>`,
+tx=(x,y,s,a='middle')=>`<text x="${x}" y="${y}" text-anchor="${a}">${s}</text>`,
+pg=(pts,c='ln')=>`<polygon class="${c}" points="${pts.map(p=>p.join(',')).join(' ')}"/>`,
+ds=(x1,y1,x2,y2)=>`<line class="ds" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`,
+// пропорції: вписуємо фігуру a×b у рамку W×H, не даючи їй стати надто вузькою
+fit=(a,b,W,H)=>{let r=a/b;r=Math.min(Math.max(r,.45),2.4);return r>W/H?[W,W/r]:[H*r,H]},
+// прямокутний трикутник: v — вертикальний катет, h — горизонтальний, c — гіпотенуза, ang — підпис кута біля правої вершини
+rt=(v,h,c,nv,nh,ang)=>{const[w,hh]=fit(nh,nv,150,95),x0=45,y0=125;return SV(pg([[x0,y0],[x0+w,y0],[x0,y0-hh]])+`<path class="ds" style="stroke-dasharray:none" d="M${x0+10},${y0} v-10 h-10"/>`+tx(x0-8,y0-hh/2+5,v,'end')+tx(x0+w/2,y0+18,h)+tx(x0+w/2+10,y0-hh/2-6,c,'start')+(ang?`<path class="ac" d="M${x0+w-26},${y0} a26,26 0 0 1 ${26-26*Math.cos(Math.atan2(hh,w))},${-26*Math.sin(Math.atan2(hh,w))}"/>`+tx(x0+w-32,y0-5,ang,'end'):''))},
+rect=(lw,lh,nw,nh,dg)=>{const[w,h]=fit(nw,nh,160,95),x0=35,y0=22;return SV(`<rect class="ln" x="${x0}" y="${y0}" width="${w}" height="${h}"/>`+(dg?ds(x0,y0+h,x0+w,y0)+tx(x0+w/2-8,y0+h/2-6,dg,'end'):'')+tx(x0+w/2,y0+h+18,lw)+tx(x0+w+8,y0+h/2+5,lh,'start'))},
+circ=(lab,d)=>SV(`<circle class="ln" cx="115" cy="75" r="58"/><circle cx="115" cy="75" r="2.5" fill="currentColor"/>`+(d?ds(57,75,173,75)+tx(115,68,lab):ds(115,75,173,75)+tx(144,68,lab))),
+tri=(b,h)=>SV(pg([[30,125],[200,125],[85,25]])+ds(85,25,85,125)+tx(115,143,b)+tx(92,82,h,'start')),
+para=(b,h)=>SV(pg([[25,125],[165,125],[205,35],[65,35]])+ds(65,35,65,125)+tx(95,143,b)+tx(72,85,h,'start')),
+trap=(a,b,h)=>SV(pg([[25,125],[205,125],[160,35],[70,35]])+ds(70,35,70,125)+tx(115,143,a)+tx(115,28,b)+tx(77,85,h,'start')),
+rhomb=(d1,d2)=>SV(pg([[20,75],[115,25],[210,75],[115,125]])+ds(20,75,210,75)+ds(115,25,115,125)+tx(160,70,d1)+tx(121,105,d2,'start')),
+iso=(b,s,h)=>SV(pg([[40,128],[190,128],[115,22]])+ds(115,22,115,128)+tx(115,146,b)+tx(160,72,s,'start')+tx(109,92,h,'end')),
+box=(a,b,c,na,nb,nc)=>{const[w,h]=fit(na,nc,110,70),d=Math.min(Math.max(nb/na,.3),.8)*40,x0=30,y0=130;return SV(pg([[x0,y0],[x0+w,y0],[x0+w,y0-h],[x0,y0-h]])+pg([[x0,y0-h],[x0+d,y0-h-d*.6],[x0+w+d,y0-h-d*.6],[x0+w,y0-h]])+pg([[x0+w,y0],[x0+w+d,y0-d*.6],[x0+w+d,y0-h-d*.6],[x0+w,y0-h]])+tx(x0+w/2,y0+16,a)+tx(x0+w+d+6,y0-h/2-d*.3+5,c,'start')+tx(x0+w+d/2+8,y0-d*.3+12,b,'start'))},
+cyl=(r,h)=>SV(`<path class="ln" d="M55,40 v70 a60,16 0 0 0 120,0 v-70"/><ellipse class="ln" cx="115" cy="40" rx="60" ry="16"/>`+ds(115,40,175,40)+tx(145,36,r)+tx(183,80,h,'start')),
+cone=(r,h)=>SV(`<path class="ln" d="M55,118 L115,20 L175,118 a60,16 0 0 1 -120,0 z"/>`+`<path class="ds" d="M55,118 a60,16 0 0 1 120,0"/>`+ds(115,20,115,118)+ds(115,118,175,118)+tx(146,114,r)+tx(109,78,h,'end')),
+sph=r=>SV(`<circle class="ln" cx="115" cy="75" r="58"/><ellipse class="ds" cx="115" cy="75" rx="58" ry="16"/>`+ds(115,75,173,75)+tx(144,69,r)),
+// правила: тема → [шаблон умови, функція малюнка]
+R={
+'Периметр і площа':[[/Прямокутник (\d+) см × (\d+) см/,m=>rect(m[1],m[2],+m[1],+m[2])],[/Квадрат зі стороною (\d+)/,m=>rect(m[1],m[1],1,1)]],
+'Коло і круг':[[/Радіус (?:кола|круга) (\d+)/,m=>circ('r = '+m[1])],[/Діаметр кола (\d+)/,m=>circ('d = '+m[1],1)],[/Довжина кола .* радіус/,()=>circ('r = ?')],[/Площа круга .* діаметр/,()=>circ('d = ?',1)]],
+'Теорема Піфагора':[[/Катети (\d+) і (\d+)\. Знайдіть гіп/,m=>rt(m[1],m[2],'?',+m[1],+m[2])],[/Гіпотенуза (\d+), катет (\d+)/,m=>rt(m[2],'?',m[1],+m[2],Math.sqrt(m[1]*m[1]-m[2]*m[2]))],[/Сторони прямокутника (\d+) і (\d+)/,m=>rect(m[2],m[1],+m[2],+m[1],'?')],[/основа (\d+), бічна сторона (\d+)/,m=>iso(m[1],m[2],'?')]],
+'Площі фігур':[[/Трикутник: основа (\d+), висота (\d+)/,m=>tri(m[1],m[2])],[/Паралелограм: сторона (\d+), висота до неї (\d+)/,m=>para(m[1],m[2])],[/Трапеція: основи (\d+) і (\d+), висота (\d+)/,m=>trap(m[1],m[2],m[3])],[/Ромб: діагоналі (\d+) і (\d+)/,m=>rhomb(m[1],m[2])]],
+'Прямокутний трикутник':[[/Гіпотенуза (\d+), ∠A = 30°/,m=>rt('?','',m[1],1,1.73,'30°')],[/Катет (\d+), гострий кут 45°/,m=>rt('?',m[1],'',1,1,'45°')],[/Катет (\d+) прилягає до ∠A = 60°/,m=>rt('',m[1],'?',1.73,1,'60°')]],
+'Об’єми тіл':[[/Куб з ребром (\d+)/,m=>box(m[1],'','',1,1,1)],[/паралелепіпед (\d+) × (\d+) × (\d+)/,m=>box(m[1],m[2],m[3],+m[1],+m[2],+m[3])],[/Циліндр: r = (\d+), h = (\d+)/,m=>cyl(m[1],m[2])],[/Конус: r = (\d+), h = (\d+)/,m=>cone(m[1],m[2])],[/Куля радіуса (\d+)/,m=>sph(m[1])]]};
+// обгортаємо генератори: до завдання додається поле fig з малюнком
+for(const[,ts]of T)for(const t of ts){const rules=R[t.n];if(!rules)continue;const g0=t.g;t.g=()=>{const e=g0.call(t);for(const[re,f]of rules){const m=e.q.match(re);if(m){e.fig=f(m);break}}return e}}
+})();
+
+/* ---- Розширені завдання: логарифми, границі, первісна, комбінаторика, матриці ---- */
+(()=>{
+const Q=(q,a,s,kt,x)=>Object.assign({q,a:[].concat(a),s,kt},x||{}),M=(...f)=>pick(f)(),
+FR=(n,d)=>{if(d<0){n=-n;d=-d}const g=gc(Math.abs(n),d)||1;n/=g;d/=g;return d==1?`${n}`:`${n}/${d}`},
+S=n=>n<0?`− ${-n}`:`+ ${n}`,nz=(a,b)=>{let v;do{v=r(a,b)}while(!v);return v},RG={};
+
+RG['Логарифми']=()=>{const b=pick([2,3,5]),m=r(1,4),n=r(1,4);return M(
+()=>Q(`log_${b} ${b**m} = ?`,m,[`${b**m} = ${b}${up(m)}`,`log_${b} ${b}${up(m)} = ${m}`]),
+()=>Q(`log_${b} ${b**m} + log_${b} ${b**n} = ?`,m+n,[`log_${b} ${b**m} = ${m}, log_${b} ${b**n} = ${n}`,`Сума: ${m+n}`]),
+()=>{const k=Math.max(m,n),j=Math.min(m,n);return Q(`log_${b} ${b**(k+j)} − log_${b} ${b**j} = ?`,k,[`Різниця логарифмів = логарифм частки: log_${b} (${b**(k+j)}/${b**j})`,`= log_${b} ${b**k} = ${k}`])},
+()=>Q(`log_${b} x = ${m}. Знайдіть x.`,b**m,[`За означенням: x = ${b}${up(m)} = ${b**m}`],`${b}^${m}`),
+()=>{const c=r(1,9);return Q(`log_${b} (x + ${c}) = ${m}. Знайдіть x.`,b**m-c,[`x + ${c} = ${b}${up(m)} = ${b**m}`,`x = ${b**m} − ${c} = ${b**m-c}`],`${b}^${m}-${c}`)},
+()=>{const k=r(1,5);return Q(`lg ${10**k} = ?`,k,[`lg — логарифм за основою 10`,`${10**k} = 10${up(k)} → lg = ${k}`],`lg(${10**k})`)},
+()=>{const k=r(2,6);return Q(`ln e${up(k)} = ?`,k,[`ln — логарифм за основою e`,`ln e${up(k)} = ${k}·ln e = ${k}`])},
+()=>{const[ba,x,p,q]=pick([[4,8,3,2],[8,4,2,3],[9,27,3,2],[27,9,2,3],[4,32,5,2],[8,2,1,3],[4,2,1,2],[25,125,3,2]]);return Q(`log_${ba} ${x} = ? (дробом)`,p/q,[`Зводимо до однієї основи: ${ba} = ${ba%2?(ba%5?3:5):2}${up(q)}, ${x} = ${ba%2?(ba%5?3:5):2}${up(p)}`,`log = ${p}/${q}`],undefined,{as:FR(p,q)})},
+()=>{const k=r(2,4);return Q(`log_${b} ${b**m}${up(k)} = ?`,m*k,[`log_a bᵏ = k·log_a b`,`${k}·log_${b} ${b**m} = ${k}·${m} = ${m*k}`])},
+()=>{const c=r(2,9);return Q(`${b}^(log_${b} ${c}) = ?`,c,[`Основна логарифмічна тотожність: a^(log_a b) = b`,`= ${c}`])})};
+
+RG['Границя функції']=()=>{const a=r(1,9);return M(
+()=>Q(`lim x→${a} (x² − ${a*a})/(x − ${a}) = ?`,2*a,[`Невизначеність 0/0 — розкладаємо: (x − ${a})(x + ${a})/(x − ${a})`,`= x + ${a} → ${2*a}`]),
+()=>{const c=r(1,5),p=r(1,9),b=r(0,9),d=r(0,9);return Q(`lim x→∞ (${p}x + ${b})/(${c}x + ${d}) = ? (дробом)`,p/c,[`Ділимо чисельник і знаменник на x: (${p} + ${b}/x)/(${c} + ${d}/x)`,`Дроби з x у знаменнику прямують до 0 → ${FR(p,c)}`],undefined,{as:FR(p,c)})},
+()=>{const k=r(1,4),m=nz(-9,9),x0=r(-3,4),v=k*x0*x0+m;return Q(`lim x→${x0} (${k==1?'':k}x² ${S(m)}) = ?`,v,[`Функція неперервна — просто підставляємо x = ${x0}`,`${k}·${x0<0?`(${x0})`:x0}² ${S(m)} = ${v}`],`${k}*(${x0})^2+(${m})`)},
+()=>{let b;do{b=r(-9,9)}while(b==a);return Q(`lim x→${a} (x² ${S(-(a+b))}x ${S(a*b)})/(x − ${a}) = ?`,a-b,[`Чисельник: (x − ${a})(x ${S(-b)})`,`Скорочуємо на (x − ${a}): x ${S(-b)} → ${a-b}`])},
+()=>{const p=r(1,9),c=r(1,5),q=r(1,9);return Q(`lim x→∞ (${p}x² + ${q}x)/(${c}x² + 1) = ? (дробом)`,p/c,[`Однакові старші степені — відношення старших коефіцієнтів`,`${p}/${c} = ${FR(p,c)}`],undefined,{as:FR(p,c)})},
+()=>{const p=r(1,9),q=r(1,9);return Q(`lim x→∞ (${p}x + ${q})/(x² + 1) = ?`,0,[`Степінь знаменника більший за степінь чисельника`,`Границя дорівнює 0`])},
+()=>{const k=r(2,9);return Q(`lim x→0 sin(${k}x)/x = ?`,k,[`Перша чудова границя: sin t / t → 1 при t → 0`,`sin(${k}x)/x = ${k}·sin(${k}x)/(${k}x) → ${k}`])},
+()=>Q(`lim x→0 (√(x + ${a*a}) − ${a})/x = ? (дробом)`,1/(2*a),[`Множимо на спряжений вираз: x / (x·(√(x + ${a*a}) + ${a}))`,`= 1/(√${a*a} + ${a}) = 1/${2*a}`],undefined,{as:`1/${2*a}`}))};
+
+RG['Первісна']=()=>M(
+()=>{const n=r(1,3),a=(n+1)*r(1,4),x0=r(1,3),C=r(1,9),v=a/(n+1)*x0**(n+1)+C;return Q(`f(x) = ${a}x${n>1?up(n):''}. Первісна F має F(0) = ${C}. Знайдіть F(${x0}).`,v,[`F(x) = ${a/(n+1)==1?'':a/(n+1)}x${up(n+1)} + C`,`F(0) = C = ${C}`,`F(${x0}) = ${a/(n+1)}·${x0**(n+1)} + ${C} = ${v}`],`${a/(n+1)}*${x0}^${n+1}+${C}`)},
+()=>{const a=3*r(1,3),b=2*r(1,5),c=r(1,9),x0=r(1,3),v=a/3*x0**3+b/2*x0*x0+c*x0;return Q(`f(x) = ${a}x² + ${b}x + ${c}. Знайдіть F(${x0}), якщо F(0) = 0.`,v,[`F(x) = ${a/3==1?'':a/3}x³ + ${b/2==1?'':b/2}x² + ${c}x + C, C = 0`,`F(${x0}) = ${a/3*x0**3} + ${b/2*x0*x0} + ${c*x0} = ${v}`],`${a/3}*${x0}^3+${b/2}*${x0}^2+${c}*${x0}`)},
+()=>{const k=r(1,5),x1=r(1,4),y1=r(-9,20),C=y1-k*x1*x1;return Q(`f(x) = ${2*k}x. Графік первісної F проходить через точку (${x1}; ${y1}). Знайдіть C.`,C,[`F(x) = ${k==1?'':k}x² + C`,`${y1} = ${k}·${x1}² + C → C = ${y1} − ${k*x1*x1} = ${C}`])},
+()=>{const c=r(1,9);return Q(`f(x) = cos x. Первісна F має F(0) = ${c}. Знайдіть F(π/2).`,1+c,[`F(x) = sin x + C, F(0) = C = ${c}`,`F(π/2) = sin(π/2) + ${c} = ${1+c}`])},
+()=>{const c=r(1,9);return Q(`f(x) = 1/x (x > 0). Первісна F має F(1) = ${c}. Знайдіть F(e).`,1+c,[`F(x) = ln x + C, F(1) = 0 + C = ${c}`,`F(e) = ln e + ${c} = ${1+c}`])},
+()=>{const n=r(2,5);return Q(`Первісна функції f(x) = x${up(n)} має вигляд x${up(n+1)}/k + C. Знайдіть k.`,n+1,[`∫xⁿdx = xⁿ⁺¹/(n + 1) + C`,`k = ${n} + 1 = ${n+1}`])},
+()=>{const a=r(2,9);return Q(`F(x) = ${a}x² + 3 — первісна функції f(x) = kx. Знайдіть k.`,2*a,[`f(x) = F′(x) = ${2*a}x`,`k = ${2*a}`])});
+
+RG['Комбінаторика']=()=>{const n=r(5,10),k=r(2,4),C=(n,k)=>fa(n)/(fa(k)*fa(n-k));return M(
+()=>Q(`Скількома способами можна розсадити ${n} учнів на ${n} місцях?`,fa(n),[`Перестановки: P = ${n}! = ${fa(n)}`],`${n}!`),
+()=>Q(`Скільки існує способів вибрати ${k} учнів із ${n}, якщо порядок важливий?`,fa(n)/fa(n-k),[`Розміщення: A = ${n}!/${n-k}! = ${Array.from({length:k},(_, i)=>n-i).join('·')} = ${fa(n)/fa(n-k)}`]),
+()=>Q(`Скількома способами можна вибрати ${k} учнів із ${n}? (порядок не важливий)`,C(n,k),[`Комбінації: C = ${n}!/(${k}!·${n-k}!) = ${C(n,k)}`]),
+()=>{const a=r(2,6),b=r(2,6),c=r(2,4);return Q(`У шафі ${a} сорочок, ${b} штанів і ${c} пари взуття. Скільки різних комплектів можна скласти?`,a*b*c,[`Правило добутку: вибори незалежні`,`${a}·${b}·${c} = ${a*b*c}`],`${a}*${b}*${c}`)},
+()=>{const d=r(3,7);return Q(`Скільки двоцифрових чисел можна скласти з ${d} різних ненульових цифр, якщо цифри не повторюються?`,d*(d-1),[`Першу цифру вибираємо ${d} способами, другу — ${d-1}`,`${d}·${d-1} = ${d*(d-1)}`],`${d}*${d-1}`)},
+()=>Q(`На зустрічі ${n} людей, кожен потиснув руку кожному. Скільки було рукостискань?`,C(n,2),[`Кожне рукостискання — пара людей: C з ${n} по 2`,`${n}·${n-1}/2 = ${C(n,2)}`],`${n}*${n-1}/2`),
+()=>Q(`У забігу ${n} спортсменів. Скількома способами можуть розподілитися 1, 2 і 3 місця?`,n*(n-1)*(n-2),[`Порядок важливий — розміщення з ${n} по 3`,`${n}·${n-1}·${n-2} = ${n*(n-1)*(n-2)}`],`${n}*${n-1}*${n-2}`),
+()=>{const a=r(4,7),b=r(3,6);return Q(`У класі ${a} хлопців і ${b} дівчат. Скількома способами можна вибрати 2 хлопців і 1 дівчину?`,C(a,2)*b,[`Хлопців: C з ${a} по 2 = ${C(a,2)}; дівчину: ${b} способів`,`${C(a,2)}·${b} = ${C(a,2)*b}`],`${C(a,2)}*${b}`)},
+()=>{const w=pick([['КІТ',3],['ШКОЛА',5],['ЗОШИТ',5],['РУЧКА',5],['ДІМ',3],['ПАРК',4]]);return Q(`Скільки різних «слів» можна скласти, переставляючи букви слова ${w[0]}?`,fa(w[1]),[`Усі ${w[1]} букв різні → перестановки`,`${w[1]}! = ${fa(w[1])}`],`${w[1]}!`)},
+()=>{const d=r(3,5);return Q(`Скільки ${d}-значних кодів можна скласти з цифр 0–9, якщо цифри можуть повторюватися?`,10**d,[`На кожному з ${d} місць — будь-яка з 10 цифр`,`10${up(d)} = ${10**d}`],`10^${d}`)})};
+
+RG['Матриці: добуток']=()=>{const m=()=>[r(-3,5),r(-3,5),r(-3,5),r(-3,5)],X=m(),Y=m(),sh=A=>`[[${A[0]}, ${A[1]}], [${A[2]}, ${A[3]}]]`,P=n=>n<0?`(${n})`:n,
+AB=[X[0]*Y[0]+X[1]*Y[2],X[0]*Y[1]+X[1]*Y[3],X[2]*Y[0]+X[3]*Y[2],X[2]*Y[1]+X[3]*Y[3]],sb=['₁₁','₁₂','₂₁','₂₂'];return M(
+()=>{const k=r(0,3),i=k>>1,j=k&1;return Q(`A = ${sh(X)}, B = ${sh(Y)}. Знайдіть елемент (AB)${sb[k]}.`,AB[k],[`Рядок ${i+1} матриці A множимо на стовпець ${j+1} матриці B`,`${X[2*i]}·${P(Y[j])} + ${X[2*i+1]}·${P(Y[2+j])} = ${AB[k]}`],`${X[2*i]}*(${Y[j]})+${X[2*i+1]}*(${Y[2+j]})`)},
+()=>{const v=[r(-4,6),r(-4,6)],k=r(0,1);return Q(`A = ${sh(X)}, v = (${v[0]}; ${v[1]}). Знайдіть ${k+1}-шу координату вектора A·v.`,X[2*k]*v[0]+X[2*k+1]*v[1],[`Рядок ${k+1} матриці множимо на вектор`,`${X[2*k]}·${P(v[0])} + ${X[2*k+1]}·${P(v[1])} = ${X[2*k]*v[0]+X[2*k+1]*v[1]}`],`${X[2*k]}*(${v[0]})+${X[2*k+1]}*(${v[1]})`)},
+()=>{const c=r(2,5),k=r(0,3);return Q(`A = ${sh(X)}, B = ${sh(Y)}. Знайдіть елемент (${c}A + B)${sb[k]}.`,c*X[k]+Y[k],[`Множення на число й додавання виконуються поелементно`,`${c}·${P(X[k])} + ${P(Y[k])} = ${c*X[k]+Y[k]}`],`${c}*(${X[k]})+(${Y[k]})`)},
+()=>{const dA=X[0]*X[3]-X[1]*X[2],dB=Y[0]*Y[3]-Y[1]*Y[2];return Q(`A = ${sh(X)}, B = ${sh(Y)}. Знайдіть det(AB).`,dA*dB,[`det(AB) = det A · det B`,`det A = ${X[0]}·${P(X[3])} − ${P(X[1])}·${P(X[2])} = ${dA}`,`det B = ${Y[0]}·${P(Y[3])} − ${P(Y[1])}·${P(Y[2])} = ${dB}`,`${dA}·${P(dB)} = ${dA*dB}`],`(${dA})*(${dB})`)},
+()=>{const k=r(0,3),i=k>>1,j=k&1,v=X[2*i]*X[j]+X[2*i+1]*X[2+j];return Q(`A = ${sh(X)}. Знайдіть елемент (A²)${sb[k]}.`,v,[`A² = A·A: рядок ${i+1} на стовпець ${j+1}`,`${X[2*i]}·${P(X[j])} + ${X[2*i+1]}·${P(X[2+j])} = ${v}`],`${X[2*i]}*(${X[j]})+${X[2*i+1]}*(${X[2+j]})`)},
+()=>Q(`A = ${sh(X)}, B = ${sh(Y)}. Знайдіть слід матриці AB (суму діагональних елементів).`,AB[0]+AB[3],[`(AB)₁₁ = ${AB[0]}, (AB)₂₂ = ${AB[3]}`,`Слід: ${AB[0]} + ${P(AB[3])} = ${AB[0]+AB[3]}`]))};
+
+for(const[,ts]of T)for(const t of ts)if(RG[t.n])t.g=RG[t.n];
+})();
+
+/* ---- Список тем: пошук, фільтри, прогрес ---- */
+let LF='all',LQ='';
+// статистика теми з журналу відповідей: n — усього, ok — правильних, last — останні 5
+function tstat(){const per={};LOG.forEach(x=>{const p=per[x.tp]=per[x.tp]||{n:0,ok:0,last:[]};p.n++;if(x.ok)p.ok++;p.last.push(x.ok?1:0);if(p.last.length>5)p.last.shift()});
+for(const k in per){const p=per[k];p.done=p.last.length>=5&&p.last.every(Boolean);p.weak=!p.done&&(p.ok/p.n<.7||p.last.slice(-3).includes(0))}return per}
+function topen(t){cur=t;$('#list').hidden=true;$('#sheet').hidden=true;$('#det').hidden=false;$('#tn').textContent=t.n;$('#th').innerHTML=thHTML(t);gen();$('#mxl').innerHTML='';$('#mx').textContent='Показати 5 прикладів';$('#mxc').hidden=true;window.scrollTo(0,0)}
+function lbuild(){const L0=$('#list'),per=tstat();
+if(!L0.querySelector('.lhead')){L0.innerHTML=`<div class="lhead"><input id="ls" type="search" placeholder="Пошук теми, напр. «дроби» або «синус»" autocomplete="off"><div class="lfil">${[['all','Усі'],['weak','Слабкі'],['new','Не розпочаті'],['done','Засвоєні']].map(([k,l])=>`<button class="chip" data-f="${k}">${l}</button>`).join('')}</div><div class="lsum" id="lsum"></div></div><div id="lbody"></div>`;
+$('#ls').oninput=e=>{LQ=e.target.value.trim().toLowerCase();lbuild()};L0.querySelectorAll('.lfil .chip').forEach(b=>b.onclick=()=>{LF=b.dataset.f;lbuild()})}
+L0.querySelectorAll('.lfil .chip').forEach(b=>b.classList.toggle('on',b.dataset.f==LF));
+const all=T.flatMap(([g,ts])=>ts),nd=all.filter(t=>per[t.n]&&per[t.n].done).length,weak=all.filter(t=>per[t.n]&&per[t.n].weak);
+$('#lsum').innerHTML=`Засвоєно <b>${nd}</b> з ${all.length} тем`+(weak.length?` · слабких: <b>${weak.length}</b> <button class="bt" id="lwk">Повторити найслабшу</button>`:'')+`<br><span class="note">Тема засвоєна, коли 5 останніх відповідей у ній правильні.</span>`;
+if(weak.length)$('#lwk').onclick=()=>topen(weak.sort((a,b)=>per[a.n].ok/per[a.n].n-per[b.n].ok/per[b.n].n)[0]);
+const B=$('#lbody');B.innerHTML='';let shown=0;
+T.forEach(([g,ts])=>{const fs=ts.filter(t=>{const p=per[t.n];if(LF=='weak'&&!(p&&p.weak))return false;if(LF=='new'&&p)return false;if(LF=='done'&&!(p&&p.done))return false;
+return!LQ||t.n.toLowerCase().includes(LQ)||(t.h||'').toLowerCase().includes(LQ)||(H[t.n]||'').toLowerCase().includes(LQ)});if(!fs.length)return;shown+=fs.length;
+const dn=ts.filter(t=>per[t.n]&&per[t.n].done).length,h=document.createElement('h3');h.innerHTML=`${g}<small>${dn?`засвоєно ${dn} з ${ts.length}`:`${ts.length} ${pl(ts.length)}`}</small>`;const gr=document.createElement('div');gr.className='tg';
+fs.forEach(t=>{const b=document.createElement('button'),p=per[t.n];b.className='tp'+(p&&p.done?' dn':p&&p.weak?' wk':'');
+b.innerHTML=`<span>${esc(t.n)}</span>${p?`<em class="${p.done?'gd':p.weak?'bd':''}" title="${p.done?'тему засвоєно':p.weak?'варто повторити':'правильних відповідей'}">${p.done?'✓ ':''}${p.ok}/${p.n}</em>`:''}`;b.onclick=()=>topen(t);gr.append(b)});B.append(h,gr)});
+if(!shown)B.innerHTML=`<p class="note" style="margin-top:14px">${LQ?'Нічого не знайдено. Спробуйте інше слово.':LF=='weak'?'Слабких тем немає — так тримати!':LF=='done'?'Засвоєних тем ще немає. Розв’яжіть 5 завдань теми поспіль без помилок.':'Усі теми вже розпочато.'}</p>`}
+
+/* ---- Аркуш завдань для друку ---- */
+function sheetBuild(){const L=[],seen=new Set();for(let k=0;k<120&&L.length<12;k++){const e=cur.g();if(!seen.has(e.q)){seen.add(e.q);L.push(e)}}
+const fr=window.self!==window.top; // у вбудованому вікні браузер не дає друкувати
+$('#sheet').innerHTML=`<div class="acts noprint" style="margin:0"><button class="bt" id="shb">← До теми</button><button class="bt" id="shn">Інші завдання</button>${fr?'':'<button class="bt pri" id="shp">Друкувати</button>'}</div>${fr?'<p class="note noprint">Друк працює у версії на сайті: xask1-lab.github.io/math</p>':''}
+<div class="shpage"><h2>${esc(cur.n)}</h2><div class="shmeta"><span>Ім’я: ____________________</span><span>Дата: ____________</span></div>
+<ol class="shl">${L.map(e=>`<li><div>${esc(e.q)}</div>${e.fig||''}<div class="shans">Відповідь: ________________</div></li>`).join('')}</ol></div>
+<div class="shpage shkey"><h2>Відповіді: ${esc(cur.n)}</h2><ol class="shk">${L.map(e=>`<li>${esc(e.as||cm(e.a.map(fmt).join('; ')))}</li>`).join('')}</ol></div>`;
+$('#shb').onclick=()=>{$('#sheet').hidden=true;$('#det').hidden=false};$('#shn').onclick=sheetBuild;if(!fr)$('#shp').onclick=()=>window.print()}
+$('#ws').onclick=()=>{$('#det').hidden=true;$('#sheet').hidden=false;sheetBuild();window.scrollTo(0,0)};
 
 lbuild();try{const t=+localStorage.getItem('mtab');if(t==2||t==3)tab(t)}catch(e){}
 </script>
