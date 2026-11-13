@@ -147,6 +147,24 @@ main:has(#calc:not([hidden])){height:calc(100dvh - env(safe-area-inset-top,0px) 
   main{max-width:none;padding:0!important;height:auto!important}
   .shpage{border:0;padding:0;border-radius:0}.shkey{break-before:page}
 }
+.lvb{display:flex;gap:4px;padding:4px;background:var(--key);border:1px solid var(--line);border-radius:12px;margin-top:6px}
+.lvb button{flex:1;border:0;background:transparent;padding:7px 4px;font-weight:600;font-size:14px;color:var(--mu);border-radius:9px}
+.lvb button.on{background:var(--ink);color:var(--sheet)}
+#lvbox{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}#lvbox .lvb{margin-top:0}
+.kdet summary{font-size:14px;font-weight:600;color:var(--ac);padding:4px 0}
+.kbox{margin-top:8px;padding:10px 12px;background:var(--key);border:1px solid var(--line);border-radius:10px}
+.kgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:2px 14px}
+.kl{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:14.5px;line-height:1.3}.kl input{width:18px;height:18px;flex:none;padding:0}.kl span{flex:1;min-width:0}
+.kl em,.knd em,.trh em{font:600 11px var(--ui);font-style:normal;border-radius:20px;padding:2px 8px;white-space:nowrap}
+.lv1{color:var(--ok);background:color-mix(in srgb,var(--ok) 13%,transparent)}.lv2{color:var(--ac);background:var(--acs)}.lv3{color:var(--red);background:color-mix(in srgb,var(--red) 13%,transparent)}
+.kfoot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:8px}.kfoot .bt{padding:5px 10px;font-size:13px}
+.knd{display:inline-block;font-size:12.5px;color:var(--mu);margin-bottom:4px}
+.tcf{display:flex;flex-direction:column;gap:14px}.tlh,.tgh,.trh{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.tgh{margin:16px 0 4px;padding-bottom:4px;border-bottom:1px solid var(--line)}.tgh b{font:600 18px var(--math)}.tgh .chip,.tkb{padding:3px 9px;font-size:12px}
+.trow{padding:5px 0}.trh label{display:flex;align-items:center;gap:8px;flex:1;min-width:0;font-size:15px}.trh input{width:18px;height:18px;flex:none;padding:0}
+.tqh{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;color:var(--mu);margin-bottom:6px}.tqh .knd{margin:0}
+.tsol{font-weight:400;font-size:14px;margin-top:4px;color:var(--ink)}
+.tres{border-left:4px solid currentColor}.tres .trq,.tres small{color:var(--ink)}.tres small{color:var(--mu)}
 .wide{width:100%;padding:11px;font-weight:600;background:var(--sheet);color:var(--ac);border-style:dashed}
 /* клавіатура */
 .pad{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
@@ -216,7 +234,7 @@ label{cursor:pointer}
 </section>
 <section id="les" hidden><div class="tabs" id="lt"><button class="on">Теми</button><button>Тест</button><button>Історія</button></div><div id="test" hidden></div><div id="hist" hidden></div><div id="list"></div><div id="sheet" hidden></div><div id="det" hidden>
 <div><button class="bt" id="bk">← Усі теми</button></div><h2 id="tn"></h2><div class="card" id="th"></div>
-<div class="card"><div class="q" id="q"></div><div id="fig"></div><div class="ansrow"><input id="in" placeholder="Відповідь, напр. 7/6 або 2 1/4" autocomplete="off"><button class="bt pri" id="ck">Перевірити</button></div><div class="res" id="res"></div>
+<div class="card"><div id="lvbox"></div><div id="knd"></div><div class="q" id="q"></div><div id="fig"></div><div class="ansrow"><input id="in" placeholder="Відповідь, напр. 7/6 або 2 1/4" autocomplete="off"><button class="bt pri" id="ck">Перевірити</button></div><div class="res" id="res"></div>
 <div class="acts"><button class="bt" id="sh">Розв’язання</button><button class="bt" id="nw">Новий приклад</button><button class="bt" id="oc">У калькулятор</button><button class="bt" id="ws" title="12 завдань цієї теми з відповідями на окремій сторінці">Аркуш завдань</button></div><ol id="st" hidden></ol></div>
 <div class="card"><div class="mxh"><b>Розв’язані приклади</b><span class="acts" style="margin:0"><button class="bt" id="mx">Показати 5 прикладів</button><button class="bt" id="mxc" hidden>✕ Закрити</button></span></div><div id="mxl"></div></div></div></section>
 </main>
@@ -224,6 +242,10 @@ label{cursor:pointer}
 <script>
 /* Показ чисел з десятковою комою (всередині програма рахує з крапкою) */
 const cm=s=>String(s).replace(/(\d)\.(\d)/g,'$1,$2');
+/* Вибір виду завдання всередині генератора теми.
+   KD — назви й рівні видів; MSEL — дозволені номери видів (null = усі); MLAST — який вид щойно обрано */
+const KD={};let MSEL=null,MLAST=-1;
+const MIDX=n=>{let c=[];for(let i=0;i<n;i++)c.push(i);if(MSEL){const f=c.filter(i=>MSEL.has(i));if(f.length)c=f}return MLAST=c[Math.floor(Math.random()*c.length)]},MM=(...f)=>f[MIDX(f.length)]();
 /* Екранування тексту перед вставкою в HTML */
 const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 
@@ -257,7 +279,7 @@ function exact(v){if(!isFinite(v))return'не визначено';if(Math.abs(v)
 for(const k of[2,3,5,6,7,10,11,13]){R=rat(v/Math.sqrt(k));if(R&&R[1]<=100){const p=R[0],q=R[1];const t=p==1?'':p==-1?'−':p;return(q==1?`${t}√${k}`:`${t}√${k}/${q}`)+` ≈ ${d}`}}return d}
 const pq=s=>/^[\da-zπ.]+$/.test(s)&&!/^\d+[a-zπ]/.test(s)?s:'('+s+')',lin=r=>r.items.map((x,k,A)=>x.t=='c'?x.v:x.t=='f'?(k&&isD(A[k-1])&&/^\d+$/.test(lin(x.n))&&/^\d+$/.test(lin(x.d))?' '+lin(x.n)+'/'+lin(x.d):pq(lin(x.n))+'/'+pq(lin(x.d))):x.t=='p'?'^'+pq(lin(x.e)):x.t=='g'?(x.fn=='abs'?'|'+lin(x.r)+'|':(x.fn||'')+'('+lin(x.r)+')'):'√('+lin(x.r)+')').join('');
 function unwrap(w){const P=w.path;if(!P.length)return;const[ix]=P[P.length-1],f=rowAt(w,P.slice(0,-1)).items[ix];if(f&&f.t=='f'&&f.n.items.length==1&&f.n.items[0].t=='g'&&!f.n.items[0].fn)f.n.items=f.n.items[0].r.items}
-function feed(w,s){let i=0,m,mx=0;const grp=()=>{let d=0,j=i;do{d+=s[j]=='('?1:s[j]==')'?-1:0;j++}while(d&&j<s.length);const v=s.slice(i+1,d?j:j-1);i=j;return v},opd=()=>{if(s[i]=='('){feed(w,grp());return}if(s[i]=='-')key(w,s[i++]);while(i<s.length&&/[0-9.a-zπ]/.test(s[i]))key(w,s[i++])};
+function feed(w,s){let i=0,m,mx=0;const grp=()=>{let d=0,j=i;do{d+=s[j]=='('?1:s[j]==')'?-1:0;j++}while(d&&j<s.length);const v=s.slice(i+1,d?j:j-1);i=j;return v},opd=()=>{if(s[i]=='('){feed(w,grp());return}if(s[i]=='-')key(w,s[i++]);const fm=s.slice(i).match(/^(arcsin|arccos|arctg|sin|cos|ctg|tg|ln|lg|abs|sqrt)\(/);if(fm){const n=fm[1];i+=n.length;key(w,n=='sqrt'?'S':'@'+n);feed(w,grp());key(w,n=='sqrt'?'>':')');return}while(i<s.length&&/[0-9.a-zπ]/.test(s[i]))key(w,s[i++])};
 while(i<s.length){const c=s[i++];
 if(c=='^'){key(w,'^');opd();key(w,'>')}
 else if(c=='¦'){key(w,'E');mx=1}
@@ -476,7 +498,7 @@ const fill=()=>{const U=Object.keys(UN[$('#uc').value]);$('#ua').innerHTML=$('#u
 calcU=()=>{const c=$('#uc').value,v=num($('#uv').value.trim()||'0'),a=$('#ua').value,b=$('#ub').value;if(!isFinite(v)){$('#ur').textContent='Введіть число';last=NaN;return}last=c=='Температура'?tConv(v,a,b):v*UN[c][a]/UN[c][b];$('#ur').textContent=`${cm(String(v))} ${a} = ${sci(last)} ${b}`};
 $('#uc').onchange=()=>{try{localStorage.setItem('munit',$('#uc').value)}catch(e){}fill()};$('#uv').oninput=$('#ua').onchange=$('#ub').onchange=calcU;$('#ui').onclick=()=>{if(isFinite(last))toCalc(last)};
 document.querySelectorAll('.cgrid .exi').forEach(b=>b.onclick=()=>toCalc(CONST[b.dataset.i][1]));fill()}
-const DKEYS=['mcalc','mlog','mgraph','mtab','mtheme','munit','mdone'];
+const DKEYS=['mcalc','mlog','mgraph','mtab','mtheme','munit','mdone','mopt','mtsel'];
 function dataDump(){const o={app:'Математика у клітинку',v:1,date:new Date().toISOString(),data:{}};DKEYS.forEach(k=>{try{const v=localStorage.getItem(k);if(v!=null)o.data[k]=v}catch(e){}});return JSON.stringify(o)}
 function applyTheme(){let t='';try{t=localStorage.getItem('mtheme')||''}catch(e){}if(t)document.documentElement.dataset.theme=t;else delete document.documentElement.dataset.theme;if(!$('#gr').hidden)gdraw()}
 function setOpen(){let th='';try{th=localStorage.getItem('mtheme')||''}catch(e){}
@@ -518,7 +540,8 @@ mx=(n,d)=>{const g=gc(Math.abs(n),d)||1;n/=g;d/=g;if(d==1)return`${n}`;const W=M
 both=(n,d)=>{const a=fr(n,d),b=mx(n,d);return a==b?a:`${a} = ${b}`},
 pf=()=>{let b,a;do{b=r(2,9);a=r(1,b-1)}while(gc(a,b)>1);return[a,b]},pm=()=>{const[a,b]=pf();return[r(1,5),a,b]},
 O=(q,n,d,s,kt)=>({q:q+' = ?',a:[n/d],as:mx(n,d),s:[...s,`Відповідь: ${both(n,d)}`],kt});
-const m=r(0,10);
+const m=MIDX(12);
+if(m==11){const b=r(3,12),sgm=r(0,1);let a=r(1,b-1),c=r(1,b-1);if(sgm&&a<=c){a=r(2,b-1);c=r(1,a-1)}const n=sgm?a-c:a+c;return O(`${a}/${b} ${sgm?'−':'+'} ${c}/${b}`,n,b,[`Знаменники однакові — ${sgm?'віднімаємо':'додаємо'} чисельники`,`${a} ${sgm?'−':'+'} ${c} = ${n}, знаменник ${b}`],`${a}/${b}${sgm?'-':'+'}${c}/${b}`)}
 if(m<=1){let[a,b]=pf(),[c,d]=pf();while(b==d)[c,d]=pf();if(m==1&&a/b<c/d)[a,b,c,d]=[c,d,a,b];const sg=m?'−':'+',L=b*d/gc(b,d),n=m?a*(L/b)-c*(L/d):a*(L/b)+c*(L/d);
 return O(`${a}/${b} ${sg} ${c}/${d}`,n,L,[`Спільний знаменник: НСК(${b}; ${d}) = ${L}`,`${a}/${b} = ${a*L/b}/${L},  ${c}/${d} = ${c*L/d}/${L}`,`${a*L/b}/${L} ${sg} ${c*L/d}/${L} = ${n}/${L}`],`${a}/${b}${m?'-':'+'}${c}/${d}`)}
 if(m==2){const[a,b]=pf(),[c,d]=pf();return O(`${a}/${b} · ${c}/${d}`,a*c,b*d,[`Чисельник на чисельник, знаменник на знаменник`,`${a}·${c} / (${b}·${d}) = ${a*c}/${b*d}`,...(gc(a*c,b*d)>1?[`Скорочуємо на ${gc(a*c,b*d)}: ${fr(a*c,b*d)}`]:[])],`${a}/${b}*${c}/${d}`)}
@@ -626,7 +649,7 @@ N('Ймовірність: незалежні події','Незалежні п
 (()=>{
 const Q=(q,a,s,kt,x)=>Object.assign({q,a:[].concat(a),s,kt},x||{}),
 FR=(n,d)=>{if(d<0){n=-n;d=-d}const g=gc(Math.abs(n),d)||1;n/=g;d/=g;return d==1?`${n}`:`${n}/${d}`},
-M=(...f)=>pick(f)(),
+M=(...f)=>MM(...f),
 L=(k,b,v='x')=>`${k==1?'':k==-1?'−':k<0?'−'+(-k):k}${v}${b?` ${b<0?'−':'+'} ${ab(b)}`:''}`,
 Lt=(k,b,v='x')=>`${k==1?'':k==-1?'-':k}${v}${b?(b<0?'-':'+')+ab(b):''}`,
 S=n=>n<0?`− ${-n}`:`+ ${n}`,
@@ -898,11 +921,11 @@ function thHTML(t){if(H[t.n])return H[t.n].split('<br>').map(x=>`<p>${x}</p>`).j
 const P=[];let d=0,c='';for(let i=0;i<t.h.length;i++){const ch=t.h[i];d+=ch=='('||ch=='['?1:ch==')'||ch==']'?-1:0;if(d<=0&&(ch==';'||ch=='.'&&/\s\S/.test(t.h.slice(i+1,i+3)))&&/\s/.test(t.h[i+1]||' ')){P.push(c);c=''}else c+=ch}P.push(c);
 return '<ul class="thl">'+P.map(x=>x.trim().replace(/\.$/,'')).filter(Boolean).map(x=>{const m=x.match(/^([^:=]{2,40}):\s*(.+)$/);return '<li>'+(m?`<b>${m[1]}:</b> ${m[2]}`:x)+'</li>'}).join('')+'</ul>'}
 function mxShow(){const L=[],seen=new Set(),ty=new Set(),C=[];for(let k=0;k<80;k++){const e=cur.g();if(!seen.has(e.q)){seen.add(e.q);C.push(e)}}const tk=e=>e.q.replace(/\d+/g,'#');C.forEach(e=>{if(L.length<5&&!ty.has(tk(e))){ty.add(tk(e));L.push(e)}});C.forEach(e=>{if(L.length<5&&!L.includes(e))L.push(e)});
-$('#mxl').innerHTML=L.map((e,i)=>`<div class="mxi"><div class="mxn">${i+1}</div><div class="mxb"><div class="mxq">${esc(e.q)}</div>${e.fig||''}<ol>${e.s.filter(x=>!/^Відповідь:/.test(x)).map(x=>`<li>${esc(x)}</li>`).join('')}</ol><div class="mxa">Відповідь: ${e.as?esc(e.as):e.a.map(v=>esc(cm(fmt(v)).replace('-','−'))).join('; ')}</div></div></div>`).join('');$('#mx').textContent='Інші 5 прикладів';$('#mxc').hidden=false;const cb=document.createElement('button');cb.className='bt';cb.textContent='✕ Закрити приклади';cb.style.marginTop='12px';cb.onclick=mxHide;$('#mxl').append(cb)}
+$('#mxl').innerHTML=L.map((e,i)=>`<div class="mxi"><div class="mxn">${i+1}</div><div class="mxb">${kindTag(e)}<div class="mxq">${esc(e.q)}</div>${e.fig||''}<ol>${e.s.filter(x=>!/^Відповідь:/.test(x)).map(x=>`<li>${esc(x)}</li>`).join('')}</ol><div class="mxa">Відповідь: ${e.as?esc(e.as):e.a.map(v=>esc(cm(fmt(v)).replace('-','−'))).join('; ')}</div></div></div>`).join('');$('#mx').textContent='Інші 5 прикладів';$('#mxc').hidden=false;const cb=document.createElement('button');cb.className='bt';cb.textContent='✕ Закрити приклади';cb.style.marginTop='12px';cb.onclick=mxHide;$('#mxl').append(cb)}
 function mxHide(){$('#mxl').innerHTML='';$('#mx').textContent='Показати 5 прикладів';$('#mxc').hidden=true;$('#mx').closest('.card').scrollIntoView({block:'nearest'})}
 $('#mx').onclick=mxShow;$('#mxc').onclick=mxHide;
 const pl=n=>n%10==1&&n%100!=11?'тема':n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?'теми':'тем';
-function gen(){ex=cur.g();$('#q').textContent=ex.q;$('#fig').innerHTML=ex.fig||'';$('#st').hidden=true;$('#st').innerHTML=ex.s.filter(x=>!/^Відповідь:/.test(x)).map(s=>`<li>${s}</li>`).join('')+`<li><b>Відповідь: ${ex.as?ex.as:cm(ex.a.map(fmt).join('; '))}</b></li>`;$('#in').value='';$('#res').textContent='';$('#oc').hidden=!(ex.k||ex.kt);$('#res').className='res'}
+function gen(){ex=cur.g();$('#q').textContent=ex.q;$('#fig').innerHTML=ex.fig||'';$('#knd').innerHTML=kindTag(ex);$('#st').hidden=true;$('#st').innerHTML=ex.s.filter(x=>!/^Відповідь:/.test(x)).map(s=>`<li>${s}</li>`).join('')+`<li><b>Відповідь: ${ex.as?ex.as:cm(ex.a.map(fmt).join('; '))}</b></li>`;$('#in').value='';$('#res').textContent='';$('#oc').hidden=!(ex.k||ex.kt);$('#res').className='res'}
 $('#bk').onclick=()=>{$('#list').hidden=false;$('#det').hidden=true;lbuild()};$('#nw').onclick=gen;$('#sh').onclick=()=>{$('#st').hidden=!$('#st').hidden};
 const num=s=>{s=s.replace(',','.').replace(/−/g,'-');s=s.replace(/sqrt\(?(\d+(?:\.\d+)?)\)?/gi,'√$1').replace(/(\d*(?:\.\d+)?)√(\d+(?:\.\d+)?)/g,(m,k,n)=>String((k?+k:1)*Math.sqrt(+n)));if(s.includes('_')){const[w,f]=s.split('_'),[a,b]=f.split('/');return(+w<0||w=='-0'?-1:1)*(Math.abs(+w)+a/b)}if(s.includes('/')){const[a,b]=s.split('/');return a/b}return parseFloat(s)};
 $('#ck').onclick=()=>{const ok=chk($('#in').value,ex.a,ex.tol);$('#res').textContent=ok?'✓ Правильно!':'✗ Не так. Спробуйте ще раз або відкрийте розв’язання';$('#res').className='res '+(ok?'gd':'bd')};$('#in').onkeydown=e=>{if(e.key=='Enter')$('#ck').click()};
@@ -912,19 +935,8 @@ function rec(tp,q,ok,u,test,ca){LOG.push({t:Date.now(),tp,q,ok,u,test:test||0,ca
 function chk(v,A,t){t=t||1e-6;v=String(v).replace(/(-?\d+)\s+(\d+)\s*\/\s*(\d+)/g,'$1_$2/$3').replace(/\s*\/\s*/g,'/');const u=v.split(/[;\s]+/).filter(Boolean).map(num).sort((a,b)=>a-b),a=[...A].sort((a,b)=>a-b);return u.length==a.length&&u.every((x,i)=>Math.abs(x-a[i])<t)}
 $('#ck').addEventListener('click',()=>{const v=$('#in').value.trim();if(!v||ex.done)return;ex.done=1;rec(cur.n,ex.q,chk(v,ex.a,ex.tol),v,0,cm(ex.a.map(fmt).join('; ')))});
 let TS=null;
-function tsetup(){const B=$('#test');B.innerHTML=`<div class="card"><b>Кількість прикладів:</b> <input id="tn2" type="number" min="1" max="50" value="10" style="width:90px"></div><div class="card" id="tl"></div><div id="tmsg" style="color:var(--mu);margin:4px 0"></div><button class="bt" id="tgo" style="width:100%">Почати тест</button>`;
-const tl=$('#tl');tl.innerHTML='<b>Теми</b> <label style="margin-left:8px"><input type="checkbox" id="tall" style="width:auto"> усі</label>';
-ALL.forEach((t,i)=>{const l=document.createElement('label');l.style.cssText='display:block;padding:5px 0';l.innerHTML=`<input type="checkbox" class="tc" data-i="${i}" style="width:auto"> ${t.n}`;tl.append(l)});
-$('#tall').onchange=e=>document.querySelectorAll('.tc').forEach(c=>c.checked=e.target.checked);
-$('#tgo').onclick=()=>{const sel=[...document.querySelectorAll('.tc')].filter(c=>c.checked).map(c=>ALL[c.dataset.i]);if(!sel.length){$('#tmsg').textContent='Оберіть хоча б одну тему';return}const n=Math.max(1,Math.min(50,+$('#tn2').value||10));TS={id:Date.now(),n,k:0,sel,res:[]};tnext()}}
 function lv(v){document.querySelectorAll('#lt button').forEach((b,i)=>b.className=i==v?'on':'');$('#list').hidden=v!=0;$('#det').hidden=true;$('#sheet').hidden=true;$('#test').hidden=v!=1;$('#hist').hidden=v!=2;if(v==1&&!TS)tsetup();if(v==2)thist();if(v==0)lbuild()}
 document.querySelectorAll('#lt button').forEach((b,i)=>b.onclick=()=>lv(i));
-function tnext(){if(TS.k>=TS.n)return tend();const B=$('#test'),t=TS.sel[r(0,TS.sel.length-1)],e=t.g();
-B.innerHTML=`<div class='card'><small>Приклад ${TS.k+1} з ${TS.n} · ${t.n}</small><div class='q'>${esc(e.q)}</div><input id='ta' placeholder='Ваша відповідь' autocomplete='off'> <button class='bt' id='tok'>Відповісти</button><div id='tv' style='margin-top:8px;font-weight:600'></div></div>`;
-const a=$('#ta'),b=$('#tok');a.focus();let done=false;
-const go=()=>{if(!done){const v=a.value,ok=chk(v,e.a,e.tol),ca=cm(e.a.map(fmt).join('; '));done=true;TS.res.push({tp:t.n,q:e.q,u:v,ok,a:ca});rec(t.n,e.q,ok,v,TS.id,ca);a.disabled=true;const tv=$('#tv');tv.className=ok?'gd':'bd';tv.innerHTML=ok?'✓ Правильно!':'✗ Неправильно. Правильна відповідь: '+esc(ca)+`<div style='font-weight:400;font-size:14px;margin-top:4px'>${e.s.map(esc).join('<br>')}</div>`;b.textContent=TS.k+1==TS.n?'Завершити':'Далі';b.focus()}else{TS.k++;tnext()}};
-b.onclick=go;a.onkeydown=ev=>{if(ev.key=='Enter')go()}}
-function tend(){const ok=TS.res.filter(x=>x.ok).length,B=$('#test');B.innerHTML=`<div class='card'><div class='q'>Результат: ${ok} з ${TS.n} (${Math.round(ok/TS.n*100)}%)</div><span class='gd'>✓ ${ok}</span> · <span class='bd'>✗ ${TS.n-ok}</span></div>`+TS.res.map((x,i)=>`<div class='card ${x.ok?'gd':'bd'}' style='border-left:4px solid currentColor'>${x.ok?'✓':'✗'} <b>${i+1}.</b> <small style='color:var(--mu)'>${esc(x.tp||'')}</small><br>${esc(x.q)}<br><small>Ваша відповідь: ${esc(x.u||'—')}${x.ok?'':' · Правильно: '+esc(x.a)}</small></div>`).join('')+`<button class='bt' id='tre'>Новий тест</button>`;$('#tre').onclick=()=>{TS=null;tsetup()};TS=null}
 function thist(){const B=$('#hist'),ok=LOG.filter(x=>x.ok).length,n=LOG.length,per={},T2={};
 LOG.forEach(x=>{const p=per[x.tp]=per[x.tp]||{n:0,ok:0};p.n++;if(x.ok)p.ok++;if(x.test)(T2[x.test]=T2[x.test]||[]).push(x)});
 const row=x=>`<div class='${x.ok?'gd':'bd'}'>${x.ok?'✓':'✗'} ${esc(x.q)} <small>(${esc(x.u||'—')}${x.ok||!x.ca?'':' · правильно: '+esc(x.ca)})</small></div>`;
@@ -999,6 +1011,262 @@ $('#gtb').onclick=()=>{G.tb=!G.tb;$('#gtb').classList.toggle('on',G.tb);gsave();
 let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{if(!$('#gr').hidden)gdraw()},80)});
 try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(!$('#gr').hidden)gdraw()})}catch(e){}})();
 
+/* ---- Види завдань з рівнями складності (1 — легкий, 2 — середній, 3 — складний) ---- */
+(()=>{
+const Q=(q,a,s,kt,x)=>Object.assign({q,a:[].concat(a),s,kt},x||{}),
+FR=(n,d)=>{if(d<0){n=-n;d=-d}const g=gc(Math.abs(n),d)||1;n/=g;d/=g;return d==1?`${n}`:`${n}/${d}`},
+S=n=>n<0?`− ${-n}`:`+ ${n}`,P=n=>n<0?`(${n})`:`${n}`,D=x=>dc(+(+x).toFixed(4)),nz=(a,b)=>{let v;do{v=r(a,b)}while(!v);return v},
+L=(k,b,v='x')=>`${k==1?'':k==-1?'−':k<0?'−'+(-k):k}${v}${b?` ${b<0?'−':'+'} ${Math.abs(b)}`:''}`,
+Lt=(k,b,v='x')=>`${k==1?'':k==-1?'-':k}${v}${b?(b<0?'-':'+')+Math.abs(b):''}`,
+// KDEF: тема отримує перелік видів [назва, рівень, генератор]
+KDEF=(name,kinds)=>{const t=T.flatMap(([g,ts])=>ts).find(x=>x.n==name);if(!t)return;KD[name]=kinds.map(k=>[k[0],k[1]]);const F=kinds.map(k=>k[2]);t.g=()=>MM(...F)},
+TR=[[3,4,5],[5,12,13],[8,15,17],[7,24,25],[20,21,29],[9,40,41],[6,8,10]];
+
+KDEF('Додавання і віднімання',[
+['у межах 20',1,()=>{const a=r(2,12),b=r(2,8);return r(0,1)?Q(`${a} + ${b} = ?`,a+b,[`${a} + ${b} = ${a+b}`],`${a}+${b}`):Q(`${a+b} − ${b} = ?`,a,[`${a+b} − ${b} = ${a}`],`${a+b}-${b}`)}],
+['двоцифрові без переходу через десяток',1,()=>{const a1=r(1,7),a0=r(1,7),b1=r(1,8-a1),b0=r(1,8-a0),a=a1*10+a0,b=b1*10+b0;return r(0,1)?Q(`${a} + ${b} = ?`,a+b,[`Десятки: ${a1} + ${b1} = ${a1+b1}; одиниці: ${a0} + ${b0} = ${a0+b0}`,`${a} + ${b} = ${a+b}`],`${a}+${b}`):Q(`${a+b} − ${b} = ?`,a,[`Десятки: ${a1+b1} − ${b1} = ${a1}; одиниці: ${a0+b0} − ${b0} = ${a0}`,`${a+b} − ${b} = ${a}`],`${a+b}-${b}`)}],
+['двоцифрові з переходом через десяток',2,()=>{const a0=r(3,9),b0=r(11-a0,9),a=r(1,4)*10+a0,b=r(1,4)*10+b0;return r(0,1)?Q(`${a} + ${b} = ?`,a+b,[`Одиниці: ${a0} + ${b0} = ${a0+b0} — пишемо ${(a0+b0)%10}, 1 переносимо`,`${a} + ${b} = ${a+b}`],`${a}+${b}`):Q(`${a+b} − ${b} = ?`,a,[`Одиниць не вистачає — позичаємо десяток`,`${a+b} − ${b} = ${a}`],`${a+b}-${b}`)}],
+['тризначні числа',2,()=>{const b=r(120,499),a=b+r(105,480);return r(0,1)?Q(`${a} + ${b} = ?`,a+b,[`Додаємо стовпчиком справа наліво з переносом`,`${a} + ${b} = ${a+b}`],`${a}+${b}`):Q(`${a} − ${b} = ?`,a-b,[`Віднімаємо порозрядно, «позичаючи» десяток, де треба`,`${a} − ${b} = ${a-b}`,`Перевірка: ${a-b} + ${b} = ${a}`],`${a}-${b}`)}],
+['три доданки',2,()=>{const a=r(10,99),b=r(10,99),c=r(10,99);return Q(`${a} + ${b} + ${c} = ?`,a+b+c,[`${a} + ${b} = ${a+b}`,`${a+b} + ${c} = ${a+b+c}`],`${a}+${b}+${c}`)}],
+['з невідомим',3,()=>{const x=r(10,300),b=r(10,300);return r(0,1)?Q(`? + ${b} = ${x+b}`,x,[`Невідомий доданок = сума − відомий доданок`,`${x+b} − ${b} = ${x}`],`x+${b}=${x+b}`):Q(`${x+b} − ? = ${b}`,x,[`Невідомий від’ємник = зменшуване − різниця`,`${x+b} − ${b} = ${x}`],`${x+b}-x=${b}`)}],
+['чотиризначні числа',3,()=>{const b=r(1200,4999),a=b+r(1005,4800);return r(0,1)?Q(`${a} + ${b} = ?`,a+b,[`Стовпчиком: розряд під розрядом`,`${a} + ${b} = ${a+b}`],`${a}+${b}`):Q(`${a} − ${b} = ?`,a-b,[`Стовпчиком: розряд під розрядом`,`${a} − ${b} = ${a-b}`],`${a}-${b}`)}]]);
+
+KDEF('Множення і ділення',[
+['таблиця множення',1,()=>{const a=r(2,9),b=r(2,9);return Q(`${a} × ${b} = ?`,a*b,[`${a} × ${b} = ${a*b}`],`${a}*${b}`)}],
+['ділення за таблицею',1,()=>{const a=r(2,9),b=r(2,9);return Q(`${a*b} ÷ ${a} = ?`,b,[`Яке число при множенні на ${a} дає ${a*b}? ${a} × ${b} = ${a*b}`],`${a*b}/${a}`)}],
+['множення на 10, 100',1,()=>{const a=r(2,99),k=pick([10,100]);return Q(`${a} × ${k} = ?`,a*k,[`Дописуємо ${k==10?'один нуль':'два нулі'}: ${a*k}`],`${a}*${k}`)}],
+['двоцифрове на одноцифрове',2,()=>{const a=r(12,99),b=r(2,9);return Q(`${a} × ${b} = ?`,a*b,[`${a} = ${a-a%10} + ${a%10}`,`${a-a%10}·${b} + ${a%10}·${b} = ${(a-a%10)*b} + ${a%10*b} = ${a*b}`],`${a}*${b}`)}],
+['ділення на одноцифрове',2,()=>{const b=r(2,9),q=r(12,99);return Q(`${b*q} ÷ ${b} = ?`,q,[`Ділимо кутом: ${b*q} ÷ ${b} = ${q}`,`Перевірка: ${q} × ${b} = ${b*q}`],`${b*q}/${b}`)}],
+['з невідомим',3,()=>{const a=r(2,9),x=r(2,12);return r(0,1)?Q(`? × ${a} = ${a*x}`,x,[`Невідомий множник = добуток ÷ відомий множник`,`${a*x} ÷ ${a} = ${x}`],`x*${a}=${a*x}`):Q(`${a*x} ÷ ? = ${a}`,x,[`Невідомий дільник = ділене ÷ частка`,`${a*x} ÷ ${a} = ${x}`],`${a*x}/x=${a}`)}],
+['двоцифрове на двоцифрове',3,()=>{const a=r(11,49),b=r(11,29);return Q(`${a} × ${b} = ?`,a*b,[`${b} = ${b-b%10} + ${b%10}`,`${a}·${b-b%10} = ${a*(b-b%10)}, ${a}·${b%10} = ${a*(b%10)}`,`${a*(b-b%10)} + ${a*(b%10)} = ${a*b}`],`${a}*${b}`)}],
+['ділення з остачею',3,()=>{const b=r(3,9),q=r(3,12),m=r(1,b-1),n=b*q+m;return Q(`${n} ÷ ${b}. Впишіть частку й остачу через пробіл.`,[q,m],[`${b} × ${q} = ${b*q} — найбільше число до ${n}, що ділиться на ${b}`,`Остача: ${n} − ${b*q} = ${m}`],undefined,{as:`${q} (ост. ${m})`})}]]);
+
+KDEF('Периметр і площа',[
+['периметр прямокутника',1,()=>{const a=r(2,15),b=r(2,15);return Q(`Прямокутник ${a} см × ${b} см. Знайдіть периметр (см).`,2*(a+b),[`P = 2·(a + b)`,`P = 2·(${a} + ${b}) = ${2*(a+b)} см`],`2(${a}+${b})`)}],
+['площа прямокутника',1,()=>{const a=r(2,15),b=r(2,15);return Q(`Прямокутник ${a} см × ${b} см. Знайдіть площу (см²).`,a*b,[`S = a·b`,`S = ${a}·${b} = ${a*b} см²`],`${a}*${b}`)}],
+['площа й периметр квадрата',1,()=>{const a=r(2,15);return r(0,1)?Q(`Квадрат зі стороною ${a} см. Знайдіть площу (см²).`,a*a,[`S = a² = ${a}² = ${a*a} см²`],`${a}^2`):Q(`Квадрат зі стороною ${a} см. Знайдіть периметр (см).`,4*a,[`P = 4a = 4·${a} = ${4*a} см`],`4*${a}`)}],
+['сторона за площею',2,()=>{const a=r(2,12),b=r(2,12);return Q(`Площа прямокутника ${a*b} см², одна сторона ${a} см. Знайдіть другу сторону (см).`,b,[`b = S : a`,`${a*b} : ${a} = ${b} см`],`${a*b}/${a}`)}],
+['сторона за периметром',2,()=>{const a=r(2,12),b=r(2,12);return Q(`Периметр прямокутника ${2*(a+b)} см, одна сторона ${a} см. Знайдіть другу сторону (см).`,b,[`Півпериметр: ${2*(a+b)} : 2 = ${a+b}`,`${a+b} − ${a} = ${b} см`],`${2*(a+b)}/2-${a}`)}],
+['площа квадрата за периметром',3,()=>{const a=r(2,12);return Q(`Периметр квадрата ${4*a} см. Знайдіть його площу (см²).`,a*a,[`Сторона: ${4*a} : 4 = ${a} см`,`S = ${a}² = ${a*a} см²`],`(${4*a}/4)^2`)}]]);
+
+const UN2=[['км','м',1000],['м','см',100],['см','мм',10],['кг','г',1000],['т','кг',1000],['год','хв',60],['хв','с',60]];
+KDEF('Одиниці вимірювання',[
+['у менші одиниці',1,()=>{const[u,v,k]=pick(UN2),n=r(2,9);return Q(`${n} ${u} = ? ${v}`,n*k,[`1 ${u} = ${k} ${v}`,`${n}·${k} = ${n*k} ${v}`],`${n}*${k}`)}],
+['у більші одиниці',2,()=>{const[u,v,k]=pick(UN2),n=r(2,9);return Q(`${n*k} ${v} = ? ${u}`,n,[`1 ${u} = ${k} ${v}`,`${n*k} : ${k} = ${n} ${u}`],`${n*k}/${k}`)}],
+['складені величини',2,()=>{const[u,v,k]=pick(UN2),n=r(1,9),m=r(1,k>100?900:k-1);return Q(`${n} ${u} ${m} ${v} = ? ${v}`,n*k+m,[`${n} ${u} = ${n*k} ${v}`,`${n*k} + ${m} = ${n*k+m} ${v}`],`${n}*${k}+${m}`)}],
+['з десятковими дробами',3,()=>{const[u,v,k]=pick(UN2.filter(x=>x[2]!=60)),n=pick([0.5,1.5,2.5,0.2,1.2,3.4,0.25]);return r(0,1)?Q(`${D(n)} ${u} = ? ${v}`,n*k,[`1 ${u} = ${k} ${v}`,`${D(n)}·${k} = ${D(n*k)} ${v}`],`${n}*${k}`):Q(`${D(n*k)} ${v} = ? ${u}`,n,[`1 ${u} = ${k} ${v}`,`${D(n*k)} : ${k} = ${D(n)} ${u}`],`${n*k}/${k}`)}],
+['час: години, хвилини, секунди',3,()=>{const h=r(1,5),m=r(5,55);return r(0,1)?Q(`${h} год ${m} хв = ? хв`,h*60+m,[`${h} год = ${h*60} хв`,`${h*60} + ${m} = ${h*60+m} хв`],`${h}*60+${m}`):Q(`${h*60+m} хв — це скільки повних годин і хвилин? (через пробіл)`,[h,m],[`${h*60+m} : 60 = ${h} (остача ${m})`,`${h} год ${m} хв`],undefined,{as:`${h} год ${m} хв`})}]]);
+
+KDEF('Цілі числа та модуль',[
+['додавання й віднімання',1,()=>{const a=r(-15,15),b=nz(-15,15);return r(0,1)?Q(`${a} + ${P(b)} = ?`,a+b,[`${a} ${S(b)} = ${a+b}`],`${a}+(${b})`):Q(`${a} − ${P(b)} = ?`,a-b,[`Віднімання — це додавання протилежного: ${a} ${S(-b)} = ${a-b}`],`${a}-(${b})`)}],
+['модуль числа',1,()=>{const a=nz(-30,30),b=nz(-30,30);return Q(`|${a}| + |${b}| = ?`,Math.abs(a)+Math.abs(b),[`|${a}| = ${Math.abs(a)}, |${b}| = ${Math.abs(b)}`,`Сума: ${Math.abs(a)+Math.abs(b)}`],`|${a}|+|${b}|`)}],
+['три числа з дужками',2,()=>{const a=r(-15,15),b=nz(-15,15),c=nz(-15,15),v=a+b-c;return Q(`${a} + ${P(b)} − ${P(c)} = ?`,v,[`Розкриваємо дужки: ${a} ${S(b)} ${S(-c)}`,`= ${v}`],`${a}+(${b})-(${c})`)}],
+['відстань між точками',2,()=>{const a=r(-15,15),b=r(-15,15);return Q(`Яка відстань між точками ${a} і ${b} на координатній прямій?`,Math.abs(a-b),[`Відстань = |a − b|`,`|${a} − ${P(b)}| = ${Math.abs(a-b)}`],`|${a}-(${b})|`)}],
+['множення й ділення',2,()=>{const a=nz(-9,9),b=nz(-9,9);return r(0,1)?Q(`${a} · ${P(b)} = ?`,a*b,[`Знаки ${a*b>0?'однакові — добуток додатний':'різні — добуток від’ємний'}`,`${Math.abs(a)}·${Math.abs(b)} = ${Math.abs(a*b)} → ${a*b}`],`${a}*(${b})`):Q(`${a*b} : ${P(b)} = ?`,a,[`Знаки ${a>0?'однакові — частка додатна':'різні — частка від’ємна'}`,`${Math.abs(a*b)} : ${Math.abs(b)} = ${Math.abs(a)} → ${a}`],`${a*b}/(${b})`)}],
+['вираз із модулем',3,()=>{const a=r(-12,12),b=r(-12,12),c=r(2,5),d=nz(-9,9),v=Math.abs(a-b)*c-Math.abs(d);return Q(`|${a} − ${P(b)}| · ${c} − |${d}| = ?`,v,[`|${a} − ${P(b)}| = |${a-b}| = ${Math.abs(a-b)}`,`${Math.abs(a-b)}·${c} = ${Math.abs(a-b)*c}`,`${Math.abs(a-b)*c} − ${Math.abs(d)} = ${v}`],`|${a}-(${b})|*${c}-|${d}|`)}]]);
+
+KDEF('НСД і НСК',[
+['найбільший спільний дільник',1,()=>{const g=r(2,9),a=g*r(1,9),b=g*r(2,9),G1=gc(a,b);return Q(`НСД(${a}; ${b}) = ?`,G1,[`${a} = ${G1}·${a/G1}, ${b} = ${G1}·${b/G1}`,`${a/G1} і ${b/G1} спільних дільників не мають → НСД = ${G1}`])}],
+['найменше спільне кратне',2,()=>{const g=r(2,9),a=g*r(1,9),b=g*r(2,9),G1=gc(a,b),L1=a*b/G1;return Q(`НСК(${a}; ${b}) = ?`,L1,[`НСД(${a}; ${b}) = ${G1}`,`НСК = ${a}·${b}/${G1} = ${L1}`],`${a}*${b}/${G1}`)}],
+['алгоритм Евкліда',2,()=>{let a=r(60,300),b=r(20,a-1);const a0=a,b0=b,st=[];while(b){st.push(`${a} = ${b}·${Math.floor(a/b)} + ${a%b}`);[a,b]=[b,a%b]}return Q(`Знайдіть НСД(${a0}; ${b0}) алгоритмом Евкліда.`,a,[...st.slice(0,6),`Остання ненульова остача: ${a}`])}],
+['задача на НСД',3,()=>{const g=r(3,12),a=g*r(2,7),b=g*r(2,7),G1=gc(a,b);return Q(`Є ${a} цукерок і ${b} яблук. Яку найбільшу кількість однакових подарунків можна скласти, використавши все?`,G1,[`Кількість подарунків має ділити і ${a}, і ${b} → шукаємо НСД`,`НСД(${a}; ${b}) = ${G1}`,`У кожному: ${a/G1} цукерок і ${b/G1} яблук`])}],
+['задача на НСК',3,()=>{const a=pick([4,6,8,9,10,12]),b=pick([6,8,10,12,15,18].filter(v=>v!=a)),L1=a*b/gc(a,b);return Q(`Один автобус вирушає кожні ${a} хв, інший — кожні ${b} хв. Вони виїхали одночасно. Через скільки хвилин вони знову виїдуть одночасно?`,L1,[`Шукаємо найменше число, що ділиться і на ${a}, і на ${b}`,`НСК(${a}; ${b}) = ${L1} хв`])}]]);
+
+KDEF('Округлення',[
+['до цілих',1,()=>{const n=r(1000,99999),v=dc((n/100).toFixed(2));return Q(`Округліть ${v} до цілих.`,Math.floor((n+50)/100),[`Перша цифра після коми: ${Math.floor(n/10)%10} — ${Math.floor(n/10)%10>=5?'збільшуємо':'залишаємо'}`,`${v} ≈ ${Math.floor((n+50)/100)}`])}],
+['до десятих',1,()=>{const n=r(1000,99999),v=dc((n/100).toFixed(2));return Q(`Округліть ${v} до десятих.`,Math.floor((n+5)/10)/10,[`Друга цифра після коми: ${n%10} — ${n%10>=5?'збільшуємо':'залишаємо'}`,`${v} ≈ ${dc(Math.floor((n+5)/10)/10)}`])}],
+['до десятків і сотень',2,()=>{const n=r(1000,99999),k=pick([10,100]),v=Math.floor((n+k/2)/k)*k;return Q(`Округліть ${n} до ${k==10?'десятків':'сотень'}.`,v,[`Дивимось на цифру ${k==10?'одиниць':'десятків'}: ${Math.floor(n/(k/10))%10}`,`${n} ≈ ${v}`])}],
+['до сотих',2,()=>{const n=r(1000,99999),v=dc((n/1000).toFixed(3));return Q(`Округліть ${v} до сотих.`,Math.floor((n+5)/10)/100,[`Третя цифра після коми: ${n%10} — ${n%10>=5?'збільшуємо':'залишаємо'}`,`${v} ≈ ${dc(Math.floor((n+5)/10)/100)}`])}],
+['до тисяч',2,()=>{const n=r(10000,999999),v=Math.floor((n+500)/1000)*1000;return Q(`Округліть ${n} до тисяч.`,v,[`Цифра сотень: ${Math.floor(n/100)%10}`,`${n} ≈ ${v}`])}],
+['прикидка суми',3,()=>{const a=r(1010,9990),b=r(1010,9990),ra=Math.floor((a+50)/100),rb=Math.floor((b+50)/100);return Q(`Округліть ${dc((a/100).toFixed(2))} і ${dc((b/100).toFixed(2))} до цілих і знайдіть суму.`,ra+rb,[`${dc((a/100).toFixed(2))} ≈ ${ra}, ${dc((b/100).toFixed(2))} ≈ ${rb}`,`${ra} + ${rb} = ${ra+rb}`])}]]);
+
+KDEF('Формули скороченого множення',[
+['квадрат суми',1,()=>{const A1=r(2,9)*10,B=r(1,3);return Q(`Обчисліть за формулою: ${A1+B}²`,(A1+B)**2,[`(${A1} + ${B})² = ${A1}² + 2·${A1}·${B} + ${B}²`,`= ${A1*A1} + ${2*A1*B} + ${B*B} = ${(A1+B)**2}`],`${A1+B}^2`)}],
+['квадрат різниці',2,()=>{const A1=r(2,9)*10,B=r(1,3);return Q(`Обчисліть за формулою: ${A1-B}²`,(A1-B)**2,[`(${A1} − ${B})² = ${A1}² − 2·${A1}·${B} + ${B}²`,`= ${A1*A1} − ${2*A1*B} + ${B*B} = ${(A1-B)**2}`],`${A1-B}^2`)}],
+['різниця квадратів',2,()=>{const m=r(51,99),n=100-m;return Q(`Обчисліть: ${m}² − ${n}²`,m*m-n*n,[`a² − b² = (a − b)(a + b)`,`(${m} − ${n})(${m} + ${n}) = ${m-n}·100 = ${m*m-n*n}`],`${m}^2-${n}^2`)}],
+['добуток суми й різниці',2,()=>{const m=r(2,9)*10,d=r(1,9);return Q(`Обчисліть: ${m+d}·${m-d}`,m*m-d*d,[`(${m} + ${d})(${m} − ${d}) = ${m}² − ${d}²`,`= ${m*m} − ${d*d} = ${m*m-d*d}`],`${m+d}*${m-d}`)}],
+['коефіцієнти розкладу',3,()=>{const k=r(2,12),s=r(0,1),t=r(0,1);return t?Q(`(x ${s?'+':'−'} ${k})² = x² + bx + c. Знайдіть b.`,s?2*k:-2*k,[`(x ${s?'+':'−'} ${k})² = x² ${s?'+':'−'} ${2*k}x + ${k*k}`,`b = ${s?2*k:-2*k}`]):Q(`(x ${s?'+':'−'} ${k})² = x² + bx + c. Знайдіть c.`,k*k,[`(x ${s?'+':'−'} ${k})² = x² ${s?'+':'−'} ${2*k}x + ${k*k}`,`c = ${k*k}`])}],
+['куб суми й різниці',3,()=>{const a=r(1,4),b=r(1,3),s=r(0,1),v=s?(a+b)**3:(a-b)**3;return Q(`Обчисліть за формулою куба ${s?'суми':'різниці'}: (${a} ${s?'+':'−'} ${b})³`,v,[`(a ${s?'+':'−'} b)³ = a³ ${s?'+':'−'} 3a²b + 3ab² ${s?'+':'−'} b³`,`= ${a**3} ${s?'+':'−'} ${3*a*a*b} + ${3*a*b*b} ${s?'+':'−'} ${b**3} = ${v}`],`(${a}${s?'+':'-'}${b})^3`)}]]);
+
+const VQ=(p,q)=>`x² ${S(-(p+q))}x ${S(p*q)} = 0`;
+KDEF('Теорема Вієта',[
+['сума коренів',1,()=>{const p=r(-6,6),q=r(-6,6);return Q(`${VQ(p,q)}. Знайдіть x₁ + x₂.`,p+q,[`x₁ + x₂ = −b`,`= ${p+q}`])}],
+['добуток коренів',1,()=>{const p=r(-6,6),q=r(-6,6);return Q(`${VQ(p,q)}. Знайдіть x₁·x₂.`,p*q,[`x₁·x₂ = c`,`= ${p*q}`])}],
+['скласти рівняння за коренями',2,()=>{const p=nz(-8,8),q=nz(-8,8),t=r(0,1);return t?Q(`Корені рівняння x² + bx + c = 0 дорівнюють ${p} і ${q}. Знайдіть b.`,-(p+q),[`b = −(x₁ + x₂) = −(${p} ${S(q)})`,`b = ${-(p+q)}`]):Q(`Корені рівняння x² + bx + c = 0 дорівнюють ${p} і ${q}. Знайдіть c.`,p*q,[`c = x₁·x₂ = ${p}·${P(q)}`,`c = ${p*q}`])}],
+['другий корінь за першим',2,()=>{const p=nz(-8,8),q=nz(-8,8);return Q(`Один із коренів рівняння ${VQ(p,q)} дорівнює ${p}. Знайдіть другий корінь.`,q,[`x₁ + x₂ = ${p+q}`,`x₂ = ${p+q} − ${P(p)} = ${q}`])}],
+['сума квадратів коренів',3,()=>{const p=nz(-6,6),q=nz(-6,6);return Q(`${VQ(p,q)}. Знайдіть x₁² + x₂².`,p*p+q*q,[`x₁² + x₂² = (x₁ + x₂)² − 2x₁x₂`,`= ${P(p+q)}² − 2·${P(p*q)} = ${(p+q)**2} ${S(-2*p*q)} = ${p*p+q*q}`])}],
+['сума обернених до коренів',3,()=>{const p=nz(-6,6),q=nz(-6,6);return Q(`${VQ(p,q)}. Знайдіть 1/x₁ + 1/x₂ (дробом).`,(p+q)/(p*q),[`1/x₁ + 1/x₂ = (x₁ + x₂)/(x₁x₂)`,`= ${p+q}/${P(p*q)} = ${FR(p+q,p*q)}`],undefined,{as:FR(p+q,p*q)})}]]);
+
+const SYS=()=>{let a1,b1,a2,b2,Dd;do{a1=r(1,5);b1=nz(-5,5);a2=r(1,5);b2=nz(-5,5);Dd=a1*b2-a2*b1}while(!Dd);const x=r(-5,9),y=r(-5,9);return{a1,b1,a2,b2,Dd,x,y,c1:a1*x+b1*y,c2:a2*x+b2*y}};
+KDEF('Системи лінійних рівнянь',[
+['підстановка',1,()=>{const x=r(1,12),d=r(1,9),y=x+d;return Q(`{ y = x + ${d};  x + y = ${x+y} }. Знайдіть x.`,x,[`Підставляємо y: x + (x + ${d}) = ${x+y}`,`2x = ${2*x} → x = ${x}`,`y = ${x} + ${d} = ${y}`],`x+x+${d}=${x+y}`)}],
+['додавання рівнянь',2,()=>{const x=r(-5,12),y=r(-5,12),t=r(0,1);return Q(`{ x + y = ${x+y};  x − y = ${x-y} }. Знайдіть ${t?'y':'x'}.`,t?y:x,[`Додаємо рівняння: 2x = ${2*x} → x = ${x}`,`y = ${x+y} − ${P(x)} = ${y}`])}],
+['знайти x',2,()=>{const s=SYS();return Q(`{ ${L(s.a1,0)} ${S(s.b1)}y = ${s.c1};  ${L(s.a2,0)} ${S(s.b2)}y = ${s.c2} }. Знайдіть x.`,s.x,[`D = ${s.a1}·${P(s.b2)} − ${s.a2}·${P(s.b1)} = ${s.Dd}`,`Dx = ${P(s.c1)}·${P(s.b2)} − ${P(s.c2)}·${P(s.b1)} = ${s.c1*s.b2-s.c2*s.b1}`,`x = Dx/D = ${s.x}`])}],
+['знайти y',3,()=>{const s=SYS();return Q(`{ ${L(s.a1,0)} ${S(s.b1)}y = ${s.c1};  ${L(s.a2,0)} ${S(s.b2)}y = ${s.c2} }. Знайдіть y.`,s.y,[`D = ${s.a1}·${P(s.b2)} − ${s.a2}·${P(s.b1)} = ${s.Dd}`,`Dy = ${s.a1}·${P(s.c2)} − ${s.a2}·${P(s.c1)} = ${s.a1*s.c2-s.a2*s.c1}`,`y = Dy/D = ${s.y}`])}],
+['задача на систему',3,()=>{const p=5*r(2,12),q=5*r(2,12),n1=r(2,5),m1=r(1,4),n2=r(1,4),m2=r(2,5);if(n1*m2==n2*m1||p==q)return SYSW();return Q(`${n1} зошити і ${m1} ручки коштують ${n1*p+m1*q} грн, а ${n2} зошити і ${m2} ручки — ${n2*p+m2*q} грн. Скільки коштує зошит?`,p,[`{ ${n1}x + ${m1}y = ${n1*p+m1*q};  ${n2}x + ${m2}y = ${n2*p+m2*q} }`,`D = ${n1*m2-n2*m1}, Dx = ${(n1*p+m1*q)*m2-(n2*p+m2*q)*m1}`,`x = ${p} грн, y = ${q} грн`])}]]);
+function SYSW(){const p=5*r(2,12);let q;do{q=5*r(2,12)}while(q==p);return Q(`2 зошити і 1 ручка коштують ${2*p+q} грн, а 1 зошит і 3 ручки — ${p+3*q} грн. Скільки коштує зошит?`,p,[`{ 2x + y = ${2*p+q};  x + 3y = ${p+3*q} }`,`D = 5, Dx = ${(2*p+q)*3-(p+3*q)}`,`x = ${p} грн, y = ${q} грн`])}
+
+KDEF('Лінійна функція',[
+['значення функції',1,()=>{const k=nz(-6,6),b=r(-9,9),x0=r(-5,5);return Q(`f(x) = ${L(k,b)}. Знайдіть f(${x0}).`,k*x0+b,[`${k}·${P(x0)} ${S(b)} = ${k*x0+b}`],`${k}*(${x0})+(${b})`)}],
+['нуль функції',1,()=>{const k=r(2,6),x0=r(-5,5);return Q(`Знайдіть нуль функції y = ${L(k,-k*x0)}.`,x0,[`${L(k,-k*x0)} = 0`,`${k}x = ${k*x0} → x = ${x0}`],`${Lt(k,-k*x0)}=0`)}],
+['перетин з віссю Oy',1,()=>{const k=nz(-6,6),b=nz(-9,9);return Q(`У якій точці графік y = ${L(k,b)} перетинає вісь Oy? Впишіть ординату.`,b,[`На осі Oy x = 0`,`y = ${b}`])}],
+['кутовий коефіцієнт за двома точками',2,()=>{const k=nz(-5,5),b=r(-6,6),x1=r(-4,2),x2=x1+r(1,4);return Q(`Пряма проходить через точки (${x1}; ${k*x1+b}) і (${x2}; ${k*x2+b}). Знайдіть її кутовий коефіцієнт k.`,k,[`k = (y₂ − y₁)/(x₂ − x₁)`,`= (${k*x2+b} − ${P(k*x1+b)})/(${x2} − ${P(x1)}) = ${k}`],`(${k*x2+b}-(${k*x1+b}))/(${x2}-(${x1}))`)}],
+['знайти b за точкою',2,()=>{const k=nz(-5,5),b=r(-9,9),x1=nz(-4,4);return Q(`Графік y = ${L(k,0)} + b проходить через точку (${x1}; ${k*x1+b}). Знайдіть b.`,b,[`${k*x1+b} = ${k}·${P(x1)} + b`,`b = ${k*x1+b} − ${P(k*x1)} = ${b}`])}],
+['точка перетину двох прямих',3,()=>{const x=r(-5,6),k1=nz(-4,5);let k2;do{k2=nz(-4,5)}while(k2==k1);const b1=r(-8,8),b2=k1*x+b1-k2*x;return Q(`Знайдіть абсцису точки перетину прямих y = ${L(k1,b1)} і y = ${L(k2,b2)}.`,x,[`Прирівнюємо: ${L(k1,b1)} = ${L(k2,b2)}`,`${k1-k2}x = ${b2-b1} → x = ${x}`],`${Lt(k1,b1)}=${Lt(k2,b2)}`)}]]);
+
+KDEF('Квадратична функція',[
+['значення функції',1,()=>{const b=r(-6,6),c=r(-9,9),x0=r(-4,4),v=x0*x0+b*x0+c;return Q(`f(x) = x² ${S(b)}x ${S(c)}. Знайдіть f(${x0}).`,v,[`${P(x0)}² ${S(b*x0)} ${S(c)} = ${v}`],`(${x0})^2+(${b})*(${x0})+(${c})`)}],
+['абсциса вершини',1,()=>{const m=nz(-6,6),c=r(-9,9);return Q(`y = x² ${S(-2*m)}x ${S(c)}. Знайдіть абсцису вершини.`,m,[`x₀ = −b/(2a) = ${2*m}/2 = ${m}`])}],
+['найменше значення',2,()=>{const m=nz(-6,6),c=r(-9,9);return Q(`Знайдіть найменше значення y = x² ${S(-2*m)}x ${S(c)}.`,c-m*m,[`x₀ = ${m}`,`y₀ = ${m*m} ${S(-2*m*m)} ${S(c)} = ${c-m*m}`],`(${m})^2-${2*m}*(${m})+(${c})`)}],
+['нулі функції',2,()=>{let p=r(-6,6),q=r(-6,6);while(p==q)q=r(-6,6);return Q(`Знайдіть нулі функції y = x² ${S(-(p+q))}x ${S(p*q)} (через пробіл).`,[p,q],[`x² ${S(-(p+q))}x ${S(p*q)} = 0`,`За теоремою Вієта: x₁ + x₂ = ${p+q}, x₁x₂ = ${p*q}`,`x = ${Math.min(p,q)} і x = ${Math.max(p,q)}`],`x^2+(${-(p+q)})x+(${p*q})=0`)}],
+['найбільше значення (вітки вниз)',3,()=>{const m=nz(-6,6),c=r(-9,9);return Q(`Знайдіть найбільше значення y = −x² ${S(2*m)}x ${S(c)}.`,m*m+c,[`a = −1 < 0 — вітки вниз, найбільше значення у вершині`,`x₀ = ${m}`,`y₀ = −${m*m} ${S(2*m*m)} ${S(c)} = ${m*m+c}`],`-(${m})^2+${2*m}*(${m})+(${c})`)}],
+['вершина за нулями',3,()=>{const p=r(-7,5),q=p+2*r(1,5);return Q(`Нулі параболи y = x² + bx + c дорівнюють ${p} і ${q}. Знайдіть абсцису вершини.`,(p+q)/2,[`Вершина лежить на осі симетрії — посередині між нулями`,`x₀ = (${p} ${S(q)})/2 = ${(p+q)/2}`],`(${p}+(${q}))/2`)}]]);
+
+KDEF('Лінійні нерівності',[
+['додатний коефіцієнт',1,()=>INEQ(r(2,6),pick(['<','>']))],
+['нестрогі нерівності',2,()=>INEQ(r(2,6),pick(['≤','≥']))],
+['від’ємний коефіцієнт — знак змінюється',3,()=>INEQ(-r(2,6),pick(['<','>','≤','≥']))]]);
+function INEQ(a,sig){const b=r(-9,9),k=r(-8,8),c=a*k+b+r(0,Math.abs(a)-1),lim=(c-b)/a,flip=a<0,sig2=flip?{'<':'>','>':'<','≤':'≥','≥':'≤'}[sig]:sig,strict=sig2=='<'||sig2=='>',big=sig2=='<'||sig2=='≤',ans=big?(strict?Math.ceil(lim)-1:Math.floor(lim)):(strict?Math.floor(lim)+1:Math.ceil(lim));
+return Q(`${L(a,b)} ${sig} ${c}. Яке ${big?'найбільше':'найменше'} ціле x?`,ans,[`${a}x ${sig} ${c} ${S(-b)} = ${c-b}`,`Ділимо на ${P(a)}${flip?' — від’ємне, знак змінюємо':''}: x ${sig2} ${D(lim)}`,`${big?'Найбільше':'Найменше'} ціле: ${ans}`],`${Lt(a,b)}${sig}${c}`,{ktx:1})}
+
+KDEF('Системи лінійних нерівностей',[
+['готовий проміжок',1,()=>{const p=r(-6,4),q=p+r(3,8);return Q(`{ x > ${p};  x ≤ ${q} }. Яке найбільше ціле x задовольняє систему?`,q,[`${p} < x ≤ ${q}`,`Найбільше ціле: ${q}`])}],
+['скільки цілих розв’язків',2,()=>{const p=r(-5,3),q=p+r(3,8),B=r(1,5);return Q(`{ 3x − 5 > ${3*p-5};  x + ${B} ≤ ${q+B} }. Скільки цілих розв’язків?`,q-p,[`3x > ${3*p} → x > ${p}`,`x ≤ ${q}`,`${p} < x ≤ ${q}: ${q-p} цілих`])}],
+['з від’ємним коефіцієнтом',3,()=>{const p=r(-5,3),q=p+r(3,8),k=r(2,4);return Q(`{ −${k}x < ${-k*p};  2x − 1 < ${2*q-1} }. Скільки цілих розв’язків?`,q-p-1,[`Ділимо на −${k}, знак змінюємо: x > ${p}`,`2x < ${2*q} → x < ${q}`,`${p} < x < ${q}: ${q-p-1} цілих`])}],
+['система без розв’язків?',3,()=>{const p=r(-5,5),d=r(-3,4),q=p+d;return Q(`{ x ≥ ${p};  x < ${q} }. Скільки цілих розв’язків? (0, якщо їх немає)`,Math.max(0,q-p),[q>p?`${p} ≤ x < ${q}`:`Проміжки не перетинаються`,`Цілих: ${Math.max(0,q-p)}`])}]]);
+
+const SL=n=>{const X=[];for(let i=0;i<n;i++)X.push(r(1,20));return X},SUM=X=>X.reduce((a,b)=>a+b,0);
+KDEF('Елементи статистики',[
+['середнє арифметичне',1,()=>{const n=pick([4,5]),X=SL(n-1);X.push(((n-SUM(X)%n)%n)||n);const s=SUM(X);return Q(`Знайдіть середнє: ${X.join(', ')}`,s/n,[`Сума = ${s}, кількість ${n}`,`${s}/${n} = ${s/n}`],`(${X.join('+')})/${n}`)}],
+['розмах',1,()=>{const X=SL(pick([5,7])),mx=Math.max(...X),mn=Math.min(...X);return Q(`Знайдіть розмах: ${X.join(', ')}`,mx-mn,[`Найбільше ${mx}, найменше ${mn}`,`${mx} − ${mn} = ${mx-mn}`],`${mx}-${mn}`)}],
+['медіана',2,()=>{const n=pick([5,7]),X=SL(n),So=[...X].sort((a,b)=>a-b);return Q(`Знайдіть медіану: ${X.join(', ')}`,So[(n-1)/2],[`Впорядкуємо: ${So.join(', ')}`,`Посередині: ${So[(n-1)/2]}`])}],
+['мода',2,()=>{const m=r(1,20),X=SL(4).filter(v=>v!=m),U=[...new Set(X)];const Y=[...U,m,m,m].sort(()=>Math.random()-.5);return Q(`Знайдіть моду: ${Y.join(', ')}`,m,[`Рахуємо, скільки разів трапляється кожне число`,`${m} трапляється 3 рази — найчастіше`])}],
+['медіана парної кількості',3,()=>{const X=SL(6),So=[...X].sort((a,b)=>a-b),v=(So[2]+So[3])/2;return Q(`Знайдіть медіану: ${X.join(', ')}`,v,[`Впорядкуємо: ${So.join(', ')}`,`Чисел парна кількість — беремо середнє двох середніх: (${So[2]} + ${So[3]})/2 = ${D(v)}`],`(${So[2]}+${So[3]})/2`)}],
+['пропущене число за середнім',3,()=>{const X=SL(4),m=r(5,15),x=5*m-SUM(X);if(x<1)return Q(`Середнє п’яти чисел дорівнює ${m}. Чотири з них: 3, 5, 7, 9. Знайдіть п’яте.`,5*m-24,[`Сума всіх: 5·${m} = ${5*m}`,`${5*m} − 24 = ${5*m-24}`],`5*${m}-24`);return Q(`Середнє п’яти чисел дорівнює ${m}. Чотири з них: ${X.join(', ')}. Знайдіть п’яте.`,x,[`Сума всіх: 5·${m} = ${5*m}`,`Сума відомих: ${SUM(X)}`,`${5*m} − ${SUM(X)} = ${x}`],`5*${m}-${SUM(X)}`)}]]);
+
+KDEF('Площі фігур',[
+['трикутник',1,()=>{const a=r(2,14),h=r(2,12);return Q(`Трикутник: основа ${a}, висота ${2*h}. Знайдіть площу.`,a*h,[`S = ½·a·h`,`S = ½·${a}·${2*h} = ${a*h}`],`${a}*${2*h}/2`)}],
+['паралелограм',1,()=>{const a=r(2,14),h=r(2,12);return Q(`Паралелограм: сторона ${a}, висота до неї ${h}. Знайдіть площу.`,a*h,[`S = a·h`,`S = ${a}·${h} = ${a*h}`],`${a}*${h}`)}],
+['трапеція',2,()=>{const a=r(2,14),b=r(2,14),h=r(2,12);return Q(`Трапеція: основи ${a} і ${b}, висота ${2*h}. Знайдіть площу.`,(a+b)*h,[`S = (a + b)/2·h`,`S = (${a} + ${b})/2·${2*h} = ${(a+b)*h}`],`(${a}+${b})/2*${2*h}`)}],
+['ромб',2,()=>{const a=r(2,14),b=r(2,14);return Q(`Ромб: діагоналі ${2*a} і ${b}. Знайдіть площу.`,a*b,[`S = d₁·d₂/2`,`S = ${2*a}·${b}/2 = ${a*b}`],`${2*a}*${b}/2`)}],
+['висота за площею',3,()=>{const a=r(2,14),h=r(2,12);return Q(`Площа трикутника ${a*h}, основа ${a}. Знайдіть висоту, проведену до цієї основи.`,2*h,[`S = ½·a·h → h = 2S/a`,`h = 2·${a*h}/${a} = ${2*h}`],`2*${a*h}/${a}`)}],
+['прямокутний трикутник за катетами',3,()=>{const[a,b,c]=pick(TR);return Q(`Прямокутний трикутник з гіпотенузою ${c} і катетом ${a}. Знайдіть площу.`,a*b/2,[`Другий катет: √(${c}² − ${a}²) = ${b}`,`S = ½·${a}·${b} = ${a*b/2}`],`${a}*sqrt(${c}^2-${a}^2)/2`)}]]);
+
+KDEF('Прямокутний трикутник',[
+['катет навпроти кута 30°',1,()=>{const c=2*r(2,15);return Q(`Гіпотенуза ${c}, ∠A = 30°. Знайдіть катет, протилежний куту A.`,c/2,[`a = c·sin 30°`,`= ${c}·½ = ${c/2}`],`${c}*sin(30)`)}],
+['кут 45°',1,()=>{const b=r(2,15);return Q(`Катет ${b}, гострий кут 45°. Знайдіть другий катет.`,b,[`tg 45° = 1, тому катети рівні`,`Другий катет: ${b}`])}],
+['гіпотенуза через cos 60°',2,()=>{const b=r(2,15);return Q(`Катет ${b} прилягає до ∠A = 60°. Знайдіть гіпотенузу.`,2*b,[`cos 60° = b/c → c = b / cos 60°`,`c = ${b} / ½ = ${2*b}`],`${b}/cos(60)`)}],
+['синус і косинус за сторонами',2,()=>{const[a,b,c]=pick(TR),t=r(0,1);return Q(`У прямокутному трикутнику катети ${a} і ${b}, гіпотенуза ${c}. Знайдіть ${t?'косинус':'синус'} кута, що лежить навпроти катета ${a} (дробом).`,t?b/c:a/c,[t?`cos = прилеглий катет / гіпотенуза`:`sin = протилежний катет / гіпотенуза`,`= ${t?b:a}/${c}${gc(t?b:a,c)>1?' = '+FR(t?b:a,c):''}`],undefined,{as:FR(t?b:a,c)})}],
+['тангенс гострого кута',3,()=>{const[a,b,c]=pick(TR);return Q(`Гіпотенуза ${c}, катет ${a}. Знайдіть тангенс кута, що лежить навпроти цього катета (дробом).`,a/b,[`Другий катет: √(${c}² − ${a}²) = ${b}`,`tg = протилежний / прилеглий = ${a}/${b}${gc(a,b)>1?' = '+FR(a,b):''}`],undefined,{as:FR(a,b)})}],
+['висота до гіпотенузи',3,()=>{const m=pick([5,10,15]),[a,b,c]=[3,4,5].map(v=>v*m);return Q(`Катети ${a} і ${b}. Знайдіть висоту, проведену до гіпотенузи.`,a*b/c,[`Гіпотенуза: √(${a}² + ${b}²) = ${c}`,`Площа двома способами: ½·${a}·${b} = ½·${c}·h`,`h = ${a}·${b}/${c} = ${a*b/c}`],`${a}*${b}/${c}`)}]]);
+
+KDEF('Формули зведення',[
+['синус',2,()=>REDF('sin')],['косинус',2,()=>REDF('cos')],['тангенс',3,()=>REDF('tg')]]);
+function REDF(f){const TV={30:['1/2','√3/2','√3/3'],45:['√2/2','√2/2','1'],60:['√3/2','1/2','√3']},b=pick([30,45,60]),base=pick([90,180,270,360]),sg1=base==360?-1:pick([-1,1]),ang=base+sg1*b,x=ang*Math.PI/180;
+let v=f=='sin'?Math.sin(x):f=='cos'?Math.cos(x):Math.tan(x);const swap=base==90||base==270,g=swap?{sin:'cos',cos:'sin',tg:'ctg'}[f]:f,qd=ang<90?'I':ang<180?'II':ang<270?'III':'IV',neg=v<0,
+tv=g=='sin'?TV[b][0]:g=='cos'?TV[b][1]:g=='tg'?TV[b][2]:TV[90-b][2],as=(neg?'−':'')+tv;
+return Q(`${f} ${ang}° = ? (можна десятковим, до тисячних)`,v,[`${ang}° = ${base}° ${sg1<0?'−':'+'} ${b}°, кут у ${qd} чверті`,`Знак ${f} у ${qd} чверті: «${neg?'−':'+'}»`,swap?`Біля 90° чи 270° функція змінюється: ${f} → ${g}`:`Біля 180° чи 360° функція не змінюється`,`${f} ${ang}° = ${neg?'−':''}${g} ${b}° = ${as}`],`${f}(${ang})`,{as,tol:.001})}
+
+KDEF('Дотична і швидкість',[
+['кутовий коефіцієнт дотичної',1,()=>{const a=r(1,5),b=nz(-5,5),x0=r(-3,4);return Q(`Знайдіть кутовий коефіцієнт дотичної до y = ${a==1?'':a}x² ${S(b)}x при x = ${x0}.`,2*a*x0+b,[`y′ = ${2*a}x ${S(b)}`,`y′(${x0}) = ${2*a*x0+b}`],`2*${a}*(${x0})+(${b})`)}],
+['швидкість руху',1,()=>{const v=r(2,6),t=r(1,5);return Q(`Точка рухається за законом s(t) = ${v}t² (м). Знайдіть швидкість при t = ${t} с.`,2*v*t,[`v(t) = s′(t) = ${2*v}t`,`v(${t}) = ${2*v*t} м/с`],`2*${v}*${t}`)}],
+['прискорення',2,()=>{const a=r(1,4),t=r(1,5);return Q(`Точка рухається за законом s(t) = ${a==1?'':a}t³ (м). Знайдіть прискорення при t = ${t} с.`,6*a*t,[`v(t) = s′ = ${3*a}t²`,`a(t) = v′ = ${6*a}t`,`a(${t}) = ${6*a*t} м/с²`],`6*${a}*${t}`)}],
+['момент зупинки',2,()=>{const p=r(1,8);return Q(`s(t) = ${2*p}t − t² (м). У який момент часу швидкість дорівнює нулю?`,p,[`v(t) = s′ = ${2*p} − 2t`,`${2*p} − 2t = 0 → t = ${p} с`],`${2*p}-2x=0`)}],
+['рівняння дотичної',3,()=>{const a=r(1,4),x0=nz(-3,3),k=2*a*x0,y0=a*x0*x0,b=y0-k*x0;return Q(`Дотична до y = ${a==1?'':a}x² у точці x₀ = ${x0} має вигляд y = kx + b. Знайдіть b.`,b,[`y(x₀) = ${y0}, y′(x₀) = ${k}`,`y = ${y0} + ${P(k)}(x − ${P(x0)})`,`y = ${L(k,b)} → b = ${b}`])}],
+['точка, де дотична горизонтальна',3,()=>{const m=nz(-5,5),c=r(-9,9);return Q(`У якій точці x дотична до y = x² ${S(-2*m)}x ${S(c)} паралельна осі Ox?`,m,[`Горизонтальна дотична: y′ = 0`,`2x ${S(-2*m)} = 0 → x = ${m}`],`2x+(${-2*m})=0`)}]]);
+
+KDEF('Комплексні числа',[
+['додавання',1,()=>{const a=r(-6,6),b=nz(-6,6),c=r(-6,6),d=nz(-6,6),t=r(0,1);return Q(`(${a} ${S(b)}i) + (${c} ${S(d)}i). Знайдіть ${t?'уявну':'дійсну'} частину.`,t?b+d:a+c,[`Додаємо окремо дійсні та уявні частини`,`(${a} ${S(c)}) + (${b} ${S(d)})i = ${a+c} ${S(b+d)}i`])}],
+['модуль',1,()=>{const[p,q,s]=pick(TR);return Q(`Знайдіть |z|, якщо z = ${p} + ${q}i.`,s,[`|z| = √(a² + b²)`,`√(${p}² + ${q}²) = √${p*p+q*q} = ${s}`],`sqrt(${p}^2+${q}^2)`)}],
+['дійсна частина добутку',2,()=>{const a=r(1,6),b=r(1,6),c=r(1,6),d=r(1,6);return Q(`(${a}+${b}i)(${c}+${d}i). Знайдіть дійсну частину.`,a*c-b*d,[`(a+bi)(c+di) = (ac − bd) + (ad + bc)i`,`Re = ${a}·${c} − ${b}·${d} = ${a*c-b*d}`],`${a}*${c}-${b}*${d}`)}],
+['уявна частина добутку',2,()=>{const a=r(1,6),b=r(1,6),c=r(1,6),d=r(1,6);return Q(`(${a}+${b}i)(${c}+${d}i). Знайдіть уявну частину.`,a*d+b*c,[`(a+bi)(c+di) = (ac − bd) + (ad + bc)i`,`Im = ${a}·${d} + ${b}·${c} = ${a*d+b*c}`],`${a}*${d}+${b}*${c}`)}],
+['добуток спряжених',3,()=>{const a=r(1,9),b=r(1,9);return Q(`z = ${a} + ${b}i. Знайдіть z·z̄ (добуток числа на спряжене).`,a*a+b*b,[`z̄ = ${a} − ${b}i`,`z·z̄ = a² + b² = ${a*a} + ${b*b} = ${a*a+b*b}`],`${a}^2+${b}^2`)}],
+['степені уявної одиниці',3,()=>{const n=r(5,40),m=n%4,v=[1,0,-1,0][m];return Q(`i${up(n)} = ? Впишіть дійсну частину результату (уявна одиниця i дає 0).`,v,[`Степені i повторюються з періодом 4: i, −1, −i, 1`,`${n} = 4·${Math.floor(n/4)} + ${m} → i${up(n)} = ${['1','i','−1','−i'][m]}`,`Дійсна частина: ${v}`])}]]);
+
+KDEF('Об’єми тіл',[
+['куб',1,()=>{const a=r(2,9);return Q(`Куб з ребром ${a}. Знайдіть об’єм.`,a**3,[`V = a³ = ${a}³ = ${a**3}`],`${a}^3`)}],
+['прямокутний паралелепіпед',1,()=>{const a=r(2,9),b=r(2,9),h=r(2,12);return Q(`Прямокутний паралелепіпед ${a} × ${b} × ${h}. Знайдіть об’єм.`,a*b*h,[`V = a·b·c = ${a}·${b}·${h} = ${a*b*h}`],`${a}*${b}*${h}`)}],
+['циліндр',2,()=>{const R0=r(1,6),h=r(2,12);return Q(`Циліндр: r = ${R0}, h = ${h}. Знайдіть V/π.`,R0*R0*h,[`V = πr²h`,`V = π·${R0}²·${h} = ${R0*R0*h}π`],`${R0}^2*${h}`)}],
+['конус',2,()=>{const R0=r(1,6),h=3*r(1,4);return Q(`Конус: r = ${R0}, h = ${h}. Знайдіть V/π.`,R0*R0*h/3,[`V = ⅓πr²h`,`V = ⅓·π·${R0}²·${h} = ${R0*R0*h/3}π`],`${R0}^2*${h}/3`)}],
+['куля',3,()=>{const R0=r(1,6);return Q(`Куля радіуса ${3*R0}. Знайдіть V/π.`,36*R0**3,[`V = 4/3·πr³`,`V = 4/3·π·${3*R0}³ = ${36*R0**3}π`],`4/3*${3*R0}^3`)}],
+['ребро куба за об’ємом',3,()=>{const a=r(2,9);return Q(`Об’єм куба ${a**3}. Знайдіть площу його повної поверхні.`,6*a*a,[`Ребро: ∛${a**3} = ${a}`,`S = 6a² = 6·${a*a} = ${6*a*a}`],`6*${a}^2`)}]]);
+
+KDEF('Нескінченно спадна геометрична прогресія',[
+['знаменник за членами',1,()=>{const[n0,d0]=pick([[1,2],[1,3],[1,4],[2,3]]),b=d0**3*r(1,3);return Q(`Прогресія: ${b}; ${b*n0/d0}; ${b*n0*n0/d0/d0}; … Знайдіть q (дробом).`,n0/d0,[`q = b₂/b₁ = ${b*n0/d0}/${b}`,`q = ${n0}/${d0}`],undefined,{as:`${n0}/${d0}`})}],
+['сума прогресії',2,()=>{const[n0,d0]=pick([[1,2],[1,3],[1,4],[2,3],[-1,2]]),b=r(1,9)*d0,Sm=b/(1-n0/d0);return Q(`b₁ = ${b}, q = ${n0}/${d0}. Знайдіть суму прогресії.`,Sm,[`S = b₁/(1 − q)`,`S = ${b} / (1 − (${n0}/${d0})) = ${exact(Sm)}`],`${b}/(1-(${n0}/${d0}))`)}],
+['перший член за сумою',3,()=>{const[n0,d0]=pick([[1,2],[1,3],[1,4],[2,3]]),b=r(1,9)*(d0-n0),Sm=b*d0/(d0-n0);return Q(`Сума нескінченно спадної прогресії дорівнює ${Sm}, q = ${n0}/${d0}. Знайдіть b₁.`,b,[`b₁ = S·(1 − q)`,`b₁ = ${Sm}·(1 − ${n0}/${d0}) = ${Sm}·${d0-n0}/${d0} = ${b}`],`${Sm}*(1-${n0}/${d0})`)}],
+['періодичний дріб',3,()=>{const d=r(1,8);return Q(`Запишіть періодичний дріб 0,(${d}) = 0,${d}${d}${d}… звичайним дробом.`,d/9,[`0,(${d}) = ${d}/10 + ${d}/100 + … — прогресія з b₁ = ${d}/10, q = 1/10`,`S = (${d}/10)/(1 − 1/10) = ${d}/9${gc(d,9)>1?' = '+FR(d,9):''}`],`${d}/9`,{as:FR(d,9)})}]]);
+
+KDEF('Визначник матриці 2×2',[
+['додатні числа',1,()=>{const[a,b,c,d]=[0,0,0,0].map(()=>r(1,9));return Q(`det [[${a}, ${b}], [${c}, ${d}]] = ?`,a*d-b*c,[`det = ad − bc`,`${a}·${d} − ${b}·${c} = ${a*d} − ${b*c} = ${a*d-b*c}`],`${a}*${d}-${b}*${c}`)}],
+['з від’ємними числами',2,()=>{const[a,b,c,d]=[0,0,0,0].map(()=>nz(-9,9));return Q(`det [[${a}, ${b}], [${c}, ${d}]] = ?`,a*d-b*c,[`det = ad − bc`,`${a}·${P(d)} − ${P(b)}·${P(c)} = ${a*d} − ${P(b*c)} = ${a*d-b*c}`],`(${a})*(${d})-(${b})*(${c})`)}],
+['вироджена матриця',3,()=>{const c=nz(-6,6),x=nz(-6,6),k=nz(-4,4),a=k*c,b=k*x;return Q(`При якому x матриця [[${a}, x], [${c}, ${b/k}]] вироджена (det = 0)?`,a*(b/k)/c,[`det = ${a}·${P(b/k)} − x·${P(c)} = 0`,`x = ${a*(b/k)}/${P(c)} = ${a*(b/k)/c}`])}],
+['визначник 3×3',3,()=>{const m=[0,0,0,0,0,0,0,0,0].map(()=>r(-3,4)),v=m[0]*(m[4]*m[8]-m[5]*m[7])-m[1]*(m[3]*m[8]-m[5]*m[6])+m[2]*(m[3]*m[7]-m[4]*m[6]);return Q(`det [[${m.slice(0,3).join(', ')}], [${m.slice(3,6).join(', ')}], [${m.slice(6).join(', ')}]] = ?`,v,[`Розкладаємо за першим рядком`,`${m[0]}·(${m[4]*m[8]-m[5]*m[7]}) − ${P(m[1])}·(${m[3]*m[8]-m[5]*m[6]}) + ${P(m[2])}·(${m[3]*m[7]-m[4]*m[6]})`,`= ${v}`])}]]);
+
+KDEF('Вектори: скалярний добуток',[
+['на площині',1,()=>{const p=[r(-5,6),r(-5,6)],q=[r(-5,6),r(-5,6)],s=p[0]*q[0]+p[1]*q[1];return Q(`a = (${p.join('; ')}), b = (${q.join('; ')}). Знайдіть a·b.`,s,[`a·b = x₁x₂ + y₁y₂`,`${p[0]}·${P(q[0])} + ${P(p[1])}·${P(q[1])} = ${s}`],`(${p[0]})*(${q[0]})+(${p[1]})*(${q[1]})`)}],
+['у просторі',2,()=>{const v=()=>[r(-4,6),r(-4,6),r(-4,6)],p=v(),q=v(),s=p[0]*q[0]+p[1]*q[1]+p[2]*q[2];return Q(`a = (${p.join('; ')}), b = (${q.join('; ')}). Знайдіть a·b.`,s,[`a·b = x₁x₂ + y₁y₂ + z₁z₂`,`${p[0]}·${P(q[0])} + ${P(p[1])}·${P(q[1])} + ${P(p[2])}·${P(q[2])} = ${s}`],`(${p[0]})*(${q[0]})+(${p[1]})*(${q[1]})+(${p[2]})*(${q[2]})`)}],
+['довжина вектора',2,()=>{const[a,b,c]=pick(TR),s1=pick([-1,1]),s2=pick([-1,1]);return Q(`Знайдіть довжину вектора a = (${s1*a}; ${s2*b}).`,c,[`|a| = √(x² + y²)`,`√(${a*a} + ${b*b}) = √${c*c} = ${c}`],`sqrt((${s1*a})^2+(${s2*b})^2)`)}],
+['перпендикулярні вектори',3,()=>{const p=nz(-6,6),q=nz(-6,6),kk=nz(-4,4),s=p*kk;return Q(`При якому m вектори a = (${p}; ${q}) і b = (m; ${s}) перпендикулярні?`,-q*kk,[`Перпендикулярні, якщо a·b = 0`,`${p}·m + ${P(q)}·${P(s)} = 0`,`m = ${-q*s}/${P(p)} = ${-q*kk}`],`${p}x+(${q*s})=0`)}],
+['косинус кута між векторами',3,()=>{const[a,b,c]=pick([[3,4,5],[5,12,13],[8,15,17]]);return Q(`Знайдіть косинус кута між a = (${a}; ${b}) і b = (${b}; ${a}) (дробом).`,2*a*b/(c*c),[`cos φ = a·b / (|a|·|b|)`,`a·b = ${a}·${b} + ${b}·${a} = ${2*a*b}, |a| = |b| = ${c}`,`cos φ = ${2*a*b}/${c*c}${gc(2*a*b,c*c)>1?' = '+FR(2*a*b,c*c):''}`],`${2*a*b}/${c*c}`,{as:FR(2*a*b,c*c)})}]]);
+
+KDEF('Системи числення',[
+['двійкова → десяткова',1,()=>{const n=r(3,31),bn=n.toString(2);return Q(`Переведіть ${bn}₂ у десяткову систему.`,n,[bn.split('').map((d,i)=>`${d}·2${up(bn.length-1-i)}`).join(' + '),`= ${n}`])}],
+['десяткова → двійкова',2,()=>{const n=r(5,63),bn=n.toString(2);return Q(`Переведіть ${n} у двійкову систему.`,+bn,[`Ділимо на 2 і записуємо остачі`,`Остачі знизу вгору: ${bn}`])}],
+['довші двійкові числа',2,()=>{const n=r(64,255),bn=n.toString(2);return Q(`Переведіть ${bn}₂ у десяткову систему.`,n,[bn.split('').map((d,i)=>d=='1'?`2${up(bn.length-1-i)}`:'').filter(Boolean).join(' + '),`= ${n}`])}],
+['шістнадцяткова → десяткова',3,()=>{const n=r(17,255),hx=n.toString(16).toUpperCase(),H=d=>parseInt(d,16);return Q(`Переведіть ${hx}₁₆ у десяткову систему.`,n,[`${hx[0]} = ${H(hx[0])}, ${hx[1]} = ${H(hx[1])}`,`${H(hx[0])}·16 + ${H(hx[1])} = ${n}`],`${H(hx[0])}*16+${H(hx[1])}`)}],
+['додавання двійкових',3,()=>{const a=r(3,31),b=r(3,31);return Q(`${a.toString(2)}₂ + ${b.toString(2)}₂ = ? (відповідь у двійковій системі)`,+(a+b).toString(2),[`У десятковій: ${a} + ${b} = ${a+b}`,`${a+b} = ${(a+b).toString(2)}₂`,`Або стовпчиком: 1 + 1 = 10 (0 пишемо, 1 переносимо)`])}]]);
+
+KDEF('Ймовірність: незалежні події',[
+['протилежна подія',1,()=>{const p=pick([.1,.2,.3,.4,.6,.7,.8,.9]);return Q(`Ймовірність дощу завтра ${D(p)}. Яка ймовірність, що дощу не буде?`,R2(1-p),[`P(не A) = 1 − P(A)`,`1 − ${D(p)} = ${D(R2(1-p))}`],`1-${p}`)}],
+['обидві події',1,()=>{const p=pick([.5,.4,.8,.9,.7,.6]),q=pick([.5,.2,.3,.9,.6]);return Q(`Ймовірність влучення першого стрільця ${D(p)}, другого ${D(q)}. Яка ймовірність, що влучать обидва?`,R2(p*q),[`Події незалежні: P = P(A)·P(B)`,`${D(p)}·${D(q)} = ${D(R2(p*q))}`],`${p}*${q}`)}],
+['жоден не відмовить',2,()=>{const p=pick([.5,.6,.7,.8,.9]);return Q(`Ймовірність відмови приладу ${D(R2(1-p))}. Яка ймовірність, що жоден із двох незалежних приладів не відмовить?`,R2(p*p),[`P(працює) = 1 − ${D(R2(1-p))} = ${D(p)}`,`P = ${D(p)}² = ${D(R2(p*p))}`],`${p}^2`)}],
+['хоча б одна подія',2,()=>{const p=pick([.5,.4,.8,.6]),q=pick([.5,.2,.6]);const v=R2(1-(1-p)*(1-q));return Q(`Ймовірність влучення першого стрільця ${D(p)}, другого ${D(q)}. Яка ймовірність, що влучить хоча б один?`,v,[`Простіше через протилежну подію: не влучив жоден`,`P(жоден) = ${D(R2(1-p))}·${D(R2(1-q))} = ${D(R2((1-p)*(1-q)))}`,`P = 1 − ${D(R2((1-p)*(1-q)))} = ${D(v)}`],`1-(1-${p})*(1-${q})`)}],
+['рівно одна подія',3,()=>{const p=pick([.5,.4,.8,.6]),q=pick([.5,.2,.6]);const v=R2(p*(1-q)+q*(1-p));return Q(`Ймовірність влучення першого стрільця ${D(p)}, другого ${D(q)}. Яка ймовірність, що влучить рівно один?`,v,[`Перший влучив, другий ні: ${D(p)}·${D(R2(1-q))} = ${D(R2(p*(1-q)))}`,`Другий влучив, перший ні: ${D(q)}·${D(R2(1-p))} = ${D(R2(q*(1-p)))}`,`Сума: ${D(v)}`],`${p}*(1-${q})+${q}*(1-${p})`)}],
+['три незалежні події',3,()=>{const p=pick([.5,.8,.9]),v=Math.round(p**3*1000)/1000;return Q(`Ймовірність, що лампа справна, дорівнює ${D(p)}. Яка ймовірність, що всі три лампи справні?`,v,[`P = p³`,`${D(p)}³ = ${D(v)}`],`${p}^3`,{tol:.0006})}]]);
+})();
+
+/* Назви й рівні для тем, де види вже є всередині генератора (порядок — як у генераторі) */
+Object.assign(KD,{
+'Порядок дій':[['додавання й множення',1],['дужки, множення, віднімання',1],['множення й ділення',2],['зі степенем',2],['дужки й ділення',2],['віднімання добутку з дужками',3]],
+'Звичайні дроби':[['додавання',2],['віднімання',2],['множення',1],['ділення',2],['скорочення',1],['мішане число → неправильний дріб',1],['виділення цілої частини',1],['додавання мішаних чисел',3],['віднімання мішаних чисел',3],['мішане число на дріб',3],['ціле мінус дріб',2],['однакові знаменники',1]],
+'Відсотки':[['відсоток від числа',1],['число за його відсотком',2],['скільки відсотків становить',2],['збільшити або зменшити на p%',3]],
+'Степені та корені':[['степінь числа',1],['квадратний корінь',1],['кубічний корінь',2],['степінь від’ємного числа',2],['від’ємний показник',3],['множення степенів',2],['добуток коренів',2]],
+'Прості рівняння':[['невідомий доданок',1],['невідоме зменшуване',1],['невідомий від’ємник',2],['невідомий множник',1],['невідоме ділене',2],['невідомий дільник',2]],
+'Десяткові дроби':[['додавання',1],['віднімання',1],['множення',2],['ділення',3],['множення й ділення на 10, 100, 1000',1]],
+'Пропорції':[['знайти четвертий член',1],['знайти перший член',2],['задача: пряма пропорційність',2],['задача: обернена пропорційність',3]],
+'Вирази зі змінними':[['ax + by',1],['з дужками',1],['з квадратом',2],['від’ємне значення змінної',2],['спростити й обчислити',3]],
+'Задачі на рух':[['відстань',1],['час',1],['швидкість',1],['назустріч',2],['навздогін',3],['за течією і проти течії',2]],
+'Задачі на роботу':[['спільна робота',2],['час другого виконавця',3],['дві труби',2],['наповнення і спорожнення',3]],
+'Задачі на відсотки':[['знижка',1],['подорожчання',1],['початкова ціна',3],['на скільки відсотків',2],['дві зміни ціни',3]],
+'Коло і круг':[['довжина кола за радіусом',1],['площа круга',1],['довжина кола за діаметром',1],['радіус за довжиною кола',2],['діаметр за площею',2]],
+'Лінійні рівняння':[['ax + b = c',1],['x в обох частинах',2],['з дужками',2],['з дробом',2],['дужки в обох частинах',3]],
+'Квадратні рівняння':[['зведене (a = 1)',2],['повне (a ≠ 1)',3],['x² − k² = 0',1],['x² + bx = 0',1],['кількість коренів',2]],
+'Теорема Піфагора':[['гіпотенуза',1],['катет',2],['діагональ прямокутника',2],['висота рівнобедреного трикутника',3],['обернена теорема',2]],
+'Розкладання на множники':[['квадратний тричлен',3],['спільний множник',1],['різниця квадратів',1],['повний квадрат',2],['обчислення через формулу',2]],
+'Раціональні дроби':[['різниця квадратів',1],['повний квадрат',2],['спільний множник',1],['ділення на x',1],['сума дробів',3]],
+'Нелінійні системи':[['сума й добуток',2],['різниця й добуток',3],['різниця квадратів',2],['сума квадратів',3]],
+'Задачі на складання рівнянь':[['сума й різниця',1],['вік',1],['периметр',2],['задумане число',1],['покупка',3],['полиці',3]],
+'Обернена пропорційність':[['y за x',1],['x за y',1],['k за точкою графіка',2],['задача',3]],
+'Квадратні нерівності':[['менше нуля',2],['не більше нуля',2],['більше нуля',3],['x² < k²',1]],
+'Геометрична прогресія':[['сума членів',2],['n-й член',1],['знаменник',2],['наступний член',1]],
+'Ймовірність':[['кулі в коробці',1],['кубик: більше ніж',1],['кубик: парне число',1],['два кубики',3],['монета кілька разів',2],['справні деталі',2]],
+'Складні відсотки':[['складні відсотки',2],['прості відсотки',1],['різниця складних і простих',3],['знецінення',2]],
+'Арифметична прогресія':[['сума членів',2],['n-й член',1],['різниця прогресії',2],['номер члена',3],['наступний член',1]],
+'Тригонометрія: значення та радіани':[['радіани → градуси',1],['градуси → радіани',2],['сума табличних значень',2],['основна тотожність',1],['добуток значень',3]],
+'Тригонометричні рівняння й тотожності':[['cos або tg за синусом',2],['найменший додатний розв’язок',2],['спростити',1],['sin за тангенсом',3]],
+'Екстремуми та монотонність':[['кубічна функція',2],['мінімум параболи',1],['найбільше значення',2],['дві критичні точки',3],['кількість критичних точок',1]],
+'Площа криволінійної трапеції':[['під параболою',1],['під прямою',2],['під кубічною параболою',1],['між параболою і прямою',3],['під синусоїдою',2]],
+'Показникові рівняння й нерівності':[['найпростіше рівняння',1],['зі зсувом показника',1],['основа 1/b',2],['різні основи',3],['нерівність',2],['нерівність з основою < 1',3]],
+'Степенева функція':[['значення функції',1],['рівняння xⁿ = a',1],['дробовий показник',2],['від’ємний дробовий показник',3],['парність',1]],
+'Похідна степеневої функції':[['одночлен',1],['многочлен',2],['добуток',2],['1/x',3],['√x',3]],
+'Визначений інтеграл':[['степенева функція від 0',1],['2x на [a; b]',1],['лінійна функція',2],['косинус',2],['1/x',3],['eˣ',3]],
+'Логарифми':[['за означенням',1],['сума логарифмів',1],['різниця логарифмів',2],['рівняння log x = m',1],['рівняння зі зсувом',2],['десятковий логарифм',1],['натуральний логарифм',1],['різні основи',3],['логарифм степеня',2],['основна тотожність',2]],
+'Границя функції':[['0/0: різниця квадратів',2],['на нескінченності: лінійні',2],['підстановка',1],['0/0: тричлен',2],['на нескінченності: квадратні',2],['границя дорівнює нулю',1],['перша чудова границя',3],['множення на спряжене',3]],
+'Первісна':[['одночлен',1],['многочлен',2],['стала C за точкою',2],['косинус',2],['1/x',3],['формула первісної',1],['функція за первісною',1]],
+'Комбінаторика':[['перестановки',1],['розміщення',2],['комбінації',2],['правило добутку',1],['двоцифрові числа',1],['рукостискання',2],['призові місця',2],['хлопці й дівчата',3],['перестановки букв',1],['коди з повторенням',2]],
+'Матриці: добуток':[['елемент добутку',1],['матриця на вектор',1],['лінійна комбінація',1],['визначник добутку',3],['квадрат матриці',2],['слід добутку',2]]});
+
 /* ---- Малюнки до геометричних задач (SVG, кольори беруться з теми) ---- */
 (()=>{
 const SV=inner=>`<svg class="fig" viewBox="0 0 230 150" role="img" aria-label="Малюнок до задачі">${inner}</svg>`,
@@ -1034,7 +1302,7 @@ for(const[,ts]of T)for(const t of ts){const rules=R[t.n];if(!rules)continue;cons
 
 /* ---- Розширені завдання: логарифми, границі, первісна, комбінаторика, матриці ---- */
 (()=>{
-const Q=(q,a,s,kt,x)=>Object.assign({q,a:[].concat(a),s,kt},x||{}),M=(...f)=>pick(f)(),
+const Q=(q,a,s,kt,x)=>Object.assign({q,a:[].concat(a),s,kt},x||{}),M=(...f)=>MM(...f),
 FR=(n,d)=>{if(d<0){n=-n;d=-d}const g=gc(Math.abs(n),d)||1;n/=g;d/=g;return d==1?`${n}`:`${n}/${d}`},
 S=n=>n<0?`− ${-n}`:`+ ${n}`,nz=(a,b)=>{let v;do{v=r(a,b)}while(!v);return v},RG={};
 
@@ -1093,12 +1361,77 @@ AB=[X[0]*Y[0]+X[1]*Y[2],X[0]*Y[1]+X[1]*Y[3],X[2]*Y[0]+X[3]*Y[2],X[2]*Y[1]+X[3]*Y
 for(const[,ts]of T)for(const t of ts)if(RG[t.n])t.g=RG[t.n];
 })();
 
+/* ---- Рівні складності та конструктор видів завдань ---- */
+// TOPT.lvl: 0 — мішаний, 1 — легкий, 2 — середній, 3 — складний; TOPT.sel[тема] — власний набір видів (номери)
+let TOPT={lvl:0,sel:{}};
+try{const o=JSON.parse(localStorage.getItem('mopt')||'null');if(o&&typeof o=='object'){TOPT.lvl=[0,1,2,3].includes(o.lvl)?o.lvl:0;if(o.sel&&typeof o.sel=='object')TOPT.sel=o.sel}}catch(e){}
+const optSave=()=>{try{localStorage.setItem('mopt',JSON.stringify(TOPT))}catch(e){}},LVN=['Мішаний','Легкий','Середній','Складний'],LVS=['','легкий','середній','складний'];
+// які види завдань зараз увімкнено для теми
+function kindsFor(t){const K=t.k,all=K.map((_,i)=>i),cs=(TOPT.sel[t.n]||[]).filter(i=>i>=0&&i<K.length);if(cs.length)return cs;
+if(!TOPT.lvl)return all;let f=all.filter(i=>K[i][1]==TOPT.lvl);if(f.length)return f;
+// у темі немає видів цього рівня — беремо найближчий
+const d=Math.min(...K.map(k=>Math.abs(k[1]-TOPT.lvl)));return all.filter(i=>Math.abs(K[i][1]-TOPT.lvl)==d)}
+// кожна тема отримує перелік видів t.k, а її генератор — фільтр за вибраними видами
+for(const[,ts]of T)for(const t of ts){t.k=KD[t.n]||[['усі завдання',2]];const g0=t.g;
+t.g=function(){MSEL=new Set(kindsFor(t));MLAST=-1;try{const e=g0.call(t),i=t.k.length==1?0:MLAST;if(t.k[i]){e.kind=t.k[i][0];e.lv=t.k[i][1]}return e}finally{MSEL=null}}}
+// перемикач рівня
+function lvBar(onch){const d=document.createElement('div');d.className='lvb';d.setAttribute('role','group');d.setAttribute('aria-label','Рівень складності');
+LVN.forEach((n,i)=>{const b=document.createElement('button');b.type='button';b.textContent=n;b.className=i==TOPT.lvl?'on':'';b.onclick=()=>{TOPT.lvl=i;optSave();d.querySelectorAll('button').forEach((x,j)=>x.className=j==i?'on':'');onch&&onch(i)};d.append(b)});return d}
+// галочки видів завдань для однієї теми
+function kindsBox(t,onch){const box=document.createElement('div');box.className='kbox';
+const draw=()=>{const on=new Set(kindsFor(t)),cust=(TOPT.sel[t.n]||[]).length>0;
+box.innerHTML=`<div class="kgrid">${t.k.map((k,i)=>`<label class="kl"><input type="checkbox" data-i="${i}" ${on.has(i)?'checked':''}><span>${esc(k[0])}</span><em class="lv${k[1]}">${LVS[k[1]]}</em></label>`).join('')}</div><div class="kfoot"><span class="note">${cust?'Власний набір — рівень для цієї теми не діє.':'Набір за рівнем «'+LVN[TOPT.lvl]+'». Змініть галочки, щоб зібрати свій.'}</span>${cust?'<button type="button" class="bt krs">Повернути за рівнем</button>':''}</div>`;
+box.querySelectorAll('input').forEach(c=>c.onchange=()=>{const s=[...box.querySelectorAll('input')].filter(x=>x.checked).map(x=>+x.dataset.i);if(s.length)TOPT.sel[t.n]=s;else delete TOPT.sel[t.n];optSave();draw();onch&&onch()});
+const rs=box.querySelector('.krs');if(rs)rs.onclick=()=>{delete TOPT.sel[t.n];optSave();draw();onch&&onch()}};
+box.redraw=draw;draw();return box}
+// підпис «вид завдання · рівень» біля умови
+const kindTag=e=>e.kind&&e.kind!='усі завдання'?`<span class="knd">${esc(e.kind)} · <em class="lv${e.lv}">${LVS[e.lv]}</em></span>`:'';
+
+/* --- сторінка теми: рівень і види над завданням --- */
+function lvTopic(){const H=$('#lvbox');H.innerHTML='';if(!cur)return;const kb=kindsBox(cur,()=>{gen();sm()}),sm=()=>{const n=kindsFor(cur).length;det.querySelector('summary').textContent=`Види завдань: ${n} з ${cur.k.length}`+((TOPT.sel[cur.n]||[]).length?' (власний набір)':'')};
+const det=document.createElement('details');det.className='kdet';det.innerHTML='<summary></summary>';det.append(kb);
+H.append(lvBar(()=>{delete TOPT.sel[cur.n];optSave();kb.redraw();sm();gen();if($('#mxl').innerHTML)mxShow()}));if(cur.k.length>1)H.append(det);sm()}
+
+/* --- конструктор тесту --- */
+function tsetup(){const B=$('#test'),per=tstat();let saved=[];try{saved=JSON.parse(localStorage.getItem('mtsel')||'[]')}catch(e){}
+B.innerHTML=`<div class="card tcf"><label class="frow"><b>Кількість завдань</b><input id="tn2" type="number" min="1" max="50" value="10" style="width:90px"></label><div><b>Рівень</b><div id="tlv"></div><p class="note" style="margin-top:6px">Рівень визначає, які види завдань потраплять у тест. Біля кожної обраної теми кнопка «види» відкриває галочки — так можна зібрати власний набір.</p></div></div>
+<div class="card" id="tl"><div class="tlh"><b>Теми</b><span class="acts" style="margin:0"><button type="button" class="chip" id="tall">Усі</button><button type="button" class="chip" id="tnone">Жодної</button><button type="button" class="chip" id="twk">Слабкі</button></span></div></div>
+<div id="tmsg" class="res bd"></div><button class="bt pri" id="tgo" style="width:100%">Почати тест</button>`;
+const tl=$('#tl'),rows=[];
+const cnt=()=>{const n=rows.filter(x=>x.c.checked).length;$('#tgo').textContent=n?`Почати тест (тем: ${n})`:'Почати тест';$('#tmsg').textContent=''};
+T.forEach(([g,ts])=>{const h=document.createElement('div');h.className='tgh';h.innerHTML=`<b>${g}</b><button type="button" class="chip">уся група</button>`;tl.append(h);const grp=[];
+ts.forEach(t=>{const row=document.createElement('div');row.className='trow';const p=per[t.n];
+row.innerHTML=`<div class="trh"><label><input type="checkbox" class="tc"> <span>${esc(t.n)}</span>${p&&p.weak?' <em class="lv3">слабка</em>':''}</label>${t.k.length>1?`<button type="button" class="chip tkb" hidden>види: <b></b></button>`:''}</div>`;
+const c=row.querySelector('.tc'),kb=row.querySelector('.tkb');let box=null;
+const upd=()=>{if(kb){kb.hidden=!c.checked;kb.querySelector('b').textContent=kindsFor(t).length+'/'+t.k.length+((TOPT.sel[t.n]||[]).length?' ✎':'');if(!c.checked&&box){box.remove();box=null}}};
+c.checked=saved.includes(t.n);c.onchange=()=>{upd();cnt()};
+if(kb)kb.onclick=()=>{if(box){box.remove();box=null}else{box=kindsBox(t,upd);row.append(box)}};
+const o={t,c,upd,rd:()=>{if(box)box.redraw()}};rows.push(o);grp.push(o);upd();tl.append(row)});
+h.querySelector('button').onclick=()=>{const all=grp.every(x=>x.c.checked);grp.forEach(x=>{x.c.checked=!all;x.upd()});cnt()}});
+$('#tlv').append(lvBar(()=>rows.forEach(x=>{x.upd();x.rd()})));
+const setAll=f=>{rows.forEach(x=>{x.c.checked=f(x.t);x.upd()});cnt()};
+$('#tall').onclick=()=>setAll(()=>true);$('#tnone').onclick=()=>setAll(()=>false);$('#twk').onclick=()=>{setAll(t=>!!(per[t.n]&&per[t.n].weak));if(!rows.some(x=>x.c.checked))$('#tmsg').textContent='Слабких тем поки немає — оберіть теми вручну.'};
+cnt();
+$('#tgo').onclick=()=>{const sel=rows.filter(x=>x.c.checked).map(x=>x.t);if(!sel.length){$('#tmsg').textContent='Оберіть хоча б одну тему';return}
+try{localStorage.setItem('mtsel',JSON.stringify(sel.map(t=>t.n)))}catch(e){}
+const n=Math.max(1,Math.min(50,+$('#tn2').value||10));sel.sort(()=>Math.random()-.5);TS={id:Date.now(),n,k:0,sel,res:[],seen:new Set()};tnext()}}
+function tnext(){if(TS.k>=TS.n)return tend();const B=$('#test'),t=TS.sel[TS.k%TS.sel.length];
+// уникаємо однакових завдань у межах одного тесту
+let e=t.g();for(let j=0;j<12&&TS.seen.has(e.q);j++)e=t.g();TS.seen.add(e.q);
+const ca=e.as||cm(e.a.map(fmt).join('; '));
+B.innerHTML=`<div class="card"><div class="tqh"><small>Завдання ${TS.k+1} з ${TS.n} · ${esc(t.n)}</small>${kindTag(e)}</div><div class="q">${esc(e.q)}</div>${e.fig||''}<div class="ansrow"><input id="ta" placeholder="Ваша відповідь" autocomplete="off"><button class="bt pri" id="tok">Відповісти</button></div><div id="tv" class="res"></div><div class="acts"><button class="bt" id="tq">Завершити тест</button></div></div>`;
+const a=$('#ta'),b=$('#tok');a.focus();let done=false;
+const go=()=>{if(!done){const v=a.value,ok=chk(v,e.a,e.tol);done=true;TS.res.push({tp:t.n,q:e.q,u:v,ok,a:ca,kind:e.kind});rec(t.n,e.q,ok,v,TS.id,ca);a.disabled=true;const tv=$('#tv');tv.className='res '+(ok?'gd':'bd');
+tv.innerHTML=ok?'✓ Правильно!':'✗ Неправильно. Правильна відповідь: '+esc(ca)+`<div class="tsol">${e.s.filter(x=>!/^Відповідь:/.test(x)).map(esc).join('<br>')}</div>`;b.textContent=TS.k+1==TS.n?'Завершити':'Далі';b.focus()}else{TS.k++;tnext()}};
+b.onclick=go;a.onkeydown=ev=>{if(ev.key=='Enter')go()};$('#tq').onclick=()=>{if(TS.res.length){TS.n=TS.res.length;tend()}else{TS=null;tsetup()}}}
+function tend(){const ok=TS.res.filter(x=>x.ok).length,B=$('#test');B.innerHTML=`<div class="card"><div class="q">Результат: ${ok} з ${TS.n} (${Math.round(ok/TS.n*100)}%)</div><span class="gd">✓ ${ok}</span> · <span class="bd">✗ ${TS.n-ok}</span> · рівень: ${LVN[TOPT.lvl].toLowerCase()}</div>`+TS.res.map((x,i)=>`<div class="card tres ${x.ok?'gd':'bd'}">${x.ok?'✓':'✗'} <b>${i+1}.</b> <small>${esc(x.tp||'')}${x.kind&&x.kind!='усі завдання'?' · '+esc(x.kind):''}</small><br><span class="trq">${esc(x.q)}</span><br><small>Ваша відповідь: ${esc(x.u||'—')}${x.ok?'':' · Правильно: '+esc(x.a)}</small></div>`).join('')+`<button class="bt pri" id="tre">Новий тест</button>`;$('#tre').onclick=()=>{TS=null;tsetup()};TS=null}
+
 /* ---- Список тем: пошук, фільтри, прогрес ---- */
 let LF='all',LQ='';
 // статистика теми з журналу відповідей: n — усього, ok — правильних, last — останні 5
 function tstat(){const per={};LOG.forEach(x=>{const p=per[x.tp]=per[x.tp]||{n:0,ok:0,last:[]};p.n++;if(x.ok)p.ok++;p.last.push(x.ok?1:0);if(p.last.length>5)p.last.shift()});
 for(const k in per){const p=per[k];p.done=p.last.length>=5&&p.last.every(Boolean);p.weak=!p.done&&(p.ok/p.n<.7||p.last.slice(-3).includes(0))}return per}
-function topen(t){cur=t;$('#list').hidden=true;$('#sheet').hidden=true;$('#det').hidden=false;$('#tn').textContent=t.n;$('#th').innerHTML=thHTML(t);gen();$('#mxl').innerHTML='';$('#mx').textContent='Показати 5 прикладів';$('#mxc').hidden=true;window.scrollTo(0,0)}
+function topen(t){cur=t;$('#list').hidden=true;$('#sheet').hidden=true;$('#det').hidden=false;$('#tn').textContent=t.n;$('#th').innerHTML=thHTML(t);lvTopic();gen();$('#mxl').innerHTML='';$('#mx').textContent='Показати 5 прикладів';$('#mxc').hidden=true;window.scrollTo(0,0)}
 function lbuild(){const L0=$('#list'),per=tstat();
 if(!L0.querySelector('.lhead')){L0.innerHTML=`<div class="lhead"><input id="ls" type="search" placeholder="Пошук теми, напр. «дроби» або «синус»" autocomplete="off"><div class="lfil">${[['all','Усі'],['weak','Слабкі'],['new','Не розпочаті'],['done','Засвоєні']].map(([k,l])=>`<button class="chip" data-f="${k}">${l}</button>`).join('')}</div><div class="lsum" id="lsum"></div></div><div id="lbody"></div>`;
 $('#ls').oninput=e=>{LQ=e.target.value.trim().toLowerCase();lbuild()};L0.querySelectorAll('.lfil .chip').forEach(b=>b.onclick=()=>{LF=b.dataset.f;lbuild()})}
