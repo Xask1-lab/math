@@ -144,6 +144,15 @@ main:has(#calc:not([hidden])){height:calc(100dvh - env(safe-area-inset-top,0px) 
 .tsol{font-weight:400;font-size:14px;margin-top:4px;color:var(--ink)}
 .tres{border-left:4px solid currentColor}.tres .trq,.tres small{color:var(--ink)}.tres small{color:var(--mu)}
 .about{font-size:14px;line-height:1.6}
+.sfr{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 .12em;font-size:.82em;line-height:1.15}
+.sfr>span{padding:0 .18em}.sfr>span:first-child{border-bottom:1.5px solid currentColor}
+.mfr{display:inline-flex;align-items:center;white-space:nowrap}.mfr .sfr{margin-left:.08em}
+.q .sfr{font-size:.78em}#st li,.mxb li,.tsol>div{line-height:1.9}
+#st .sub,.mxb .sub,.tsol .sub{padding-left:12px;color:var(--mu);font-size:.93em;line-height:1.9}
+.tgo-wrap{position:sticky;top:calc(env(safe-area-inset-top,0px) + 6px);z-index:4;display:flex;flex-direction:column;gap:4px}
+.tgo-wrap #tgo{box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.ctp{display:flex;flex-direction:column;gap:10px}.ctg{display:flex;flex-wrap:wrap;align-items:center;gap:6px}.ctg>b{width:100%;font-size:13px;color:var(--mu)}
+.ctg .chip{padding:6px 10px}.ctx{padding:2px 0}.ctp .note{margin:0}
 .wide{width:100%;padding:11px;font-weight:600;background:var(--sheet);color:var(--ac);border-style:dashed}
 /* клавіатура */
 .pad{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
@@ -293,6 +302,14 @@ label{cursor:pointer}
           фільтри й прогрес тем; аркуш для друку; десяткова кома.
      1.5  Рівні складності та конструктор видів завдань (355 видів у 64 темах),
           новий конструктор тесту; версія й опис у налаштуваннях.
+     1.6  «Конструктор прикладів»: дії (+ − × :), види чисел (натуральні,
+          від’ємні, дроби, мішані, десяткові) і невідоме x — у темах і тестах
+          (функції ctMake/ctTree/ctStep/ctSolve, точна арифметика Rq).
+          Докладні шкільні кроки: НСК, додаткові множники, скорочення, ціла
+          частина, правила компонентів дій. Рівняння з дробами в «Звичайних
+          дробах». Дроби в умовах і кроках — «поверхом» (fracHTML/stepsHTML).
+          Кнопка «Почати тест» угорі. У «Розв’язку» калькулятора — множення
+          на спільний знаменник.
 
    ЩО ЩЕ НЕ ЗРОБЛЕНО (ідеї)
      • Клавіатура, що налаштовується під задачу (як у Mathlab) — чекає на
@@ -303,7 +320,7 @@ label{cursor:pointer}
      • Розмиття під статус-баром iOS у встановленому застосунку — додано
        відступ (--topx), на телефоні автора ще не підтверджено.
      • Інтерфейс англійською. */
-const APP_VER='1.5.0',APP_DATE='2026-11-13';
+const APP_VER='1.6.0',APP_DATE='2026-11-17';
 /* Показ чисел з десятковою комою (всередині програма рахує з крапкою) */
 const cm=s=>String(s).replace(/(\d)\.(\d)/g,'$1,$2');
 /* Вибір виду завдання всередині генератора теми.
@@ -471,12 +488,14 @@ if(vs.size!=1)return{st:[...st,vs.size?`Кілька невідомих (${[...v
 const v=[...vs][0],op=O[0],G=x=>Q[0].f({[v]:x})-Q[1].f({[v]:x}),C=polyFit(G);
 if(Math.abs(Q[1].f({[v]:0}))>1e-12||Q[1].vs.size)st.push(`Переносимо все в ліву частину: (${TP[0]}) − (${TP[1]}) ${op} 0`);
 if(!C)return{st:[...st,'Рівняння не лінійне й не квадратне (дроби з невідомою, корені, функції або вищий степінь)','Корені знайдено чисельно — підбором і уточненням з точністю до 10⁻⁸'],fin:ans};
-const[a,b,c]=C;
+let[a,b,c]=C;
 if(Math.abs(a)<1e-12){ // лінійне
 st.push(`Зводимо подібні: ${sPoly([b,c],v)} ${op} 0`);
+// дробові коефіцієнти: множимо обидві частини на спільний знаменник (як у школі)
+{const db=rat(b),dcn=rat(c);if(db&&dcn&&(db[1]>1||dcn[1]>1)){const N=db[1]*dcn[1]/gc(db[1],dcn[1]);st.push(`Коефіцієнти дробові — помножимо обидві частини на спільний знаменник ${N}:`,`   ${sPoly([b*N,c*N],v)} ${op} 0`);b*=N;c*=N}}
 if(Math.abs(b)<1e-12)return{st:[...st,`Невідома скоротилась: ${sF(c)} ${op} 0`],fin:ans};
 if(c)st.push(`Переносимо число вправо зі зміною знака: ${sPoly([b,0],v)} ${op} ${sF(-c)}`);
-const r0=-c/b;if(op=='=')return{st:[...st,`Ділимо обидві частини на ${sP(b)}: ${v} = ${sF(-c)} : ${sP(b)}`,`${v} = ${sF(r0)}`,`Перевірка: ліва частина ${sF(Q[0].f({[v]:r0}))}, права ${sF(Q[1].f({[v]:r0}))} ✓`],fin:`${v} = ${sF(r0)}`};
+const r0=-c/b;if(op=='=')return{st:[...st,`${v} — невідомий множник. Щоб знайти множник, добуток ділимо на відомий множник: ${v} = ${sF(-c)} : ${sP(b)}`,`${v} = ${sF(r0)}`,`Перевірка: ліва частина ${sF(Q[0].f({[v]:r0}))}, права ${sF(Q[1].f({[v]:r0}))} ✓`],fin:`${v} = ${sF(r0)}`};
 const op2=b<0?FLIP[op]:op;return{st:[...st,`Ділимо на ${sP(b)}${b<0?' — число від’ємне, тому знак нерівності змінюємо на протилежний':''}`,`${v} ${op2} ${sF(r0)}`],fin:ans}}
 // квадратне
 st.push(`Зводимо до вигляду a${v}² + b${v} + c ${op} 0: ${sPoly([a,b,c],v)} ${op} 0`,`a = ${sF(a)}, b = ${sF(b)}, c = ${sF(c)}`);
@@ -605,7 +624,33 @@ mx=(n,d)=>{const g=gc(Math.abs(n),d)||1;n/=g;d/=g;if(d==1)return`${n}`;const W=M
 both=(n,d)=>{const a=fr(n,d),b=mx(n,d);return a==b?a:`${a} = ${b}`},
 pf=()=>{let b,a;do{b=r(2,9);a=r(1,b-1)}while(gc(a,b)>1);return[a,b]},pm=()=>{const[a,b]=pf();return[r(1,5),a,b]},
 O=(q,n,d,s,kt)=>({q:q+' = ?',a:[n/d],as:mx(n,d),s:[...s,`Відповідь: ${both(n,d)}`],kt});
-const m=MIDX(12);
+const m=MIDX(15);
+// дії з дробами: докладні шкільні кроки дає конструктор (одна дія)
+const CTK={0:[['+'],['f']],1:[['−'],['f']],2:[['×'],['f']],3:[[':'],['f']],7:[['+'],['m']],8:[['−'],['m']],9:[['×'],['m','f']]};
+if(CTK[m]){const e=ctMake({ops:CTK[m][0],nums:CTK[m][1],x:false},m>=7?2:1,1);return e}
+// рівняння з дробами
+const Fq=(q,x,st,kt,as)=>({q,a:[x],s:[...st,`Відповідь: x = ${as??x}`],kt,as:as??String(x)});
+if(m==12){ // легкий: однакові знаменники, x — у чисельнику
+  const b=r(3,12),a=r(1,b-1),sg=r(0,1),xx=sg?r(a+1,3*b):r(1,3*b),c=sg?xx-a:xx+a;
+  return Fq(`x/${b} ${sg?'−':'+'} ${a}/${b} = ${c}/${b}. Знайдіть x.`,xx,[`x/${b} — невідом${sg?'е зменшуване':'ий доданок'}. ${sg?'Щоб знайти зменшуване, до різниці додаємо від’ємник':'Щоб знайти доданок, від суми віднімаємо відомий доданок'}:`,`   x/${b} = ${c}/${b} ${sg?'+':'−'} ${a}/${b}`,`   Знаменники однакові — ${sg?'додаємо':'віднімаємо'} чисельники: (${c} ${sg?'+':'−'} ${a})/${b} = ${xx}/${b}`,`x/${b} = ${xx}/${b} — дроби з однаковими знаменниками рівні, коли рівні чисельники`,`x = ${xx}`,`Перевірка: ${xx}/${b} ${sg?'−':'+'} ${a}/${b} = ${c}/${b} ✓`],`x/${b}${sg?'-':'+'}${a}/${b}=${c}/${b}`)}
+if(m==13){const t=r(0,2);
+  if(t==0){ // x/b − a/b = n (n — ціле)
+    const b=r(3,12),a=r(1,b-1),n=r(2,20),sg=r(0,1),xx=sg?n*b+a:n*b-a;
+    return Fq(`x/${b} ${sg?'−':'+'} ${a}/${b} = ${n}. Знайдіть x.`,xx,[`x/${b} — невідом${sg?'е зменшуване':'ий доданок'}:`,`   x/${b} = ${n} ${sg?'+':'−'} ${a}/${b}`,`   Записуємо ${n} дробом зі знаменником ${b}: ${n} = ${n*b}/${b}`,`   x/${b} = ${n*b}/${b} ${sg?'+':'−'} ${a}/${b} = ${xx}/${b}`,`Знаменники рівні — прирівнюємо чисельники: x = ${xx}`,`Перевірка: ${xx}/${b} ${sg?'−':'+'} ${a}/${b} = ${sg?xx-a:xx+a}/${b} = ${n} ✓`],`x/${b}${sg?'-':'+'}${a}/${b}=${n}`)}
+  if(t==1){ // (x + a)/b = c/b
+    const b=r(3,12),a=r(1,9),xx=r(1,15),c=xx+a;
+    return Fq(`(x + ${a})/${b} = ${c}/${b}. Знайдіть x.`,xx,[`Знаменники однакові — дроби рівні, коли рівні чисельники:`,`   x + ${a} = ${c}`,`x — невідомий доданок: x = ${c} − ${a} = ${xx}`,`Перевірка: (${xx} + ${a})/${b} = ${c}/${b} ✓`],`(x+${a})/${b}=${c}/${b}`)}
+  // a/b + x = c/d — дробова відповідь (через конструктор)
+  return ctMake({ops:['+','−'],nums:['f'],x:true},1,1)}
+if(m==14){const t=r(0,2);
+  if(t==0){ // x/a + x/b = n
+    let a1,b1;do{a1=r(2,6);b1=r(2,8)}while(a1==b1);const L=a1*b1/gc(a1,b1),k=r(1,4),xx=L*k,n=xx/a1+xx/b1;
+    return Fq(`x/${a1} + x/${b1} = ${n}. Знайдіть x.`,xx,[`Спільний знаменник: НСК(${a1}; ${b1}) = ${L}`,`Помножимо обидві частини рівняння на ${L}, щоб позбутися дробів:`,`   ${L}·x/${a1} + ${L}·x/${b1} = ${L}·${n}`,`   ${L/a1}x + ${L/b1}x = ${L*n}`,`Зводимо подібні: ${L/a1+L/b1}x = ${L*n}`,`x — невідомий множник: x = ${L*n} : ${L/a1+L/b1} = ${xx}`,`Перевірка: ${xx}/${a1} + ${xx}/${b1} = ${xx/a1} + ${xx/b1} = ${n} ✓`],`x/${a1}+x/${b1}=${n}`)}
+  if(t==1){ // a/x = c/d  (пропорція)
+    const c=r(1,6),d=r(c+1,12),k=r(1,4),a=c*k,xx=d*k;
+    return Fq(`${a}/x = ${c}/${d}. Знайдіть x.`,xx,[`Це пропорція: добуток крайніх членів дорівнює добутку середніх`,`   ${a}·${d} = x·${c}`,`   ${a*d} = ${c}x`,`x — невідомий множник: x = ${a*d} : ${c} = ${xx}`,`Перевірка: ${a}/${xx} = ${c}/${d} (скорочуємо на ${k}) ✓`],`${a}/x=${c}/${d}`)}
+  // різні знаменники, мішані числа, дві дії — через конструктор
+  return ctMake({ops:['+','−','×',':'],nums:['f','m'],x:true},2,2)}
 if(m==11){const b=r(3,12),sgm=r(0,1);let a=r(1,b-1),c=r(1,b-1);if(sgm&&a<=c){a=r(2,b-1);c=r(1,a-1)}const n=sgm?a-c:a+c;return O(`${a}/${b} ${sgm?'−':'+'} ${c}/${b}`,n,b,[`Знаменники однакові — ${sgm?'віднімаємо':'додаємо'} чисельники`,`${a} ${sgm?'−':'+'} ${c} = ${n}, знаменник ${b}`],`${a}/${b}${sgm?'-':'+'}${c}/${b}`)}
 if(m<=1){let[a,b]=pf(),[c,d]=pf();while(b==d)[c,d]=pf();if(m==1&&a/b<c/d)[a,b,c,d]=[c,d,a,b];const sg=m?'−':'+',L=b*d/gc(b,d),n=m?a*(L/b)-c*(L/d):a*(L/b)+c*(L/d);
 return O(`${a}/${b} ${sg} ${c}/${d}`,n,L,[`Спільний знаменник: НСК(${b}; ${d}) = ${L}`,`${a}/${b} = ${a*L/b}/${L},  ${c}/${d} = ${c*L/d}/${L}`,`${a*L/b}/${L} ${sg} ${c*L/d}/${L} = ${n}/${L}`],`${a}/${b}${m?'-':'+'}${c}/${d}`)}
@@ -986,11 +1031,11 @@ function thHTML(t){if(H[t.n])return H[t.n].split('<br>').map(x=>`<p>${x}</p>`).j
 const P=[];let d=0,c='';for(let i=0;i<t.h.length;i++){const ch=t.h[i];d+=ch=='('||ch=='['?1:ch==')'||ch==']'?-1:0;if(d<=0&&(ch==';'||ch=='.'&&/\s\S/.test(t.h.slice(i+1,i+3)))&&/\s/.test(t.h[i+1]||' ')){P.push(c);c=''}else c+=ch}P.push(c);
 return '<ul class="thl">'+P.map(x=>x.trim().replace(/\.$/,'')).filter(Boolean).map(x=>{const m=x.match(/^([^:=]{2,40}):\s*(.+)$/);return '<li>'+(m?`<b>${m[1]}:</b> ${m[2]}`:x)+'</li>'}).join('')+'</ul>'}
 function mxShow(){const L=[],seen=new Set(),ty=new Set(),C=[];for(let k=0;k<80;k++){const e=cur.g();if(!seen.has(e.q)){seen.add(e.q);C.push(e)}}const tk=e=>e.q.replace(/\d+/g,'#');C.forEach(e=>{if(L.length<5&&!ty.has(tk(e))){ty.add(tk(e));L.push(e)}});C.forEach(e=>{if(L.length<5&&!L.includes(e))L.push(e)});
-$('#mxl').innerHTML=L.map((e,i)=>`<div class="mxi"><div class="mxn">${i+1}</div><div class="mxb">${kindTag(e)}<div class="mxq">${esc(e.q)}</div>${e.fig||''}<ol>${e.s.filter(x=>!/^Відповідь:/.test(x)).map(x=>`<li>${esc(x)}</li>`).join('')}</ol><div class="mxa">Відповідь: ${e.as?esc(e.as):e.a.map(v=>esc(cm(fmt(v)).replace('-','−'))).join('; ')}</div></div></div>`).join('');$('#mx').textContent='Інші 5 прикладів';$('#mxc').hidden=false;const cb=document.createElement('button');cb.className='bt';cb.textContent='✕ Закрити приклади';cb.style.marginTop='12px';cb.onclick=mxHide;$('#mxl').append(cb)}
+$('#mxl').innerHTML=L.map((e,i)=>`<div class="mxi"><div class="mxn">${i+1}</div><div class="mxb">${kindTag(e)}<div class="mxq">${fracHTML(e.q)}</div>${e.fig||''}<ol>${stepsHTML(e.s.filter(x=>!/^Відповідь:/.test(x)),'li')}</ol><div class="mxa">Відповідь: ${e.as?esc(e.as):e.a.map(v=>esc(cm(fmt(v)).replace('-','−'))).join('; ')}</div></div></div>`).join('');$('#mx').textContent='Інші 5 прикладів';$('#mxc').hidden=false;const cb=document.createElement('button');cb.className='bt';cb.textContent='✕ Закрити приклади';cb.style.marginTop='12px';cb.onclick=mxHide;$('#mxl').append(cb)}
 function mxHide(){$('#mxl').innerHTML='';$('#mx').textContent='Показати 5 прикладів';$('#mxc').hidden=true;$('#mx').closest('.card').scrollIntoView({block:'nearest'})}
 $('#mx').onclick=mxShow;$('#mxc').onclick=mxHide;
 const pl=n=>n%10==1&&n%100!=11?'тема':n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?'теми':'тем';
-function gen(){ex=cur.g();$('#q').textContent=ex.q;$('#fig').innerHTML=ex.fig||'';$('#knd').innerHTML=kindTag(ex);$('#st').hidden=true;$('#st').innerHTML=ex.s.filter(x=>!/^Відповідь:/.test(x)).map(s=>`<li>${s}</li>`).join('')+`<li><b>Відповідь: ${ex.as?ex.as:cm(ex.a.map(fmt).join('; '))}</b></li>`;$('#in').value='';$('#res').textContent='';$('#oc').hidden=!(ex.k||ex.kt);$('#res').className='res'}
+function gen(){ex=cur.g();$('#q').innerHTML=fracHTML(ex.q);$('#fig').innerHTML=ex.fig||'';$('#knd').innerHTML=kindTag(ex);$('#st').hidden=true;$('#st').innerHTML=stepsHTML(ex.s.filter(x=>!/^Відповідь:/.test(x)),'li')+`<li><b>Відповідь: ${ex.as?ex.as:cm(ex.a.map(fmt).join('; '))}</b></li>`;$('#in').value='';$('#res').textContent='';$('#oc').hidden=!(ex.k||ex.kt);$('#res').className='res'}
 $('#bk').onclick=()=>{$('#list').hidden=false;$('#det').hidden=true;lbuild()};$('#nw').onclick=gen;$('#sh').onclick=()=>{$('#st').hidden=!$('#st').hidden};
 const num=s=>{s=s.replace(',','.').replace(/−/g,'-');s=s.replace(/sqrt\(?(\d+(?:\.\d+)?)\)?/gi,'√$1').replace(/(\d*(?:\.\d+)?)√(\d+(?:\.\d+)?)/g,(m,k,n)=>String((k?+k:1)*Math.sqrt(+n)));if(s.includes('_')){const[w,f]=s.split('_'),[a,b]=f.split('/');return(+w<0||w=='-0'?-1:1)*(Math.abs(+w)+a/b)}if(s.includes('/')){const[a,b]=s.split('/');return a/b}return parseFloat(s)};
 $('#ck').onclick=()=>{const ok=chk($('#in').value,ex.a,ex.tol);$('#res').textContent=ok?'✓ Правильно!':'✗ Не так. Спробуйте ще раз або відкрийте розв’язання';$('#res').className='res '+(ok?'gd':'bd')};$('#in').onkeydown=e=>{if(e.key=='Enter')$('#ck').click()};
@@ -1294,7 +1339,7 @@ KDEF('Ймовірність: незалежні події',[
 /* Назви й рівні для тем, де види вже є всередині генератора (порядок — як у генераторі) */
 Object.assign(KD,{
 'Порядок дій':[['додавання й множення',1],['дужки, множення, віднімання',1],['множення й ділення',2],['зі степенем',2],['дужки й ділення',2],['віднімання добутку з дужками',3]],
-'Звичайні дроби':[['додавання',2],['віднімання',2],['множення',1],['ділення',2],['скорочення',1],['мішане число → неправильний дріб',1],['виділення цілої частини',1],['додавання мішаних чисел',3],['віднімання мішаних чисел',3],['мішане число на дріб',3],['ціле мінус дріб',2],['однакові знаменники',1]],
+'Звичайні дроби':[['додавання',2],['віднімання',2],['множення',1],['ділення',2],['скорочення',1],['мішане число → неправильний дріб',1],['виділення цілої частини',1],['додавання мішаних чисел',3],['віднімання мішаних чисел',3],['мішане число на дріб',3],['ціле мінус дріб',2],['однакові знаменники',1],['рівняння: x/b ± a/b = c/b',1],['рівняння: x/b − a/b = n, (x + a)/b = c/b',2],['рівняння: різні знаменники, пропорція',3]],
 'Відсотки':[['відсоток від числа',1],['число за його відсотком',2],['скільки відсотків становить',2],['збільшити або зменшити на p%',3]],
 'Степені та корені':[['степінь числа',1],['квадратний корінь',1],['кубічний корінь',2],['степінь від’ємного числа',2],['від’ємний показник',3],['множення степенів',2],['добуток коренів',2]],
 'Прості рівняння':[['невідомий доданок',1],['невідоме зменшуване',1],['невідомий від’ємник',2],['невідомий множник',1],['невідоме ділене',2],['невідомий дільник',2]],
@@ -1453,24 +1498,25 @@ box.redraw=draw;draw();return box}
 const kindTag=e=>e.kind&&e.kind!='усі завдання'?`<span class="knd">${esc(e.kind)} · <em class="lv${e.lv}">${LVS[e.lv]}</em></span>`:'';
 
 /* --- сторінка теми: рівень і види над завданням --- */
-function lvTopic(){const H=$('#lvbox');H.innerHTML='';if(!cur)return;const kb=kindsBox(cur,()=>{gen();sm()}),sm=()=>{const n=kindsFor(cur).length;det.querySelector('summary').textContent=`Види завдань: ${n} з ${cur.k.length}`+((TOPT.sel[cur.n]||[]).length?' (власний набір)':'')};
+function lvTopic(){const H=$('#lvbox');H.innerHTML='';if(!cur)return;
+if(cur.ct){H.append(lvBar(()=>{gen();if($('#mxl').innerHTML)mxShow()}),ctPanel(()=>{gen();if($('#mxl').innerHTML)mxShow()}));return}const kb=kindsBox(cur,()=>{gen();sm()}),sm=()=>{const n=kindsFor(cur).length;det.querySelector('summary').textContent=`Види завдань: ${n} з ${cur.k.length}`+((TOPT.sel[cur.n]||[]).length?' (власний набір)':'')};
 const det=document.createElement('details');det.className='kdet';det.innerHTML='<summary></summary>';det.append(kb);
 H.append(lvBar(()=>{delete TOPT.sel[cur.n];optSave();kb.redraw();sm();gen();if($('#mxl').innerHTML)mxShow()}));if(cur.k.length>1)H.append(det);sm()}
 
 /* --- конструктор тесту --- */
 function tsetup(){const B=$('#test'),per=tstat();let saved=[];try{saved=JSON.parse(localStorage.getItem('mtsel')||'[]')}catch(e){}
-B.innerHTML=`<div class="card tcf"><label class="frow"><b>Кількість завдань</b><input id="tn2" type="number" min="1" max="50" value="10" style="width:90px"></label><div><b>Рівень</b><div id="tlv"></div><p class="note" style="margin-top:6px">Рівень визначає, які види завдань потраплять у тест. Біля кожної обраної теми кнопка «види» відкриває галочки — так можна зібрати власний набір.</p></div></div>
+B.innerHTML=`<div class="tgo-wrap"><button class="bt pri" id="tgo" style="width:100%">Почати тест</button><div id="tmsg" class="res bd"></div></div><div class="card tcf"><label class="frow"><b>Кількість завдань</b><input id="tn2" type="number" min="1" max="50" value="10" style="width:90px"></label><div><b>Рівень</b><div id="tlv"></div><p class="note" style="margin-top:6px">Рівень визначає, які види завдань потраплять у тест. Біля кожної обраної теми кнопка «види» відкриває галочки. Щоб комбінувати дії, числа й невідоме x, оберіть угорі «Конструктор прикладів» → «налаштувати».</p></div></div>
 <div class="card" id="tl"><div class="tlh"><b>Теми</b><span class="acts" style="margin:0"><button type="button" class="chip" id="tall">Усі</button><button type="button" class="chip" id="tnone">Жодної</button><button type="button" class="chip" id="twk">Слабкі</button></span></div></div>
-<div id="tmsg" class="res bd"></div><button class="bt pri" id="tgo" style="width:100%">Почати тест</button>`;
+`;
 const tl=$('#tl'),rows=[];
 const cnt=()=>{const n=rows.filter(x=>x.c.checked).length;$('#tgo').textContent=n?`Почати тест (тем: ${n})`:'Почати тест';$('#tmsg').textContent=''};
 T.forEach(([g,ts])=>{const h=document.createElement('div');h.className='tgh';h.innerHTML=`<b>${g}</b><button type="button" class="chip">уся група</button>`;tl.append(h);const grp=[];
 ts.forEach(t=>{const row=document.createElement('div');row.className='trow';const p=per[t.n];
-row.innerHTML=`<div class="trh"><label><input type="checkbox" class="tc"> <span>${esc(t.n)}</span>${p&&p.weak?' <em class="lv3">слабка</em>':''}</label>${t.k.length>1?`<button type="button" class="chip tkb" hidden>види: <b></b></button>`:''}</div>`;
+row.innerHTML=`<div class="trh"><label><input type="checkbox" class="tc"> <span>${esc(t.n)}</span>${p&&p.weak?' <em class="lv3">слабка</em>':''}</label>${t.k.length>1||t.ct?`<button type="button" class="chip tkb" hidden>${t.ct?'налаштувати':'види'}: <b></b></button>`:''}</div>`;
 const c=row.querySelector('.tc'),kb=row.querySelector('.tkb');let box=null;
-const upd=()=>{if(kb){kb.hidden=!c.checked;kb.querySelector('b').textContent=kindsFor(t).length+'/'+t.k.length+((TOPT.sel[t.n]||[]).length?' ✎':'');if(!c.checked&&box){box.remove();box=null}}};
+const upd=()=>{if(kb){kb.hidden=!c.checked;kb.querySelector('b').textContent=t.ct?TOPT.ct.ops.join(' ')+(TOPT.ct.x?' · x':''):kindsFor(t).length+'/'+t.k.length+((TOPT.sel[t.n]||[]).length?' ✎':'');if(!c.checked&&box){box.remove();box=null}}};
 c.checked=saved.includes(t.n);c.onchange=()=>{upd();cnt()};
-if(kb)kb.onclick=()=>{if(box){box.remove();box=null}else{box=kindsBox(t,upd);row.append(box)}};
+if(kb)kb.onclick=()=>{if(box){box.remove();box=null}else{box=t.ct?ctPanel(upd):kindsBox(t,upd);row.append(box)}};
 const o={t,c,upd,rd:()=>{if(box)box.redraw()}};rows.push(o);grp.push(o);upd();tl.append(row)});
 h.querySelector('button').onclick=()=>{const all=grp.every(x=>x.c.checked);grp.forEach(x=>{x.c.checked=!all;x.upd()});cnt()}});
 $('#tlv').append(lvBar(()=>rows.forEach(x=>{x.upd();x.rd()})));
@@ -1484,12 +1530,163 @@ function tnext(){if(TS.k>=TS.n)return tend();const B=$('#test'),t=TS.sel[TS.k%TS
 // уникаємо однакових завдань у межах одного тесту
 let e=t.g();for(let j=0;j<12&&TS.seen.has(e.q);j++)e=t.g();TS.seen.add(e.q);
 const ca=e.as||cm(e.a.map(fmt).join('; '));
-B.innerHTML=`<div class="card"><div class="tqh"><small>Завдання ${TS.k+1} з ${TS.n} · ${esc(t.n)}</small>${kindTag(e)}</div><div class="q">${esc(e.q)}</div>${e.fig||''}<div class="ansrow"><input id="ta" placeholder="Ваша відповідь" autocomplete="off"><button class="bt pri" id="tok">Відповісти</button></div><div id="tv" class="res"></div><div class="acts"><button class="bt" id="tq">Завершити тест</button></div></div>`;
+B.innerHTML=`<div class="card"><div class="tqh"><small>Завдання ${TS.k+1} з ${TS.n} · ${esc(t.n)}</small>${kindTag(e)}</div><div class="q">${fracHTML(e.q)}</div>${e.fig||''}<div class="ansrow"><input id="ta" placeholder="Ваша відповідь" autocomplete="off"><button class="bt pri" id="tok">Відповісти</button></div><div id="tv" class="res"></div><div class="acts"><button class="bt" id="tq">Завершити тест</button></div></div>`;
 const a=$('#ta'),b=$('#tok');a.focus();let done=false;
 const go=()=>{if(!done){const v=a.value,ok=chk(v,e.a,e.tol);done=true;TS.res.push({tp:t.n,q:e.q,u:v,ok,a:ca,kind:e.kind});rec(t.n,e.q,ok,v,TS.id,ca);a.disabled=true;const tv=$('#tv');tv.className='res '+(ok?'gd':'bd');
-tv.innerHTML=ok?'✓ Правильно!':'✗ Неправильно. Правильна відповідь: '+esc(ca)+`<div class="tsol">${e.s.filter(x=>!/^Відповідь:/.test(x)).map(esc).join('<br>')}</div>`;b.textContent=TS.k+1==TS.n?'Завершити':'Далі';b.focus()}else{TS.k++;tnext()}};
+tv.innerHTML=ok?'✓ Правильно!':'✗ Неправильно. Правильна відповідь: '+esc(ca)+`<div class="tsol">${stepsHTML(e.s.filter(x=>!/^Відповідь:/.test(x)),'div')}</div>`;b.textContent=TS.k+1==TS.n?'Завершити':'Далі';b.focus()}else{TS.k++;tnext()}};
 b.onclick=go;a.onkeydown=ev=>{if(ev.key=='Enter')go()};$('#tq').onclick=()=>{if(TS.res.length){TS.n=TS.res.length;tend()}else{TS=null;tsetup()}}}
 function tend(){const ok=TS.res.filter(x=>x.ok).length,B=$('#test');B.innerHTML=`<div class="card"><div class="q">Результат: ${ok} з ${TS.n} (${Math.round(ok/TS.n*100)}%)</div><span class="gd">✓ ${ok}</span> · <span class="bd">✗ ${TS.n-ok}</span> · рівень: ${LVN[TOPT.lvl].toLowerCase()}</div>`+TS.res.map((x,i)=>`<div class="card tres ${x.ok?'gd':'bd'}">${x.ok?'✓':'✗'} <b>${i+1}.</b> <small>${esc(x.tp||'')}${x.kind&&x.kind!='усі завдання'?' · '+esc(x.kind):''}</small><br><span class="trq">${esc(x.q)}</span><br><small>Ваша відповідь: ${esc(x.u||'—')}${x.ok?'':' · Правильно: '+esc(x.a)}</small></div>`).join('')+`<button class="bt pri" id="tre">Новий тест</button>`;$('#tre').onclick=()=>{TS=null;tsetup()};TS=null}
+
+/* ---- Конструктор прикладів: дії + види чисел + невідоме, з докладним «шкільним» розв’язанням ---- */
+// Раціональні числа {n,d}: точна арифметика без похибок
+const Rq=(n,d=1)=>{if(d<0){n=-n;d=-d}const g=gc(Math.abs(n),d)||1;return{n:n/g,d:d/g}},
+Rv=a=>a.n/a.d,Radd=(a,b)=>Rq(a.n*b.d+b.n*a.d,a.d*b.d),Rsub=(a,b)=>Rq(a.n*b.d-b.n*a.d,a.d*b.d),Rmul=(a,b)=>Rq(a.n*b.n,a.d*b.d),Rdiv=(a,b)=>Rq(a.n*b.d,a.d*b.n),
+Rint=a=>a.d==1,lcm=(a,b)=>a/gc(a,b)*b,
+// чи дріб скінченний десятковий (знаменник лише з 2 і 5)
+Rdecok=a=>{let d=a.d;while(d%2==0)d/=2;while(d%5==0)d/=5;return d==1},
+// запис числа: f — дріб, m — мішане, d — десяткове, i — ціле
+Rs=(a,st)=>{const neg=a.n<0,n=Math.abs(a.n),d=a.d,sg=neg?'−':'';
+if(d==1)return sg+n;
+if(st=='d'&&Rdecok(a))return sg+dc(+(n/d).toFixed(6));
+if(st=='m'&&n>d)return sg+Math.floor(n/d)+' '+(n%d)+'/'+d;
+return sg+n+'/'+d},
+Rsc=(a,st)=>{const s=Rs(a,st);return s[0]=='−'?'('+s+')':s},
+// відповідь: дріб, а якщо неправильний — ще й мішаним числом; десяткові — десятковим
+Rans=(a,dec)=>{if(dec&&Rdecok(a))return Rs(a,'d');const f=Rs(a,'f'),m=Rs(a,'m');return f==m?f:f+' = '+m},
+CTOPS={'+':'додавання','−':'віднімання','×':'множення',':':'ділення'},
+CTNUMS={i:'натуральні',n:'від’ємні',f:'звичайні дроби',m:'мішані числа',d:'десяткові дроби'};
+
+/* Число для листка виразу. lv — рівень (1..3), t — вид числа */
+function ctNum(t,lv){const big=lv==1?[1,20]:lv==2?[5,99]:[12,999];
+if(t=='i')return{v:Rq(r(...big)),t};
+if(t=='n')return{v:Rq(ctNZ(-big[1],big[1])),t};
+if(t=='d'){const k=lv==3&&r(0,1)?100:10;let n;do{n=r(1,lv==1?99:lv==2?499:999)}while(n%10==0);return{v:Rq(n,k),t}}
+const mxd=lv==1?9:lv==2?12:16;let b,a;do{b=r(2,mxd);a=r(1,b-1)}while(gc(a,b)>1);
+if(t=='m')return{v:Rq(r(1,lv==3?9:5)*b+a,b),t};return{v:Rq(a,b),t}}
+const ctNZ=(a,b)=>{let v;do{v=r(a,b)}while(!v);return v};
+
+/* Побудова дерева виразу з k діями. Листок: {v,t}; вузол: {op,l,r} */
+function ctTree(cf,lv,k){const types=cf.nums.length?cf.nums:['i'],ops=cf.ops.length?cf.ops:['+'];
+const leaf=()=>ctNum(pick(types),lv),val=x=>x.op?x.val:x.v;
+const node=(op,l,rr)=>{let v;if(op=='+')v=Radd(val(l),val(rr));else if(op=='−')v=Rsub(val(l),val(rr));else if(op=='×')v=Rmul(val(l),val(rr));else v=Rdiv(val(l),val(rr));return{op,l,r:rr,val:v}};
+let t=leaf(),guard=0;
+for(let j=0;j<k;j++){if(++guard>40)return null;const op=pick(ops);let other=leaf();const onRight=op==':'||op=='−'||r(0,1);
+let l=onRight?t:other,rr=onRight?other:t;
+if(op==':'){const lvv=val(l),allInt=types.every(x=>x=='i'||x=='n');
+  if(allInt){ // ділимо націло
+    if(!Rint(lvv)||lvv.n==0){j--;continue}const L=Math.abs(lvv.n),dv=[2,3,4,5,6,7,8,9,10,11,12].filter(q=>L%q==0&&L/q>=1);
+    if(!dv.length){if(l.op){j--;continue}const q=r(2,9);l={v:Rq(lvv.n*q),t:l.t};rr={v:Rq(q),t:'i'}}
+    else rr={v:Rq(pick(dv)*(types.includes('n')&&r(0,1)?-1:1)),t:types.includes('n')?'n':'i'}}
+  else if(types.every(x=>x=='d'||x=='i'||x=='n')){ // десятковий результат має бути скінченним
+    rr=types.includes('d')?{v:pick([Rq(2),Rq(4),Rq(5),Rq(1,2),Rq(1,5),Rq(1,4),Rq(5,4),Rq(5,2)]),t:'d'}:{v:Rq(pick([2,4,5])),t:'i'}}}
+if(op=='−'&&!types.includes('n')&&Rv(val(l))<Rv(val(rr))){ // без від’ємних: зменшуване не менше від’ємника
+  if(!l.op&&!rr.op)[l,rr]=[rr,l];else if(!rr.op){let g=0;do{rr=leaf()}while(Rv(val(l))<Rv(val(rr))&&++g<25);if(Rv(val(l))<Rv(val(rr))){j--;continue}}else{j--;continue}}
+if(op=='×'&&types.every(x=>x=='i'||x=='n')&&!rr.op&&Math.abs(rr.v.n)>12)rr={v:Rq(r(2,lv==1?9:12)*(rr.v.n<0?-1:1)),t:rr.t};
+t=node(op,l,rr)}
+return t}
+
+const CTPR={'+':1,'−':1,'×':2,':':2};
+// текст виразу для людини; x — листок-невідоме
+function ctTxt(t,X){if(!t.op)return t===X?'x':Rsc(t.v,t.t=='m'?'m':t.t=='d'?'d':'f');
+let L=ctTxt(t.l,X),R=ctTxt(t.r,X);if(t.l.op&&CTPR[t.l.op]<CTPR[t.op])L='('+L+')';if(t.r.op&&(CTPR[t.r.op]<CTPR[t.op]||(CTPR[t.r.op]==CTPR[t.op]&&(t.op=='−'||t.op==':'))))R='('+R+')';return L+' '+t.op+' '+R}
+// текст для калькулятора
+function ctKt(t,X){if(!t.op){if(t===X)return'x';const v=t.v;if(t.t=='d'&&Rdecok(v))return'('+(v.n/v.d)+')';if(t.t=='m'&&Math.abs(v.n)>v.d)return'('+Math.trunc(v.n/v.d)+' '+Math.abs(v.n%v.d)+'/'+v.d+')';return'('+v.n+(v.d>1?'/'+v.d:'')+')'}
+return'('+ctKt(t.l,X)+({'+':'+','−':'-','×':'*',':':'/'})[t.op]+ctKt(t.r,X)+')'}
+
+/* Докладні кроки однієї дії a op b (числа a, b — {v,t}). Повертає [рядки, результат] */
+function ctStep(a,op,b,dec){const A=a.v,B=b.v,S=[],sa=Rsc(A,a.t=='m'?'m':a.t=='d'?'d':'f'),sb=Rsc(B,b.t=='m'?'m':b.t=='d'?'d':'f');
+let res=op=='+'?Radd(A,B):op=='−'?Rsub(A,B):op=='×'?Rmul(A,B):Rdiv(A,B);
+const isFr=x=>x.d>1&&!(dec&&Rdecok(x)),frac=isFr(A)||isFr(B);
+if(!frac&&dec&&(A.d>1||B.d>1)){ // десяткові дроби
+  if(op=='+'||op=='−')S.push(`Записуємо в стовпчик кома під комою й ${op=='+'?'додаємо':'віднімаємо'} як натуральні числа; кома у відповіді — під комами`);
+  else if(op=='×'){const ca=String(+(Math.abs(Rv(A))).toFixed(6)).split('.')[1]||'',cb=String(+(Math.abs(Rv(B))).toFixed(6)).split('.')[1]||'';S.push(`Множимо, не зважаючи на коми: ${String(Math.abs(Rv(A))).replace('.','')} · ${String(Math.abs(Rv(B))).replace('.','')} = ${Math.round(Math.abs(Rv(res))*10**(ca.length+cb.length))}`,`Після коми в множниках разом ${ca.length+cb.length} цифр(и) — стільки ж відокремлюємо комою: ${Rs(res,'d')}`)}
+  else{const cb=(String(+Math.abs(Rv(B)).toFixed(6)).split('.')[1]||'').length;if(cb)S.push(`Переносимо кому в діленому й дільнику на ${cb} знак(и) вправо: ${dc(+(Math.abs(Rv(A))*10**cb).toFixed(6))} : ${dc(+(Math.abs(Rv(B))*10**cb).toFixed(6))}`);S.push(`${sa} : ${sb} = ${Rs(res,'d')}`)}
+  return[S,res]}
+if(!frac){ // цілі числа
+  if(A.n<0||B.n<0){const rule=op=='+'||op=='−'?(op=='−'?`Віднімання замінюємо додаванням протилежного: ${sa} + ${Rsc(Rq(-B.n),'f')}. `:'')+(op=='+'||op=='−'?((op=='−'?-B.n:B.n)*A.n<0?'Знаки різні — від більшого модуля віднімаємо менший, ставимо знак більшого':'Знаки однакові — додаємо модулі, знак зберігаємо'):''):(A.n*B.n<0?'Знаки різні — результат від’ємний':'Знаки однакові — результат додатний');S.push(`${rule}: ${sa} ${op} ${sb} = ${Rs(res,'f')}`)}
+  return[S,res]}
+// звичайні дроби та мішані числа
+const mixed=x=>x.t=='m'&&Math.abs(x.v.n)>x.v.d;
+if(mixed(a)||mixed(b)){const L=[];if(mixed(a))L.push(`${Rs(A,'m')} = (${Math.floor(Math.abs(A.n)/A.d)}·${A.d} + ${Math.abs(A.n)%A.d})/${A.d} = ${Rs(A,'f')}`);if(mixed(b))L.push(`${Rs(B,'m')} = (${Math.floor(Math.abs(B.n)/B.d)}·${B.d} + ${Math.abs(B.n)%B.d})/${B.d} = ${Rs(B,'f')}`);S.push('Переводимо мішані числа в неправильні дроби: '+L.join(';  '))}
+const fa=Rs(A,'f'),fb=Rs(B,'f');
+if(op=='+'||op=='−'){const w=op=='+'?'додаємо':'віднімаємо';
+  if(A.d==B.d)S.push(`Знаменники однакові — ${w} чисельники, знаменник залишаємо: (${A.n} ${op} ${Rsc(Rq(B.n),'f')})/${A.d} = ${A.n*1+(op=='+'?B.n:-B.n)}/${A.d}`);
+  else{const Lc=lcm(A.d,B.d),ka=Lc/A.d,kb=Lc/B.d;S.push(`Найменший спільний знаменник: НСК(${A.d}; ${B.d}) = ${Lc}`,ka==1||kb==1?`Додатковий множник до ${ka==1?fb:fa} — ${ka==1?kb:ka}: ${ka==1?fb:fa} = ${ka==1?B.n*kb:A.n*ka}/${Lc}`:`Додаткові множники: до ${fa} — ${ka}, до ${fb} — ${kb}`,...(ka==1||kb==1?[]:[`${fa} = ${A.n*ka}/${Lc},  ${fb} = ${B.n*kb}/${Lc}`]),`${A.n*ka}/${Lc} ${op} ${Rsc(Rq(B.n*kb,Lc),'f')} = (${A.n*ka} ${op} ${Rsc(Rq(B.n*kb),'f')})/${Lc} = ${A.n*ka+(op=='+'?B.n*kb:-B.n*kb)}/${Lc}`)}}
+else{let P=A,Qd=B;if(op==':'){Qd=Rq(B.d,B.n);S.push(`Ділення замінюємо множенням на обернений дріб: ${fb} → ${Rs(Qd,'f')}`,`${fa} : ${fb} = ${fa} · ${Rs(Qd,'f')}`)}
+  const g1=gc(Math.abs(P.n),Qd.d),g2=gc(Math.abs(Qd.n),P.d);
+  S.push(`Чисельник множимо на чисельник, знаменник — на знаменник: (${P.n}·${Rsc(Rq(Qd.n),'f')})/(${P.d}·${Qd.d}) = ${P.n*Qd.n}/${P.d*Qd.d}`);
+  if(g1>1||g2>1)S.push(`Порада: зручніше скоротити ще до множення${g1>1?` — ${Math.abs(P.n)} і ${Qd.d} на ${g1}`:''}${g2>1?`${g1>1?',':' —'} ${Math.abs(Qd.n)} і ${P.d} на ${g2}`:''}`)}
+const raw=op=='+'||op=='−'?(A.d==B.d?Rq(1,1):null):null;
+const nn=res.n,dd=res.d;
+// скорочення та ціла частина
+const un=op=='+'||op=='−'?(A.d==B.d?{n:A.n+(op=='+'?B.n:-B.n),d:A.d}:{n:A.n*(lcm(A.d,B.d)/A.d)+(op=='+'?1:-1)*B.n*(lcm(A.d,B.d)/B.d),d:lcm(A.d,B.d)}):op=='×'?{n:A.n*B.n,d:A.d*B.d}:{n:A.n*B.d,d:A.d*B.n};
+const g=gc(Math.abs(un.n),Math.abs(un.d));if(g>1&&un.n)S.push(`Скорочуємо на ${g}: ${un.n}/${un.d} = ${Rs(res,'f')}`);
+if(Math.abs(nn)>dd&&dd>1)S.push(`Виділяємо цілу частину: ${Math.abs(nn)} : ${dd} = ${Math.floor(Math.abs(nn)/dd)} (остача ${Math.abs(nn)%dd}) → ${Rs(res,'m')}`);
+return[S,res]}
+
+/* Обчислення дерева з кроками «1) … 2) …» */
+function ctEval(t,dec,out){if(!t.op)return t;const L=ctEval(t.l,dec,out),R=ctEval(t.r,dec,out);const[S,res]=ctStep(L,t.op,R,dec);
+const st=res.d>1&&!(dec&&Rdecok(res))?(Math.abs(res.n)>res.d&&(L.t=='m'||R.t=='m')?'m':'f'):dec&&res.d>1?'d':'f';
+out.push({h:`${ctTxtV(L)} ${t.op} ${ctTxtV(R)} = ${Rs(res,st)}`,s:S});return{v:res,t:st=='m'?'m':st=='d'?'d':res.d>1?'f':(res.n<0?'n':'i')}}
+const ctTxtV=x=>Rsc(x.v,x.t=='m'?'m':x.t=='d'?'d':'f');
+const ctFlat=out=>{const L=[];out.forEach((o,i)=>{L.push(`${out.length>1?(i+1)+') ':''}${o.h}`);o.s.forEach(x=>L.push('   '+x))});return L};
+
+/* Розв’язування рівняння з невідомим за правилами компонентів дій */
+function ctSolve(t,X,target,dec,S){if(t===X)return target;const inL=ctHas(t.l,X),other=inL?t.r:t.l,sub=inL?t.l:t.r;
+const ov=[];const O=ctEval(other,dec,ov);if(ov.length){S.push(`Обчислюємо частину без x: ${ctTxt(other)} = ${ctTxtV(O)}`);ctFlat(ov).forEach(x=>S.push('   '+x))}
+const ot=ctTxtV(O),tt=Rsc(target,dec&&Rdecok(target)?'d':'f'),st=ctTxt(sub,X),w=sub.op?`(${st})`:st;let nt,rule;
+if(t.op=='+'){nt=Rsub(target,O.v);rule=`${w} — невідомий доданок. Щоб знайти невідомий доданок, від суми віднімаємо відомий доданок`}
+else if(t.op=='−'&&inL){nt=Radd(target,O.v);rule=`${w} — невідоме зменшуване. Щоб знайти зменшуване, до різниці додаємо від’ємник`}
+else if(t.op=='−'){nt=Rsub(O.v,target);rule=`${w} — невідомий від’ємник. Щоб знайти від’ємник, від зменшуваного віднімаємо різницю`}
+else if(t.op=='×'){if(!O.v.n)return null;nt=Rdiv(target,O.v);rule=`${w} — невідомий множник. Щоб знайти невідомий множник, добуток ділимо на відомий множник`}
+else if(inL){nt=Rmul(target,O.v);rule=`${w} — невідоме ділене. Щоб знайти ділене, частку множимо на дільник`}
+else{if(!target.n)return null;nt=Rdiv(O.v,target);rule=`${w} — невідомий дільник. Щоб знайти дільник, ділене ділимо на частку`}
+const Tg={v:target,t:target.d>1?(dec&&Rdecok(target)?'d':'f'):(target.n<0?'n':'i')},
+// [перше число, дія, друге число] для оберненої дії
+INV=t.op=='+'?[Tg,'−',O]:t.op=='−'?(inL?[Tg,'+',O]:[O,'−',Tg]):t.op=='×'?[Tg,':',O]:(inL?[Tg,'×',O]:[O,':',Tg]);
+const[SS,res]=ctStep(INV[0],INV[1],INV[2],dec);
+S.push(rule+':',`   ${st} = ${ctTxtV(INV[0])} ${INV[1]} ${ctTxtV(INV[2])}`);SS.forEach(x=>S.push('   '+x));S.push(`   ${st} = ${Rs(res,dec&&Rdecok(res)?'d':(Math.abs(res.n)>res.d&&res.d>1?'m':'f'))}`);
+return ctSolve(sub,X,res,dec,S)}
+const ctHas=(t,X)=>t===X||(t.op&&(ctHas(t.l,X)||ctHas(t.r,X)));
+const ctLeaves=t=>t.op?[...ctLeaves(t.l),...ctLeaves(t.r)]:[t];
+
+/* Одне завдання конструктора. cf = {ops:[…], nums:[…], x:bool}, lv — 1..3 */
+function ctMake(cf,lv0,kk){for(let att=0;att<160;att++){const lv=att>110?1:att>60?Math.min(lv0,2):lv0,k=kk||(att>110?1:lv==1?1:lv==2?r(1,2):r(2,3)),T0=ctTree(cf,lv,k);if(!T0)continue;const dec=cf.nums.includes('d')&&!cf.nums.some(t=>t=='f'||t=='m');
+const res=T0.val||T0.v;if(!T0.op)continue;const nodes=[];(function w(t){if(t.op){nodes.push(t.val);w(t.l);w(t.r)}})(T0);
+const lim=dec?1000:lv==3?144:lv==2?72:36;if(nodes.some(v=>v.d>lim||Math.abs(Rv(v))>(dec?100000:lv==3?5000:1000)))continue;if(dec&&!Rdecok(res))continue;
+if(!cf.x){const out=[];const R=ctEval(T0,dec,out),txt=ctTxt(T0);const as=Rans(R.v,dec),st=ctFlat(out);
+if(out.length>1)st.unshift(`Порядок дій: ${out.length==2?'спочатку дія в дужках або множення/ділення, потім решта':'дужки → множення й ділення → додавання й віднімання'}`);
+return{q:`${txt} = ?`,a:[Rv(R.v)],as,s:[...st,`Відповідь: ${as}`],kt:ctKt(T0),cq:txt}}
+const Lf=ctLeaves(T0),X=pick(Lf),xv=X.v;if(xv.n==0)continue;const S=[];const sol=ctSolve(T0,X,res,dec,S);if(!sol||sol.n!=xv.n||sol.d!=xv.d)continue;
+const rs=Rsc(res,dec&&Rdecok(res)?'d':'f').replace(/^\((.*)\)$/,'$1'),txt=ctTxt(T0,X)+' = '+rs,as=Rans(xv,dec);
+return{q:`${txt}. Знайдіть x.`,a:[Rv(xv)],as,s:[...S,`Перевірка: підставляємо x = ${Rs(xv,dec&&Rdecok(xv)?'d':'f')} — рівність виконується ✓`,`Відповідь: x = ${as}`],kt:ctKt(T0,X)+'='+(Rv(res)<0?'(':'')+(res.d>1&&!(dec&&Rdecok(res))?res.n+'/'+res.d:+(Rv(res)).toFixed(6))+(Rv(res)<0?')':''),cq:txt}}
+return{q:'2 + 3 = ?',a:[5],as:'5',s:['2 + 3 = 5','Відповідь: 5'],kt:'2+3'}}
+
+/* Налаштування конструктора зберігаються разом з рівнем */
+if(!TOPT.ct)TOPT.ct={ops:['+','−'],nums:['f'],x:false};
+const CT={n:'Конструктор прикладів',h:'Оберіть дії, види чисел і, за бажанням, невідоме x — програма складе приклади з докладним розв’язанням. Рівень визначає кількість дій: легкий — одна, середній — одна-дві, складний — дві-три з дужками.',k:[['за вашими налаштуваннями',2]],ct:1,
+g(){const lv=TOPT.lvl||r(1,3),e=ctMake(TOPT.ct,lv);e.kind=[TOPT.ct.ops.join(' '),TOPT.ct.nums.map(t=>CTNUMS[t]).join(', '),TOPT.ct.x?'з x':''].filter(Boolean).join(' · ');e.lv=lv;return e}};
+T.unshift(['Конструктор',[CT]]);ALL.unshift(CT);
+// панель вибору: дії, числа, невідоме
+function ctPanel(onch){const box=document.createElement('div');box.className='kbox ctp';
+const draw=()=>{const c=TOPT.ct;box.innerHTML=`<div class="ctg"><b>Дії</b>${Object.entries(CTOPS).map(([k,n])=>`<button type="button" class="chip ${c.ops.includes(k)?'on':''}" data-o="${k}" title="${n}">${k} ${n}</button>`).join('')}</div>
+<div class="ctg"><b>Числа</b>${Object.entries(CTNUMS).map(([k,n])=>`<button type="button" class="chip ${c.nums.includes(k)?'on':''}" data-n="${k}">${n}</button>`).join('')}</div>
+<div class="ctg"><b>Невідоме</b><label class="kl ctx"><input type="checkbox" ${c.x?'checked':''}><span>з невідомим x — приклад стає рівнянням</span></label></div>
+<p class="note">Приклад: ${esc(ctMake(c,TOPT.lvl||2).cq||'')}</p>`;
+box.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{const o=b.dataset.o,a=c.ops;if(a.includes(o)){if(a.length>1)a.splice(a.indexOf(o),1)}else a.push(o);optSave();draw();onch&&onch()});
+box.querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>{const o=b.dataset.n,a=c.nums;if(a.includes(o)){if(a.length>1)a.splice(a.indexOf(o),1)}else a.push(o);optSave();draw();onch&&onch()});
+box.querySelector('.ctx input').onchange=e=>{c.x=e.target.checked;optSave();draw();onch&&onch()}};
+box.redraw=draw;draw();return box}
+
+/* Дроби в умові — «поверхом»: чисельник над знаменником */
+function stepsHTML(arr,tag){const out=[];arr.forEach(x=>{const sub=/^   /.test(x),h=fracHTML(x.trim());if(sub&&out.length)out[out.length-1].sub.push(h);else out.push({h,sub:[]})});
+return out.map(o=>`<${tag}>${o.h}${o.sub.map(z=>`<div class="sub">${z}</div>`).join('')}</${tag}>`).join('')}
+function fracHTML(s){s=esc(s);
+const A='(?:\\(−?[\\dx]+(?:\\s?[+−]\\s?[\\dx]+)?\\)|[\\dx]+)';
+// мішане число «2 3/4»
+s=s.replace(new RegExp('(^|[^\\d/,])(\\d+)\\u00a0(\\d+)/(\\d+)(?![\\d/]|,\\d)','g'),(m,p,w,n,d)=>`${p}<span class="mfr">${w}<span class="sfr"><span>${n}</span><span>${d}</span></span></span>`);
+s=s.replace(new RegExp('(^|[^\\w/,.)])('+A+')/('+A+')(?![\\w/]|,\\d)','g'),(m,p,n,d)=>{const cl=x=>x[0]=='('&&!/[+−]/.test(x)?x.slice(1,-1):x;return`${p}<span class="sfr"><span>${cl(n)}</span><span>${cl(d)}</span></span>`});
+return s}
 
 /* ---- Список тем: пошук, фільтри, прогрес ---- */
 let LF='all',LQ='';
@@ -1517,7 +1714,7 @@ function sheetBuild(){const L=[],seen=new Set();for(let k=0;k<120&&L.length<12;k
 const fr=window.self!==window.top; // у вбудованому вікні браузер не дає друкувати
 $('#sheet').innerHTML=`<div class="acts noprint" style="margin:0"><button class="bt" id="shb">← До теми</button><button class="bt" id="shn">Інші завдання</button>${fr?'':'<button class="bt pri" id="shp">Друкувати</button>'}</div>${fr?'<p class="note noprint">Друк працює у версії на сайті: xask1-lab.github.io/math</p>':''}
 <div class="shpage"><h2>${esc(cur.n)}</h2><div class="shmeta"><span>Ім’я: ____________________</span><span>Дата: ____________</span></div>
-<ol class="shl">${L.map(e=>`<li><div>${esc(e.q)}</div>${e.fig||''}<div class="shans">Відповідь: ________________</div></li>`).join('')}</ol></div>
+<ol class="shl">${L.map(e=>`<li><div>${fracHTML(e.q)}</div>${e.fig||''}<div class="shans">Відповідь: ________________</div></li>`).join('')}</ol></div>
 <div class="shpage shkey"><h2>Відповіді: ${esc(cur.n)}</h2><ol class="shk">${L.map(e=>`<li>${esc(e.as||cm(e.a.map(fmt).join('; ')))}</li>`).join('')}</ol></div>`;
 $('#shb').onclick=()=>{$('#sheet').hidden=true;$('#det').hidden=false};$('#shn').onclick=sheetBuild;if(!fr)$('#shp').onclick=()=>window.print()}
 $('#ws').onclick=()=>{$('#det').hidden=true;$('#sheet').hidden=false;sheetBuild();window.scrollTo(0,0)};
