@@ -60,7 +60,7 @@ input{font:inherit;color:var(--ink);background:var(--sheet);border:1px solid var
 .warea{position:relative;flex:1;min-height:90px;display:flex;flex-direction:column}
 #exs,#sol{position:absolute;left:0;right:0;bottom:0;max-height:78%;overflow-y:auto;z-index:3;box-shadow:0 -6px 24px rgba(0,0,0,.25)}
 /* калькулятор уміщується в екран: рядки забирають вільне місце, клавіатура внизу */
-main:has(#calc:not([hidden])){height:calc(100dvh - env(safe-area-inset-top,0px) - var(--topx,0px) - env(safe-area-inset-bottom,0px));box-sizing:border-box;padding-block:calc(10px + var(--topx,0px)) 8px;gap:8px}
+main:is(:has(#calc:not([hidden])),:has(#gr:not([hidden])),:has(#les:not([hidden]))){height:calc(100dvh - env(safe-area-inset-top,0px) - var(--topx,0px) - env(safe-area-inset-bottom,0px));box-sizing:border-box;padding-block:calc(10px + var(--topx,0px)) 8px;gap:8px}
 #calc:not([hidden]){flex:1;min-height:0;gap:8px}
 #calc .ctl,#calc .pad,#nl,#calc .note{flex:none}
 .warea{flex:1}
@@ -122,7 +122,8 @@ main:has(#calc:not([hidden])){height:calc(100dvh - env(safe-area-inset-top,0px) 
   :root,:root:not([data-theme="light"]),:root[data-theme="dark"]{--paper:#fff;--sheet:#fff;--ink:#000;--mu:#444;--line:#999;--acs:#eef2fb;--red:#000;--ok:#000;color-scheme:light}
   body{background:#fff}
   .top,#lt,.noprint,.modal{display:none!important}
-  main{max-width:none;padding:0!important;height:auto!important}
+  main{max-width:none;padding:0!important;height:auto!important;display:block!important}
+  #les,#sheet{display:block!important;overflow:visible!important;height:auto!important}
   .shpage{border:0;padding:0;border-radius:0}.shkey{break-before:page}
 }
 .lvb{display:flex;gap:4px;padding:4px;background:var(--key);border:1px solid var(--line);border-radius:12px;margin-top:6px}
@@ -153,6 +154,28 @@ main:has(#calc:not([hidden])){height:calc(100dvh - env(safe-area-inset-top,0px) 
 .tgo-wrap #tgo{box-shadow:0 6px 18px rgba(0,0,0,.25)}
 .ctp{display:flex;flex-direction:column;gap:10px}.ctg{display:flex;flex-wrap:wrap;align-items:center;gap:6px}.ctg>b{width:100%;font-size:13px;color:var(--mu)}
 .ctg .chip{padding:6px 10px}.ctx{padding:2px 0}.ctp .note{margin:0}
+/* Графік і уроки, як калькулятор, займають рівно один екран */
+#gr:not([hidden]){flex:1;min-height:0;gap:8px}
+#gr #gfs{flex:none;gap:6px!important;padding-block:10px}
+#gr .gf input{padding:7px 10px;font-size:17px}
+#gr .gwrap{flex:1;min-height:170px;display:flex}
+#gr #gc{aspect-ratio:auto;max-height:none;height:100%;flex:1}
+#gr #gi{flex:none;max-height:17vh;overflow-y:auto;padding-block:8px}
+#gr #gtab{flex:none;max-height:28vh;overflow-y:auto;padding-block:8px}
+#gr>.note{display:none}
+/* кнопки графіка — рядком угорі, щоб не вилазили за низьке полотно */
+#gr .gbtns{flex-direction:row;gap:5px}#gr .gbtns button{width:34px;height:34px;font-size:16px}
+/* телефон: компактніша шапка списку тем */
+@media (max-width:480px){#list .lsum .lnote{display:none}#list .lhead{gap:6px}#list .lfil .chip{padding:5px 8px;font-size:12.5px}#ls{padding:8px 10px}}
+@media (max-height:700px){#gr .gf input{padding:5px 8px;font-size:16px}#gr #gi{max-height:13vh}#gr .gwrap{min-height:130px}#gr #gtab{max-height:20vh}}
+/* Уроки: верхній блок закріплений, прокручується лише вміст нижче */
+#les:not([hidden]){flex:1;min-height:0;display:flex;flex-direction:column;gap:10px}
+#les>#lt{flex:none}
+#les>#list:not([hidden]){flex:1;min-height:0;display:flex;flex-direction:column}
+#list .lhead{flex:none;padding-bottom:8px;border-bottom:1px solid var(--line)}
+#list #lbody{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-right:2px}
+#les>#det:not([hidden]),#les>#test:not([hidden]),#les>#hist:not([hidden]),#les>#sheet:not([hidden]){flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+#test .tgo-wrap{top:0}
 .wide{width:100%;padding:11px;font-weight:600;background:var(--sheet);color:var(--ac);border-style:dashed}
 /* клавіатура */
 .pad{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
@@ -524,7 +547,7 @@ const tx=document.createElement('input');tx.className='tx';tx.autocomplete='off'
 tx.oninput=()=>{const v=tx.value,p=tx.selectionStart;act=i;fromText(w,v);snap(w);w.txt=v;render();const n=$('#wins').querySelectorAll('.tx')[i];n.focus();n.setSelectionRange(p,p)};
 tx.onkeydown=e=>{if(e.key=='Enter'){e.preventDefault();act=i;nl();setTimeout(()=>{const n=$('#wins').querySelectorAll('.tx')[act];n&&n.focus()},0)}};
 const ed=document.createElement('div');ed.className='ed';ed.append(rr(w.root,[],w));const a=document.createElement('div');a.className='ans';a.textContent=cm(w.ans||'');if(/^✗/.test(a.textContent))a.className='ans bad';else if(/^(Додайте|Впишіть|Кілька|Система з рядком)/.test(a.textContent))a.className='ans hint';
-const L1=lin(w.root);if(L1.includes('x')&&!/[yzabc]/.test(L1.replace(/arcsin|arccos|arctg|abs|cos|ctg/g,''))&&!/[<>≤≥]/.test(L1)&&L1.split('=').length<=2&&!/^x=[^x]*$/.test(L1)){const gb=document.createElement('button');gb.className='gb';gb.textContent='Графік';gb.title='Побудувати графік цього виразу';gb.onclick=e=>{e.stopPropagation();const P2=L1.split('=');G.f[0]=P2.length==2?(P2[0]=='y'?P2[1]:`(${P2[0]})-(${P2[1]})`):L1;gsave();tab(3)};a.append(gb)}
+const L1=lin(w.root);if(L1.includes('x')&&!/[yzabc]/.test(L1.replace(/arcsin|arccos|arctg|abs|cos|ctg/g,''))&&!/[<>≤≥]/.test(L1)&&L1.split('=').length<=2&&!/^x=[^x]*$/.test(L1)){const gb=document.createElement('button');gb.className='gb';gb.textContent='Графік';gb.title='Побудувати графік цього виразу';gb.onclick=e=>{e.stopPropagation();const P2=L1.split('=');G.f[0]=P2.length==2?(P2[0]=='y'?P2[1]:P2[1]=='0'?P2[0]:`(${P2[0]})-(${P2[1]})`):L1;gsave();tab(3);requestAnimationFrame(()=>{gcomp();gfit(0);gdraw()})};a.append(gb)}
 const xb=document.createElement('button');xb.className='rx';xb.textContent='✕';xb.title=wins.length>1?'Видалити рядок':'Очистити рядок';xb.setAttribute('aria-label',xb.title);xb.onclick=e=>{e.stopPropagation();delRow(i)};
 d.append(tx,ed,a,xb);rws.append(d)});
 const ad=document.createElement('button');ad.className='addrow';ad.textContent='＋';ad.title='Новий рядок';ad.setAttribute('aria-label','Новий рядок');ad.disabled=wins.length>=50;
@@ -1106,6 +1129,12 @@ if(G.pt!=null){const xv=X(G.pt);x.strokeStyle=col('--mu');x.setLineDash([4,4]);x
 const vals=[];G.F.forEach((F,i)=>{if(!F||!F.f)return;const v=gf(F,xv);if(isFinite(v)){vals.push(`f${SUB[i]} = ${n4(v)}`);const py=PY(v);if(py>=0&&py<=H){x.fillStyle=col(GC[i]);x.beginPath();x.arc(G.pt,py,4,0,7);x.fill()}}});
 info.unshift(`<b>x = ${n4(xv)}</b>${vals.length?': '+vals.join(', '):''}`)}
 if(!G.F.some(Boolean))info.push('Впишіть функцію в одне з полів вище.');$('#gi').innerHTML=info.join('<br>');gtable(st,x0,x1)}
+// автопідбір вигляду: нулі всіх функцій у полі зору; без нулів — біля x = 0
+function gfit(only){const c=$('#gc'),W=c.clientWidth||360,H=c.clientHeight||360;G.pt=null;let Z=[];
+// періодичні функції (багато нулів) — беремо лише нулі біля початку координат
+G.F.forEach((F,i)=>{if(!F||!F.f||(only!=null&&i!=only))return;let z=gzeros(v=>gf(F,v),-1000,1000,40000);if(z.length>6)z=z.filter(t=>Math.abs(t)<=10);Z=Z.concat(z)});Z=Z.filter(z=>Math.abs(z)<1000).sort((a,b)=>a-b);
+if(Z.length){const a=Z[0],b=Z[Z.length-1],span=Math.max(b-a,4)*1.5;G.cx=(a+b)/2;G.s=Math.min(60,Math.max(.05,W/span));G.cy=0}
+else{G.cx=0;G.s=40;const F=only!=null?G.F[only]:G.F.find(F=>F&&F.f),y0=0;G.cy=F&&F.f&&isFinite(gf(F,0))&&Math.abs(gf(F,0))>H/2/G.s*0.8?gf(F,0):0}}
 function gzoom(k,px,py,nd){const c=$('#gc'),W=c.clientWidth,H=c.clientHeight;px=px??W/2;py=py??H/2;const wx=(px-W/2)/G.s+G.cx,wy=G.cy-(py-H/2)/G.s;G.s=Math.min(20000,Math.max(.05,G.s*k));G.cx=wx-(px-W/2)/G.s;G.cy=wy+(py-H/2)/G.s;if(!nd)gdraw()}
 (()=>{const c=$('#gc'),P=new Map();let moved=false;const pos=e=>{const b=c.getBoundingClientRect();return{x:e.clientX-b.left,y:e.clientY-b.top}};
 c.onpointerdown=e=>{c.setPointerCapture(e.pointerId);P.set(e.pointerId,pos(e));moved=false};
@@ -1116,7 +1145,8 @@ P.set(e.pointerId,p);gdraw()};
 c.onpointerup=c.onpointercancel=e=>{if(!moved&&P.size==1)G.pt=pos(e).x;P.delete(e.pointerId);gdraw()};
 c.onpointerleave=e=>{if(e.pointerType=='mouse'&&!P.size){G.pt=null;gdraw()}};
 c.addEventListener('wheel',e=>{e.preventDefault();const p=pos(e);gzoom(e.deltaY<0?1.2:1/1.2,p.x,p.y)},{passive:false});
-$('#gzi').onclick=()=>gzoom(1.5);$('#gzo').onclick=()=>gzoom(1/1.5);$('#g0').onclick=()=>{G.cx=0;G.cy=0;G.s=40;G.pt=null;gdraw()};
+$('#gzi').onclick=()=>gzoom(1.5);$('#gzo').onclick=()=>gzoom(1/1.5);$('#g0').onclick=()=>{gfit();gdraw()};$('#g0').title='Показати графіки цілком';
+try{new ResizeObserver(()=>{if(!$('#gr').hidden)gdraw()}).observe($('#gc'))}catch(e){}
 $('#gtb').onclick=()=>{G.tb=!G.tb;$('#gtb').classList.toggle('on',G.tb);gsave();gdraw()};
 let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{if(!$('#gr').hidden)gdraw()},80)});
 try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(!$('#gr').hidden)gdraw()})}catch(e){}})();
@@ -1693,13 +1723,13 @@ let LF='all',LQ='';
 // статистика теми з журналу відповідей: n — усього, ok — правильних, last — останні 5
 function tstat(){const per={};LOG.forEach(x=>{const p=per[x.tp]=per[x.tp]||{n:0,ok:0,last:[]};p.n++;if(x.ok)p.ok++;p.last.push(x.ok?1:0);if(p.last.length>5)p.last.shift()});
 for(const k in per){const p=per[k];p.done=p.last.length>=5&&p.last.every(Boolean);p.weak=!p.done&&(p.ok/p.n<.7||p.last.slice(-3).includes(0))}return per}
-function topen(t){cur=t;$('#list').hidden=true;$('#sheet').hidden=true;$('#det').hidden=false;$('#tn').textContent=t.n;$('#th').innerHTML=thHTML(t);lvTopic();gen();$('#mxl').innerHTML='';$('#mx').textContent='Показати 5 прикладів';$('#mxc').hidden=true;window.scrollTo(0,0)}
+function topen(t){['#det','#lbody'].forEach(q=>{const e=$(q);if(e)e.scrollTop=0});cur=t;$('#list').hidden=true;$('#sheet').hidden=true;$('#det').hidden=false;$('#tn').textContent=t.n;$('#th').innerHTML=thHTML(t);lvTopic();gen();$('#mxl').innerHTML='';$('#mx').textContent='Показати 5 прикладів';$('#mxc').hidden=true;window.scrollTo(0,0)}
 function lbuild(){const L0=$('#list'),per=tstat();
 if(!L0.querySelector('.lhead')){L0.innerHTML=`<div class="lhead"><input id="ls" type="search" placeholder="Пошук теми, напр. «дроби» або «синус»" autocomplete="off"><div class="lfil">${[['all','Усі'],['weak','Слабкі'],['new','Не розпочаті'],['done','Засвоєні']].map(([k,l])=>`<button class="chip" data-f="${k}">${l}</button>`).join('')}</div><div class="lsum" id="lsum"></div></div><div id="lbody"></div>`;
 $('#ls').oninput=e=>{LQ=e.target.value.trim().toLowerCase();lbuild()};L0.querySelectorAll('.lfil .chip').forEach(b=>b.onclick=()=>{LF=b.dataset.f;lbuild()})}
 L0.querySelectorAll('.lfil .chip').forEach(b=>b.classList.toggle('on',b.dataset.f==LF));
 const all=T.flatMap(([g,ts])=>ts),nd=all.filter(t=>per[t.n]&&per[t.n].done).length,weak=all.filter(t=>per[t.n]&&per[t.n].weak);
-$('#lsum').innerHTML=`Засвоєно <b>${nd}</b> з ${all.length} тем`+(weak.length?` · слабких: <b>${weak.length}</b> <button class="bt" id="lwk">Повторити найслабшу</button>`:'')+`<br><span class="note">Тема засвоєна, коли 5 останніх відповідей у ній правильні.</span>`;
+$('#lsum').innerHTML=`Засвоєно <b>${nd}</b> з ${all.length} тем`+(weak.length?` · слабких: <b>${weak.length}</b> <button class="bt" id="lwk">Повторити найслабшу</button>`:'')+`<span class="note lnote"><br>Тема засвоєна, коли 5 останніх відповідей у ній правильні.</span>`;
 if(weak.length)$('#lwk').onclick=()=>topen(weak.sort((a,b)=>per[a.n].ok/per[a.n].n-per[b.n].ok/per[b.n].n)[0]);
 const B=$('#lbody');B.innerHTML='';let shown=0;
 T.forEach(([g,ts])=>{const fs=ts.filter(t=>{const p=per[t.n];if(LF=='weak'&&!(p&&p.weak))return false;if(LF=='new'&&p)return false;if(LF=='done'&&!(p&&p.done))return false;
