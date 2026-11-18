@@ -58,7 +58,7 @@ input{font:inherit;color:var(--ink);background:var(--sheet);border:1px solid var
 .solst{margin:0 0 10px;padding-left:22px;font:17px/1.5 var(--math)}.solst li{margin:3px 0;overflow-wrap:anywhere}
 /* панелі «Приклади» і «Розв’язок» спливають поверх нижньої частини вікна, не стискаючи його */
 .warea{position:relative;flex:1;min-height:90px;display:flex;flex-direction:column}
-#exs,#sol{position:absolute;left:0;right:0;bottom:0;max-height:78%;overflow-y:auto;z-index:3;box-shadow:0 -6px 24px rgba(0,0,0,.25)}
+#exs,#sol{position:absolute;left:0;right:0;bottom:0;max-height:min(78%,calc(100% - 46px));box-sizing:border-box;overflow-y:auto;z-index:3;box-shadow:0 -6px 24px rgba(0,0,0,.25)}
 /* калькулятор уміщується в екран: рядки забирають вільне місце, клавіатура внизу */
 main:is(:has(#calc:not([hidden])),:has(#gr:not([hidden])),:has(#les:not([hidden]))){height:calc(100dvh - env(safe-area-inset-top,0px) - var(--topx,0px) - env(safe-area-inset-bottom,0px));box-sizing:border-box;padding-block:calc(10px + var(--topx,0px)) 8px;gap:8px}
 #calc:not([hidden]){flex:1;min-height:0;gap:8px}
@@ -176,6 +176,19 @@ main:is(:has(#calc:not([hidden])),:has(#gr:not([hidden])),:has(#les:not([hidden]
 #list #lbody{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-right:2px}
 #les>#det:not([hidden]),#les>#test:not([hidden]),#les>#hist:not([hidden]),#les>#sheet:not([hidden]){flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain}
 #test .tgo-wrap{top:0}
+.toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;max-width:min(92vw,460px);padding:10px 16px;border-radius:12px;background:var(--ink);color:var(--sheet);font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.3);text-align:center}
+.updb{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:55;width:min(94vw,520px);box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 14px;border-radius:14px;background:var(--sheet);border:1.5px solid var(--ac);box-shadow:0 10px 30px rgba(0,0,0,.35);font-size:14.5px}
+.updb .note{font-size:12.5px}
+.wh .pngb{font-weight:700;font-size:12px;color:var(--ac)}
+@media (max-width:480px){.wh .stp{display:none}}
+/* зображення вікна для експорту PNG */
+.expbox{position:fixed;left:-10000px;top:0;width:680px;padding:22px 26px 16px;box-sizing:border-box;color:var(--ink);background-color:var(--sheet);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px;font-family:var(--ui)}
+.expbox .exh2{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--red);padding-bottom:8px;margin-bottom:6px}.expbox .exh2 b{font:600 22px var(--math)}.expbox .exh2 span{color:var(--mu);font-size:13px}
+.expbox .exr{display:flex;gap:14px;padding:8px 0;border-bottom:1px dashed var(--line)}.expbox .exr>i{font:600 13px var(--ui);color:var(--red);font-style:normal;width:18px;padding-top:14px}
+.expbox .exr>div{flex:1;min-width:0}.expbox .ed{overflow:visible;white-space:normal;flex-wrap:wrap}.expbox .ans{padding-top:0}
+.expbox .exsol{margin-top:12px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--sheet)}
+.expbox .mxa{background:var(--acs)!important}.expbox .lv1,.expbox .lv3{background:transparent!important}
+.expbox .exf{margin-top:12px;text-align:right;color:var(--mu);font-size:11px}
 .wide{width:100%;padding:11px;font-weight:600;background:var(--sheet);color:var(--ac);border-style:dashed}
 /* клавіатура */
 .pad{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
@@ -337,6 +350,12 @@ label{cursor:pointer}
           тягнеться на вільне місце (ResizeObserver), кнопки — рядком; в уроках
           шапка (вкладки, пошук, фільтри) закріплена, прокручується лише вміст.
           ⌂ і кнопка «Графік» з калькулятора самі підбирають вигляд (gfit).
+     1.7  Оновлення: сайт сам перевіряє нову версію (updCheck: читає APP_VER з
+          index.html) і показує «Оновити / Пізніше»; sw.js більше не вмикає нову
+          версію без згоди (SKIP_WAITING). У налаштуваннях — «Перевірити й
+          оновити». Експорт вікна калькулятора в PNG (кнопка PNG у заголовку
+          вікна, бібліотека html2canvas з cdnjs, на телефоні — «Поділитися»).
+          Реєстрація сервіс-воркера тепер у самій сторінці, не в build.py.
 
    ЩО ЩЕ НЕ ЗРОБЛЕНО (ідеї)
      • Клавіатура, що налаштовується під задачу (як у Mathlab) — чекає на
@@ -347,12 +366,14 @@ label{cursor:pointer}
      • Розмиття під статус-баром iOS у встановленому застосунку — додано
        відступ (--topx), на телефоні автора ще не підтверджено.
      • Інтерфейс англійською. */
-const APP_VER='1.6.1',APP_DATE='2026-11-18';
+const APP_VER='1.7.0',APP_DATE='2026-11-18';
 /* Показ чисел з десятковою комою (всередині програма рахує з крапкою) */
 const cm=s=>String(s).replace(/(\d)\.(\d)/g,'$1,$2');
 /* Вибір виду завдання всередині генератора теми.
    KD — назви й рівні видів; MSEL — дозволені номери видів (null = усі); MLAST — який вид щойно обрано */
 const KD={};let MSEL=null,MLAST=-1;
+/* Чи відкрито у вбудованому вікні (артефакт): там не працюють друк, файли, сервіс-воркер */
+const IN_FRAME=window.self!==window.top;
 const MIDX=n=>{let c=[];for(let i=0;i<n;i++)c.push(i);if(MSEL){const f=c.filter(i=>MSEL.has(i));if(f.length)c=f}return MLAST=c[Math.floor(Math.random()*c.length)]},MM=(...f)=>f[MIDX(f.length)]();
 /* Екранування тексту перед вставкою в HTML */
 const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
@@ -522,7 +543,7 @@ st.push(`Зводимо подібні: ${sPoly([b,c],v)} ${op} 0`);
 {const db=rat(b),dcn=rat(c);if(db&&dcn&&(db[1]>1||dcn[1]>1)){const N=db[1]*dcn[1]/gc(db[1],dcn[1]);st.push(`Коефіцієнти дробові — помножимо обидві частини на спільний знаменник ${N}:`,`   ${sPoly([b*N,c*N],v)} ${op} 0`);b*=N;c*=N}}
 if(Math.abs(b)<1e-12)return{st:[...st,`Невідома скоротилась: ${sF(c)} ${op} 0`],fin:ans};
 if(c)st.push(`Переносимо число вправо зі зміною знака: ${sPoly([b,0],v)} ${op} ${sF(-c)}`);
-const r0=-c/b;if(op=='=')return{st:[...st,`${v} — невідомий множник. Щоб знайти множник, добуток ділимо на відомий множник: ${v} = ${sF(-c)} : ${sP(b)}`,`${v} = ${sF(r0)}`,`Перевірка: ліва частина ${sF(Q[0].f({[v]:r0}))}, права ${sF(Q[1].f({[v]:r0}))} ✓`],fin:`${v} = ${sF(r0)}`};
+const r0=-c/b;if(op=='='&&Math.abs(b-1)<1e-12)return{st:[...st,`Перевірка: ліва частина ${sF(Q[0].f({[v]:r0}))}, права ${sF(Q[1].f({[v]:r0}))} ✓`],fin:`${v} = ${sF(r0)}`};if(op=='=')return{st:[...st,`${v} — невідомий множник. Щоб знайти множник, добуток ділимо на відомий множник: ${v} = ${sF(-c)} : ${sP(b)}`,`${v} = ${sF(r0)}`,`Перевірка: ліва частина ${sF(Q[0].f({[v]:r0}))}, права ${sF(Q[1].f({[v]:r0}))} ✓`],fin:`${v} = ${sF(r0)}`};
 const op2=b<0?FLIP[op]:op;return{st:[...st,`Ділимо на ${sP(b)}${b<0?' — число від’ємне, тому знак нерівності змінюємо на протилежний':''}`,`${v} ${op2} ${sF(r0)}`],fin:ans}}
 // квадратне
 st.push(`Зводимо до вигляду a${v}² + b${v} + c ${op} 0: ${sPoly([a,b,c],v)} ${op} 0`,`a = ${sF(a)}, b = ${sF(b)}, c = ${sF(c)}`);
@@ -536,14 +557,14 @@ if(op=='='){st.push(`Перевірка за Вієтою: ${v}₁ + ${v}₂ = �
 const inside=(op=='<'||op=='≤')==(a>0);st.push(`Вітки параболи ${a>0?'вгору':'вниз'}, тому вираз ${op=='<'||op=='≤'?'менший':'більший'} за нуль ${inside?'між коренями':'поза коренями'}`,inside?`${xs(lo)} ${op=='≤'||op=='≥'?'≤':'<'} ${v} ${op=='≤'||op=='≥'?'≤':'<'} ${xs(hi)}`:`${v} ${op=='≤'||op=='≥'?'≤':'<'} ${xs(lo)} або ${v} ${op=='≤'||op=='≥'?'≥':'>'} ${xs(hi)}`);
 return{st,fin:ans}}
 function solBuild(){const B=$('#sol'),w=wins[act],R=solveSteps(w);
-B.innerHTML=`<div class="exh solh"><b>Розв’язок рядка ${act+1}</b><button class="bt" id="solc" title="Закрити">✕</button></div>`+(R.err?`<p class="note">${esc(R.err)}</p>`:`<ol class="solst">${R.st.map(x=>`<li>${esc(cm(x))}</li>`).join('')}</ol>${R.fin?`<div class="mxa">Відповідь: ${esc(cm(R.fin))}</div>`:''}`);
+B.innerHTML=`<div class="exh solh"><b>Розв’язок рядка ${act+1}</b><button class="bt" id="solc" title="Закрити">✕</button></div>`+(R.err?`<p class="note">${esc(R.err)}</p>`:`<ol class="solst">${R.st.map(x=>`<li>${fracHTML(cm(x))}</li>`).join('')}</ol>${R.fin?`<div class="mxa">Відповідь: ${esc(cm(R.fin))}</div>`:''}`);
 $('#solc').onclick=()=>{B.hidden=true;$('#sv').classList.remove('on')}}
 $('#sv').onclick=()=>{const B=$('#sol');B.hidden=!B.hidden;$('#sv').classList.toggle('on',!B.hidden);if(!B.hidden){$('#exs').hidden=true;$('#ex').classList.remove('on');solBuild()}};
 
 function nl(){if(wins.length>=50)return;wins.splice(act+1,0,newWin());act++;snap(wins[act]);render()}
 function render(){const W=$('#wins'),o0=W.querySelector('.rws'),st0=o0?o0.scrollTop:0,sw0=o0&&o0.dataset.w==cw;W.innerHTML='';const box=document.createElement('div');box.className='win on';
-box.innerHTML=`<div class="wh"><b class="wn" title="Натисніть, щоб перейменувати">${esc(wins.name||'Вікно '+(cw+1))}</b><span>крок ${wins.hi}/${wins.h.length-1}<button title="Скасувати">↶</button><button title="Повторити">↷</button><button title="Видалити всі рядки цього вікна">Очистити</button></span></div>`;
-const bs=box.querySelectorAll('button');bs[0].onclick=()=>hist(-1);bs[1].onclick=()=>hist(1);bs[2].onclick=clearWin;
+box.innerHTML=`<div class="wh"><b class="wn" title="Натисніть, щоб перейменувати">${esc(wins.name||'Вікно '+(cw+1))}</b><span><i class="stp">крок ${wins.hi}/${wins.h.length-1}</i><button title="Скасувати">↶</button><button title="Повторити">↷</button><button title="Видалити всі рядки цього вікна">Очистити</button>${IN_FRAME?'':'<button class="pngb" title="Зберегти вікно як зображення PNG">PNG</button>'}</span></div>`;
+const bs=box.querySelectorAll('button');bs[0].onclick=()=>hist(-1);bs[1].onclick=()=>hist(1);bs[2].onclick=clearWin;if(bs[3])bs[3].onclick=exportPNG;
 box.querySelector('.wn').onclick=e=>{const b=e.currentTarget,inp=document.createElement('input');inp.className='wni';inp.maxLength=24;inp.value=wins.name||'';inp.placeholder='Вікно '+(cw+1);b.replaceWith(inp);inp.focus();let done=0;const ok=()=>{if(done)return;done=1;wins.name=inp.value.trim()||null;saveSoon();render()};inp.onblur=ok;inp.onkeydown=ev=>{if(ev.key=='Enter')ok();if(ev.key=='Escape'){done=1;render()}}};
 const rws=document.createElement('div');rws.className='rws';rws.dataset.w=cw;
 wins.forEach((w,i)=>{const d=document.createElement('div');d.className='rw'+(i==act?' on':'');d.onclick=()=>{act=i;render()};
@@ -620,8 +641,10 @@ mOpen(`<div class="exh solh"><b>Налаштування</b><button class="bt" i
 <textarea id="bin" rows="3" placeholder="Вставте сюди дані резервної копії" spellcheck="false"></textarea>
 <div class="acts"><input type="file" id="bfile" accept=".json,application/json,text/plain"><button class="bt pri" id="brs">Відновити</button></div><div class="note" id="rmsg"></div>
 <h4>Очищення</h4><div class="acts"><button class="bt" id="bwipe">Стерти всі дані програми</button></div>
+<h4>Оновлення</h4><div class="acts">${IN_FRAME?'<span class="note">У цьому вікні оновлення надходять автоматично.</span>':'<button class="bt" id="bupd">Перевірити й оновити</button>'}</div><div class="note" id="umsg"></div>
 <h4>Про програму</h4><div class="about"><b>Математика у клітинку</b>, версія ${APP_VER} від ${APP_DATE.split('-').reverse().join('.')}<br>Тем: ${ALL.length} · видів завдань: ${ALL.reduce((n,t)=>n+t.k.length,0)}<br><span class="note">${window.self!==window.top?'Відкрито у вбудованому вікні — друк і збереження файлів працюють на сайті.':'Працює без інтернету після першого відкриття.'}<br>Сайт: xask1-lab.github.io/math</span></div>`);
 $('#mx0').onclick=mClose;
+if($('#bupd'))$('#bupd').onclick=async()=>{const m=$('#umsg');m.textContent='Перевіряю…';const r=await updCheck(true);m.textContent=r.upd?'Знайдено нову версію'+(r.ver?' '+r.ver:'')+' — натисніть «Оновити» внизу екрана.':r.net?'У вас остання версія ('+APP_VER+').':'Немає зв’язку з сайтом. Спробуйте пізніше.';if(r.upd)mClose()};
 document.querySelectorAll('#thm button').forEach(b=>b.onclick=()=>{try{b.dataset.v?localStorage.setItem('mtheme',b.dataset.v):localStorage.removeItem('mtheme')}catch(e){}applyTheme();document.querySelectorAll('#thm button').forEach(x=>x.className=x==b?'on':'')});
 $('#bcp').onclick=()=>{const d=dataDump();navigator.clipboard.writeText(d).then(()=>{$('#bmsg').textContent='Скопійовано. Вставте в нотатки або надішліть собі повідомленням.'}).catch(()=>{$('#bin').value=d;$('#bin').select();$('#bmsg').textContent='Не вдалося скопіювати автоматично — дані в полі нижче, скопіюйте їх вручну.'})};
 if(window.self!==window.top)$('#bdl').hidden=true;
@@ -1752,6 +1775,49 @@ $('#sheet').innerHTML=`<div class="acts noprint" style="margin:0"><button class=
 <div class="shpage shkey"><h2>Відповіді: ${esc(cur.n)}</h2><ol class="shk">${L.map(e=>`<li>${esc(e.as||cm(e.a.map(fmt).join('; ')))}</li>`).join('')}</ol></div>`;
 $('#shb').onclick=()=>{$('#sheet').hidden=true;$('#det').hidden=false};$('#shn').onclick=sheetBuild;if(!fr)$('#shp').onclick=()=>window.print()}
 $('#ws').onclick=()=>{$('#det').hidden=true;$('#sheet').hidden=false;sheetBuild();window.scrollTo(0,0)};
+
+/* ---- Повідомлення внизу екрана ---- */
+let toastT=0;function toast(msg,ms=2600){let t=$('#toast');if(!t){t=document.createElement('div');t.id='toast';t.className='toast';t.setAttribute('role','status');document.body.append(t)}t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,ms)}
+
+/* ---- Оновлення програми (лише на сайті, де працює сервіс-воркер) ---- */
+let SWREG=null;
+// порівняння версій «1.6.1» > «1.6.0»
+const cmpVer=(a,b)=>{const A=String(a).split('.').map(Number),B=String(b).split('.').map(Number);for(let i=0;i<Math.max(A.length,B.length);i++){const d=(A[i]||0)-(B[i]||0);if(d)return d}return 0};
+function updBanner(ver){if($('#updb'))return;const d=document.createElement('div');d.id='updb';d.className='updb';d.setAttribute('role','alert');
+d.innerHTML=`<span><b>Доступна нова версія${ver?' '+esc(ver):''}</b><br><span class="note">Ваші вікна й історія збережуться.</span></span><span class="acts" style="margin:0"><button class="bt pri" id="updy">Оновити</button><button class="bt" id="updn">Пізніше</button></span>`;
+document.body.append(d);$('#updy').onclick=updApply;$('#updn').onclick=()=>{d.remove();try{sessionStorage.setItem('updlater',ver||'sw')}catch(e){}}}
+function updApply(){try{saveSoon()}catch(e){}const b=$('#updy');if(b){b.disabled=true;b.textContent='Оновлюю…'}
+setTimeout(()=>{if(SWREG&&SWREG.waiting)SWREG.waiting.postMessage({type:'SKIP_WAITING'});setTimeout(()=>location.reload(),1200)},400)}
+// перевірка: чи на сайті новіша версія (manual — натиснуто кнопку в налаштуваннях)
+async function updCheck(manual){if(IN_FRAME||!/^https?:/.test(location.protocol))return{off:true};let ver=null;
+try{const r=await fetch('index.html?v='+Date.now(),{cache:'no-store'});if(r.ok){const m=(await r.text()).match(/APP_VER='([^']+)'/);ver=m&&m[1]}}catch(e){}
+try{if(SWREG)await SWREG.update()}catch(e){}
+const newer=ver&&cmpVer(ver,APP_VER)>0,waiting=!!(SWREG&&SWREG.waiting&&navigator.serviceWorker.controller);let later='';try{later=sessionStorage.getItem('updlater')||''}catch(e){}
+if(newer||waiting){if(manual||later!==(ver||'sw'))updBanner(newer?ver:'');return{upd:true,ver}}return{upd:false,ver,net:ver!=null}}
+if('serviceWorker' in navigator&&!IN_FRAME&&/^https?:/.test(location.protocol)){const hadCtl=!!navigator.serviceWorker.controller;
+window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').then(reg=>{if(!reg)return;SWREG=reg;if(reg.waiting&&hadCtl)updCheck(false);
+reg.addEventListener('updatefound',()=>{const nw=reg.installing;if(nw)nw.addEventListener('statechange',()=>{if(nw.state=='installed'&&navigator.serviceWorker.controller)updCheck(false)})})}).catch(e=>console.warn('SW:',e))});
+let rl=0;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!hadCtl||rl)return;rl=1;setTimeout(()=>location.reload(),300)});
+setTimeout(()=>updCheck(false),8000);setInterval(()=>updCheck(false),30*60*1000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)updCheck(false)})}
+
+/* ---- Збереження вікна калькулятора як зображення PNG ---- */
+function loadH2C(){if(window.html2canvas)return Promise.resolve();return new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';s.onload=ok;s.onerror=no;document.head.append(s)})}
+async function exportPNG(){const rows=[...document.querySelectorAll('#wins .rw')].filter((r,i)=>ser(wins[i].root));if(!rows.length){toast('Вікно порожнє — нема чого зберігати');return}
+toast('Готую зображення…',8000);try{await loadH2C()}catch(e){toast('Не вдалося завантажити модуль зображень. Потрібен інтернет (лише першого разу).',4500);return}
+const box=document.createElement('div');box.className='expbox';const dt=new Date().toLocaleDateString('uk-UA');
+box.innerHTML=`<div class="exh2"><b>${esc(wins.name||'Вікно '+(cw+1))}</b><span>${dt}</span></div>`;
+rows.forEach((r,i)=>{const d=document.createElement('div');d.className='exr';d.innerHTML=`<i>${i+1}</i>`;const body=document.createElement('div');
+const ed=r.querySelector('.ed').cloneNode(true),an=r.querySelector('.ans').cloneNode(true);ed.querySelectorAll('.cr,.tb').forEach(x=>x.remove());ed.querySelectorAll('.row.e').forEach(x=>x.classList.remove('e'));an.querySelectorAll('button').forEach(x=>x.remove());
+body.append(ed,an);d.append(body);box.append(d)});
+// якщо відкрито «Розв’язок» — додаємо його до зображення
+const sol=$('#sol');if(sol&&!sol.hidden){const c=sol.cloneNode(true);c.removeAttribute('id');c.className='exsol';c.querySelectorAll('button').forEach(x=>x.remove());box.append(c)}
+box.insertAdjacentHTML('beforeend','<div class="exf">Математика у клітинку · xask1-lab.github.io/math</div>');document.body.append(box);
+try{const bg=getComputedStyle(box).backgroundColor,cv=await html2canvas(box,{scale:2,backgroundColor:bg,logging:false});box.remove();
+const blob=await new Promise(ok=>cv.toBlob(ok,'image/png')),name=`matematyka-${(wins.name||'vikno-'+(cw+1)).replace(/[^\wа-яіїєґ-]+/gi,'-')}-${new Date().toISOString().slice(0,10)}.png`;
+// на телефоні — системне меню «Поділитися / Зберегти зображення», на комп’ютері — завантаження файлу
+const file=new File([blob],name,{type:'image/png'});if(/iPhone|iPad|Android/i.test(navigator.userAgent)&&navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:'Приклади'});toast('Готово');return}catch(e){if(e.name=='AbortError'){toast('Скасовано');return}}}
+const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.append(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},3000);toast('Зображення збережено: '+name,4000)}
+catch(e){box.remove();toast('Не вдалося створити зображення',4000);console.warn(e)}}
 
 lbuild();try{const t=+localStorage.getItem('mtab');if(t==2||t==3)tab(t)}catch(e){}
 </script>

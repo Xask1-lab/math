@@ -28,10 +28,6 @@ img{{max-width:100%}}
 </head>
 <body>
 {body}
-<script>
-/* Реєстрація сервіс-воркера: програма працює офлайн після першого відкриття */
-if('serviceWorker' in navigator){{window.addEventListener('load',()=>{{navigator.serviceWorker.register('sw.js').catch(e=>console.warn('SW:',e))}})}}
-</script>
 </body>
 </html>
 '''
