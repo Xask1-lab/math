@@ -188,6 +188,8 @@ main:is(:has(#calc:not([hidden])),:has(#gr:not([hidden])),:has(#les:not([hidden]
 .expbox .exr>div{flex:1;min-width:0}.expbox .ed{overflow:visible;white-space:normal;flex-wrap:wrap}.expbox .ans{padding-top:0}
 .expbox .exsol{margin-top:12px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--sheet)}
 .expbox .mxa{background:var(--acs)!important}.expbox .lv1,.expbox .lv3{background:transparent!important}
+.pngv{max-height:58vh;overflow:auto;border:1px solid var(--line);border-radius:10px;background:var(--key)}.pngv img{display:block;width:100%;height:auto}
+.pnga{justify-content:flex-end}
 .expbox .exf{margin-top:12px;text-align:right;color:var(--mu);font-size:11px}
 .wide{width:100%;padding:11px;font-weight:600;background:var(--sheet);color:var(--ac);border-style:dashed}
 /* клавіатура */
@@ -356,6 +358,8 @@ label{cursor:pointer}
           оновити». Експорт вікна калькулятора в PNG (кнопка PNG у заголовку
           вікна, бібліотека html2canvas з cdnjs, на телефоні — «Поділитися»).
           Реєстрація сервіс-воркера тепер у самій сторінці, не в build.py.
+     1.7.1 PNG: перед збереженням — перегляд зображення з кнопками «Копіювати»
+          (у буфер обміну), «Зберегти» (на телефоні — «Поділитися») і «Скасувати».
 
    ЩО ЩЕ НЕ ЗРОБЛЕНО (ідеї)
      • Клавіатура, що налаштовується під задачу (як у Mathlab) — чекає на
@@ -366,7 +370,7 @@ label{cursor:pointer}
      • Розмиття під статус-баром iOS у встановленому застосунку — додано
        відступ (--topx), на телефоні автора ще не підтверджено.
      • Інтерфейс англійською. */
-const APP_VER='1.7.0',APP_DATE='2026-11-18';
+const APP_VER='1.7.1',APP_DATE='2026-11-18';
 /* Показ чисел з десятковою комою (всередині програма рахує з крапкою) */
 const cm=s=>String(s).replace(/(\d)\.(\d)/g,'$1,$2');
 /* Вибір виду завдання всередині генератора теми.
@@ -1802,6 +1806,17 @@ setTimeout(()=>updCheck(false),8000);setInterval(()=>updCheck(false),30*60*1000)
 
 /* ---- Збереження вікна калькулятора як зображення PNG ---- */
 function loadH2C(){if(window.html2canvas)return Promise.resolve();return new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';s.onload=ok;s.onerror=no;document.head.append(s)})}
+/* Перегляд зображення перед збереженням: Копіювати / Зберегти / Поділитися / Скасувати */
+function pngPreview(blob,name){const url=URL.createObjectURL(blob),file=new File([blob],name,{type:'image/png'}),
+mob=/iPhone|iPad|Android/i.test(navigator.userAgent),canShare=!!(navigator.canShare&&navigator.canShare({files:[file]})),canCopy=!!(navigator.clipboard&&window.ClipboardItem);
+mOpen(`<div class="exh solh"><b>Зображення вікна</b><button class="bt" id="mx0" title="Скасувати">✕</button></div>
+<div class="pngv"><img src="${url}" alt="Попередній перегляд зображення"></div><div class="note">${esc(name)} · ${Math.round(blob.size/1024)} КБ</div>
+<div class="acts pnga">${canCopy?'<button class="bt" id="pcp">Копіювати</button>':''}<button class="bt pri" id="psv">${mob&&canShare?'Зберегти / поділитися':'Зберегти'}</button><button class="bt" id="pcx">Скасувати</button></div><div class="note" id="pmsg"></div>`);
+const done=msg=>{mClose();URL.revokeObjectURL(url);if(msg)toast(msg,3500)};
+$('#mx0').onclick=$('#pcx').onclick=()=>done('Скасовано');
+if($('#pcp'))$('#pcp').onclick=async()=>{try{await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);done('Зображення скопійовано — вставте його (Ctrl+V) у месенджер чи документ')}catch(e){$('#pmsg').textContent='Браузер не дозволив копіювати зображення. Скористайтеся кнопкою «Зберегти».'}};
+$('#psv').onclick=async()=>{if(mob&&canShare){try{await navigator.share({files:[file],title:'Приклади'});done('Готово');return}catch(e){if(e.name=='AbortError')return}}
+const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();mClose();setTimeout(()=>URL.revokeObjectURL(url),4000);toast('Зображення збережено: '+name,4000)}}
 async function exportPNG(){const rows=[...document.querySelectorAll('#wins .rw')].filter((r,i)=>ser(wins[i].root));if(!rows.length){toast('Вікно порожнє — нема чого зберігати');return}
 toast('Готую зображення…',8000);try{await loadH2C()}catch(e){toast('Не вдалося завантажити модуль зображень. Потрібен інтернет (лише першого разу).',4500);return}
 const box=document.createElement('div');box.className='expbox';const dt=new Date().toLocaleDateString('uk-UA');
@@ -1813,11 +1828,8 @@ body.append(ed,an);d.append(body);box.append(d)});
 const sol=$('#sol');if(sol&&!sol.hidden){const c=sol.cloneNode(true);c.removeAttribute('id');c.className='exsol';c.querySelectorAll('button').forEach(x=>x.remove());box.append(c)}
 box.insertAdjacentHTML('beforeend','<div class="exf">Математика у клітинку · xask1-lab.github.io/math</div>');document.body.append(box);
 try{const bg=getComputedStyle(box).backgroundColor,cv=await html2canvas(box,{scale:2,backgroundColor:bg,logging:false});box.remove();
-const blob=await new Promise(ok=>cv.toBlob(ok,'image/png')),name=`matematyka-${(wins.name||'vikno-'+(cw+1)).replace(/[^\wа-яіїєґ-]+/gi,'-')}-${new Date().toISOString().slice(0,10)}.png`;
-// на телефоні — системне меню «Поділитися / Зберегти зображення», на комп’ютері — завантаження файлу
-const file=new File([blob],name,{type:'image/png'});if(/iPhone|iPad|Android/i.test(navigator.userAgent)&&navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:'Приклади'});toast('Готово');return}catch(e){if(e.name=='AbortError'){toast('Скасовано');return}}}
-const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.append(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},3000);toast('Зображення збережено: '+name,4000)}
-catch(e){box.remove();toast('Не вдалося створити зображення',4000);console.warn(e)}}
+const blob=await new Promise(ok=>cv.toBlob(ok,'image/png')),name=`matematyka-${(wins.name||'vikno-'+(cw+1)).replace(/[^\wа-яіїєґ-]+/gi,'-')}-${new Date().toISOString().slice(0,10)}.png`;{const t=$('#toast');if(t)t.hidden=true}
+pngPreview(blob,name)}catch(e){box.remove();toast('Не вдалося створити зображення',4000);console.warn(e)}}
 
 lbuild();try{const t=+localStorage.getItem('mtab');if(t==2||t==3)tab(t)}catch(e){}
 </script>
